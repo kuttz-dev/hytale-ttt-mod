@@ -67,6 +67,38 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 		return RoundState.IN_GAME.equals(gameModeState.roundState) || RoundState.AFTER_GAME.equals(gameModeState.roundState);
 	}
 
+	/**
+	 * Schedules a world transition with a delay to prevent fade conflicts.
+	 * The client needs time to fully initialize after joining before we can teleport.
+	 * Also ensures only one transition happens at a time.
+	 */
+	private static void scheduleWorldTransition(World world, Runnable transitionAction) {
+		// Skip if a transition is already in progress
+		if (TroubleInTrorkTownPlugin.isWorldTransitionInProgress) {
+			return;
+		}
+
+		// Mark transition as pending
+		TroubleInTrorkTownPlugin.isWorldTransitionInProgress = true;
+
+		// Delay the transition to allow client to fully initialize after initial join
+		// 3 seconds should be enough for the client to complete any pending fade/loading
+		HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
+			world.execute(() -> {
+				try {
+					transitionAction.run();
+				} finally {
+					// Reset flag after additional delay for the actual fade to complete
+					HytaleServer.SCHEDULED_EXECUTOR.schedule(
+							() -> TroubleInTrorkTownPlugin.isWorldTransitionInProgress = false,
+							3000L,
+							TimeUnit.MILLISECONDS
+					);
+				}
+			});
+		}, 3000L, TimeUnit.MILLISECONDS);
+	}
+
 	@Override
 	public void accept(PlayerReadyEvent event) {
 		Player player = event.getPlayer();
@@ -93,41 +125,33 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 			GameModeState gameModeState = gameModeStateForWorld.getOrDefault(world.getWorldConfig().getUuid(), new GameModeState());
 
 			// Handle world instance transitions
-			// These are guarded to prevent "Cannot start a fade out while a fade completion callback is pending" error
+			// We need to delay teleports to prevent "Cannot start a fade out while a fade completion callback is pending"
+			// The client needs time to fully initialize after the initial world join before we can teleport them
 			if (TroubleInTrorkTownPlugin.currentInstance == null && playerInfo.getWorldInstance() == null) {
-				// No current instance exists, load a new map
+				// No current instance exists, load a new map with delay
 				String nextMap = getNextMap(gameModeState);
-				ChangeWorldCommand.loadInstance(world, nextMap);
+				scheduleWorldTransition(world, () -> ChangeWorldCommand.loadInstance(world, nextMap));
 				return;
 
 			} else if (Universe.get().getWorld(TroubleInTrorkTownPlugin.currentInstance) == null && playerInfo.getWorldInstance() == null) {
-				// Current instance reference exists but world doesn't, reload the instance
-				ChangeWorldCommand.loadInstance(world, TroubleInTrorkTownPlugin.currentInstance);
+				// Current instance reference exists but world doesn't, reload the instance with delay
+				scheduleWorldTransition(world, () -> ChangeWorldCommand.loadInstance(world, TroubleInTrorkTownPlugin.currentInstance));
 				return;
 
 			} else if (playerInfo.getWorldInstance() == null) {
-				// Instance exists, teleport player to it (if no transition is in progress)
-				if (TroubleInTrorkTownPlugin.isWorldTransitionInProgress) {
-					// A transition is in progress, skip teleport - the player will be handled when transition completes
-					return;
-				}
-
+				// Instance exists, teleport player to it with delay
 				World targetWorld = Universe.get().getWorld(TroubleInTrorkTownPlugin.currentInstance);
 				if (targetWorld == null) {
-					// Target world not found, skip to prevent NPE
 					return;
 				}
 
-				// Mark transition in progress for individual player teleport
-				TroubleInTrorkTownPlugin.isWorldTransitionInProgress = true;
-				InstancesPlugin.teleportPlayerToInstance(reference, reference.getStore(), targetWorld, new Transform());
-
-				// Reset flag after fade completes
-				HytaleServer.SCHEDULED_EXECUTOR.schedule(
-						() -> TroubleInTrorkTownPlugin.isWorldTransitionInProgress = false,
-						2000L,
-						TimeUnit.MILLISECONDS
-				);
+				scheduleWorldTransition(world, () -> {
+					// Re-check if player still needs teleport (they might have disconnected)
+					if (reference.isValid() && playerInfo.getWorldInstance() == null) {
+						playerInfo.setWorldInstance(TroubleInTrorkTownPlugin.currentInstance);
+						InstancesPlugin.teleportPlayerToInstance(reference, reference.getStore(), targetWorld, new Transform());
+					}
+				});
 				return;
 			}
 
