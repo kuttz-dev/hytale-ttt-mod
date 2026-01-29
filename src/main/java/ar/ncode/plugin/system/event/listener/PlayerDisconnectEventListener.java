@@ -2,6 +2,7 @@ package ar.ncode.plugin.system.event.listener;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.commands.SpectatorMode;
+import ar.ncode.plugin.system.scheduled.DoubleTapDetector;
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
@@ -70,6 +71,9 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 		if (reference == null) {
 			return;
 		}
+
+		// Remove player from DoubleTapDetector to prevent memory leak
+		DoubleTapDetector.getInstance().removePlayer(playerRef.getUuid());
 
 		Store<EntityStore> store = reference.getStore();
 		World world = store.getExternalData().getWorld();
