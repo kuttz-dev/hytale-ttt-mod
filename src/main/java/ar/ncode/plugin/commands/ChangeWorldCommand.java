@@ -12,14 +12,11 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
-import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
-
-import java.util.concurrent.TimeUnit;
 
 public class ChangeWorldCommand extends CommandBase {
 
@@ -56,7 +53,7 @@ public class ChangeWorldCommand extends CommandBase {
 				Ref<EntityStore> ref = playerRef.getReference();
 				PlayerGameModeInfo playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
 
-				if (ref == null || !ref.isValid()) {
+				if (!ref.isValid()) {
 					continue;
 				}
 
@@ -67,6 +64,7 @@ public class ChangeWorldCommand extends CommandBase {
 						targetWorld,
 						null
 				);
+				InstancesPlugin.safeRemoveInstance(currentWorld);
 			}
 
 			// Clear all player states to prevent memory leak when changing instances

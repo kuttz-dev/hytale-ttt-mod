@@ -9,7 +9,7 @@ import ar.ncode.plugin.component.death.LostInCombat;
 import ar.ncode.plugin.config.CustomConfig;
 import ar.ncode.plugin.interaction.ShowDeadPlayerInteraction;
 import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.LootBox;
+import ar.ncode.plugin.model.InstanceConfig;
 import ar.ncode.plugin.model.WorldPreview;
 import ar.ncode.plugin.packet.filter.GuiPacketsFilter;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
@@ -57,7 +57,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 	public static Config<CustomConfig> config;
 	public static List<WorldPreview> worldPreviews;
 	public static String currentInstance;
-	public static Config<LootBox> lootBox;
+	public static Config<InstanceConfig> instanceConfig;
 
 	/**
 	 * Flag to track if a world transition (fade) is currently in progress.
@@ -74,7 +74,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		super(init);
 		instance = this;
 		config = this.withConfig("config", CustomConfig.CODEC);
-		lootBox = this.withConfig("lootBox", LootBox.CODEC);
+		instanceConfig = this.withConfig("instanceConfig", InstanceConfig.CODEC);
 		LOGGER.atInfo().log("Starting plugin: " + this.getName() + " - version " + this.getManifest().getVersion().toString());
 
 	}

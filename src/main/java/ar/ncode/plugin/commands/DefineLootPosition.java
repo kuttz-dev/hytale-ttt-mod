@@ -1,5 +1,6 @@
 package ar.ncode.plugin.commands;
 
+import ar.ncode.plugin.model.LootBox;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.Message;
@@ -9,7 +10,7 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.lootBox;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.instanceConfig;
 
 public class DefineLootPosition extends CommandBase {
 
@@ -37,9 +38,16 @@ public class DefineLootPosition extends CommandBase {
 			}
 
 			// Here you would add the logic to actually store the loot position
-			lootBox.get().setPosition(transformComponent.getPosition());
-			lootBox.get().setRotation(transformComponent.getRotation());
-			lootBox.save();
+			LootBox lootBox = new LootBox(transformComponent.getPosition(), transformComponent.getRotation());
+			LootBox[] lootBoxes = instanceConfig.get().getLootBoxes();
+			if (lootBoxes == null) {
+				lootBoxes = new LootBox[0];
+			}
+			LootBox[] newLootBoxes = new LootBox[lootBoxes.length + 1];
+			System.arraycopy(lootBoxes, 0, newLootBoxes, 0, lootBoxes.length);
+			newLootBoxes[lootBoxes.length] = lootBox;
+			instanceConfig.get().setLootBoxes(newLootBoxes);
+			instanceConfig.save();
 		});
 	}
 }

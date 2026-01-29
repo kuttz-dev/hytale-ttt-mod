@@ -204,7 +204,8 @@ public class CustomConfig {
 	};
 
 	private String[] detectiveStoreItems = new String[]{
-			"Weapon_Staff_Frost:1"
+			"Weapon_Staff_Frost:1",
+			"Weapon_Deployable_Healing_Totem:1"
 	};
 
 	private String playerGraveId = "Player_Grave";

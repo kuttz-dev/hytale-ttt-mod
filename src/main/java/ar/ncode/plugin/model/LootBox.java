@@ -5,11 +5,13 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Arrays;
 
 @Setter
+@NoArgsConstructor
 public class LootBox {
 
 	public static final BuilderCodec<LootBox> CODEC =
@@ -29,10 +31,13 @@ public class LootBox {
 							(c, extraInfo) -> c.possibleLoot)
 					.add()
 					.build();
-
 	private Vector3d position = new Vector3d();
 	private Vector3f rotation = new Vector3f();
 	private String[] possibleLoot = new String[]{};
+	public LootBox(Vector3d position, Vector3f rotation) {
+		this.position = position;
+		this.rotation = rotation;
+	}
 
 	@Override
 	public String toString() {

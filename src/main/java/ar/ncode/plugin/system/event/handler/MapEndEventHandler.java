@@ -8,6 +8,7 @@ import ar.ncode.plugin.ui.pages.MapVotePage;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -78,9 +79,13 @@ public class MapEndEventHandler implements Consumer<MapEndEvent> {
 
 				playerInfo.getHud().update();
 
-				player.getPageManager().openCustomPage(
-						reference, reference.getStore(),
-						new MapVotePage(playerRef, CustomPageLifetime.CantClose, worldPreviews, playerInfo)
+				HytaleServer.SCHEDULED_EXECUTOR.schedule(() ->
+						world.execute(() ->
+								player.getPageManager().openCustomPage(
+										reference, reference.getStore(),
+										new MapVotePage(playerRef, CustomPageLifetime.CantClose, worldPreviews, playerInfo)
+								)
+						), 2, TimeUnit.SECONDS
 				);
 			}
 

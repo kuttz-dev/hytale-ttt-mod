@@ -100,7 +100,9 @@ public class MapVotePage extends InteractiveCustomUIPage<MapVotePage.MapVoteInte
 		}
 
 		var gameModeState = gameModeStateForWorld.get(super.playerRef.getWorldUuid());
-		gameModeState.addVoteForMap(event.mapName);
+		if (gameModeState != null) {
+			gameModeState.addVoteForMap(event.mapName);
+		}
 		close();
 	}
 

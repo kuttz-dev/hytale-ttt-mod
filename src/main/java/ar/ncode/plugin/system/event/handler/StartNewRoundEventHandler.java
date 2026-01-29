@@ -8,6 +8,7 @@ import ar.ncode.plugin.model.MessageId;
 import ar.ncode.plugin.system.event.StartNewRoundEvent;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
+import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
@@ -144,7 +145,6 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 			stats.maximizeStatValue(DefaultEntityStatTypes.getHealth());
 			player.getInventory().clear();
 			player.getInventory().setActiveHotbarSlot((byte) 0);
-
 			addConfiguredStartingItemsToPlayer(player);
 
 			NotificationStyle notificationStyle;
@@ -173,6 +173,7 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 			if (playerInfo.getHud() != null) {
 				playerInfo.getHud().update();
 			}
+			player.getPageManager().setPage(reference, reference.getStore(), Page.None);
 		}
 	}
 
