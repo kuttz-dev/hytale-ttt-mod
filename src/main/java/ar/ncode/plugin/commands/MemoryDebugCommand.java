@@ -29,8 +29,11 @@ public class MemoryDebugCommand extends CommandBase {
 		long usedBefore = (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
 		long totalBefore = rt.totalMemory() / 1024 / 1024;
 
-		commandContext.sendMessage(Message.raw("§e=== Memory Debug ==="));
-		commandContext.sendMessage(Message.raw("Before GC: " + usedBefore + "MB / " + totalBefore + "MB"));
+		commandContext.sendMessage(Message.raw("=== Memory Debug ===").color("#FFAA00"));
+		commandContext.sendMessage(Message.raw("Before GC: ").color("#AAAAAA")
+				.insert(Message.raw(usedBefore + "MB").color("#FFFFFF"))
+				.insert(Message.raw(" / ").color("#AAAAAA"))
+				.insert(Message.raw(totalBefore + "MB").color("#FFFFFF")));
 
 		// Force garbage collection
 		System.gc();
@@ -38,26 +41,32 @@ public class MemoryDebugCommand extends CommandBase {
 		// Small delay to let GC complete
 		try {
 			Thread.sleep(100);
-		} catch (InterruptedException ignored) {
-		}
+		} catch (InterruptedException ignored) {}
 
 		// Memory after GC
 		long usedAfter = (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
 		long totalAfter = rt.totalMemory() / 1024 / 1024;
 		long freed = usedBefore - usedAfter;
 
-		commandContext.sendMessage(Message.raw("After GC: " + usedAfter + "MB / " + totalAfter + "MB"));
-		commandContext.sendMessage(Message.raw("Freed:    " + freed + "MB"));
+		commandContext.sendMessage(Message.raw("After GC:  ").color("#AAAAAA")
+				.insert(Message.raw(usedAfter + "MB").color("#FFFFFF"))
+				.insert(Message.raw(" / ").color("#AAAAAA"))
+				.insert(Message.raw(totalAfter + "MB").color("#FFFFFF")));
+		commandContext.sendMessage(Message.raw("Freed:     ").color("#AAAAAA")
+				.insert(Message.raw(freed + "MB").color("#55FF55")));
 
 		// Additional debug info
 		int worldCount = Universe.get().getWorlds().size();
 		int gameStateCount = TroubleInTrorkTownPlugin.gameModeStateForWorld.size();
 		int playerStateCount = DoubleTapDetector.getInstance().getPlayerStateCount();
 
-		commandContext.sendMessage(Message.raw("=== TTT State ==="));
-		commandContext.sendMessage(Message.raw("Worlds in Universe:     " + worldCount));
-		commandContext.sendMessage(Message.raw("GameModeStates:         " + gameStateCount));
-		commandContext.sendMessage(Message.raw("DoubleTap PlayerStates: " + playerStateCount));
+		commandContext.sendMessage(Message.raw("=== TTT State ===").color("#FFAA00"));
+		commandContext.sendMessage(Message.raw("Worlds in Universe: ").color("#AAAAAA")
+				.insert(Message.raw(String.valueOf(worldCount)).color("#FFFFFF")));
+		commandContext.sendMessage(Message.raw("GameModeStates: ").color("#AAAAAA")
+				.insert(Message.raw(String.valueOf(gameStateCount)).color("#FFFFFF")));
+		commandContext.sendMessage(Message.raw("DoubleTap PlayerStates: ").color("#AAAAAA")
+				.insert(Message.raw(String.valueOf(playerStateCount)).color("#FFFFFF")));
 
 		// Log to console as well
 		LOGGER.atInfo().log("Memory Debug - Before: %dMB, After: %dMB, Freed: %dMB, Worlds: %d, GameStates: %d, PlayerStates: %d",
