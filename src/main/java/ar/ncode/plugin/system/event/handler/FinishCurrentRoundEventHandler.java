@@ -6,6 +6,7 @@ import ar.ncode.plugin.component.enums.PlayerRole;
 import ar.ncode.plugin.component.enums.RoundState;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
+import ar.ncode.plugin.system.event.MapEndEvent;
 import ar.ncode.plugin.system.event.StartNewRoundEvent;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.RemoveReason;
@@ -24,8 +25,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.model.MessageId.ROUND_INNOCENTS_WIN_MSG;
 import static ar.ncode.plugin.model.MessageId.ROUND_TRAITORS_WIN_MSG;
 
@@ -97,22 +98,32 @@ public class FinishCurrentRoundEventHandler implements Consumer<FinishCurrentRou
 			);
 		}
 
-
 		world.execute(() -> {
 			gameModeState.graveStones.forEach(graveStone -> {
 				Ref<EntityStore> namePlateReference = graveStone.getNamePlateReference();
-				if (namePlateReference != null && namePlateReference.isValid()) {
-					namePlateReference.getStore().removeEntity(namePlateReference, RemoveReason.REMOVE);
-				}
+				if (!config.get().isDebugMode()) {
+					if (namePlateReference != null && namePlateReference.isValid()) {
+						namePlateReference.getStore().removeEntity(namePlateReference, RemoveReason.REMOVE);
+					}
 
-				Vector3i graveStonePosition = graveStone.getGraveStonePosition();
-				world.breakBlock(graveStonePosition.x, graveStonePosition.y, graveStonePosition.z, 0);
+					Vector3i graveStonePosition = graveStone.getGraveStonePosition();
+					world.breakBlock(graveStonePosition.x, graveStonePosition.y, graveStonePosition.z, 0);
+				}
 			});
 
 			gameModeState.roundState = RoundState.AFTER_GAME;
 			gameModeState.roundStateUpdatedAt = LocalDateTime.now();
 
 			updatePlayersKarma(gameModeState);
+
+			gameModeState.playedRounds++;
+
+			if (gameModeState.hasLastRoundFinished()) {
+				HytaleServer.get().getEventBus()
+						.dispatchForAsync(MapEndEvent.class)
+						.dispatch(new MapEndEvent(world.getWorldConfig().getUuid()));
+				return;
+			}
 
 			executor.schedule(
 					() -> prepareNextRound(gameModeState, world),

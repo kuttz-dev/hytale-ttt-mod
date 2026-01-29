@@ -5,6 +5,7 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +59,16 @@ public class CustomConfig {
 							(config, extraInfo) -> config.roundDurationInSeconds)
 					.add()
 					.append(new KeyedCodec<>("TimeAfterRoundInSeconds", Codec.INTEGER),
-							(config, value, extraInfo) -> config.timeBeforeRoundInSeconds = value,
-							(config, extraInfo) -> config.timeBeforeRoundInSeconds)
+							(config, value, extraInfo) -> config.timeAfterRoundInSeconds = value,
+							(config, extraInfo) -> config.timeAfterRoundInSeconds)
+					.add()
+					.append(new KeyedCodec<>("TimeToVoteMapInSeconds", Codec.INTEGER),
+							(config, value, extraInfo) -> config.timeToVoteMapInSeconds = value,
+							(config, extraInfo) -> config.timeToVoteMapInSeconds)
+					.add()
+					.append(new KeyedCodec<>("TimeBeforeChangingMapInSeconds", Codec.INTEGER),
+							(config, value, extraInfo) -> config.timeBeforeChangingMapInSeconds = value,
+							(config, extraInfo) -> config.timeBeforeChangingMapInSeconds)
 					.add()
 					.append(new KeyedCodec<>("KarmaStartingValue", Codec.INTEGER),
 							(config, value, extraInfo) -> config.karmaStartingValue = value,
@@ -125,6 +134,22 @@ public class CustomConfig {
 							(config, value, extraInfo) -> config.playerGraveId = value,
 							(config, extraInfo) -> config.playerGraveId)
 					.add()
+					.append(new KeyedCodec<>("RoundPerMap", Codec.INTEGER),
+							(config, value, extraInfo) -> config.roundPerMap = value,
+							(config, extraInfo) -> config.roundPerMap)
+					.add()
+					.append(new KeyedCodec<>("MapsInARowForVoting", Codec.INTEGER),
+							(config, value, extraInfo) -> config.mapsInARowForVoting = value,
+							(config, extraInfo) -> config.mapsInARowForVoting)
+					.add()
+					.append(new KeyedCodec<>("WorldTemplatesFolder", Codec.STRING),
+							(config, value, extraInfo) -> config.worldTemplatesFolder = value,
+							(config, extraInfo) -> config.worldTemplatesFolder)
+					.add()
+					.append(new KeyedCodec<>("DebugMode", Codec.BOOLEAN),
+							(config, value, extraInfo) -> config.debugMode = value,
+							(config, extraInfo) -> config.debugMode)
+					.add()
 					.build();
 
 	// Sets Player's hud background color for current role
@@ -141,8 +166,10 @@ public class CustomConfig {
 	private int maxDetectives = 10;
 	// Time in seconds before the round starts
 	private int timeBeforeRoundInSeconds = 10;
-	private int roundDurationInSeconds = 15 * 60;
+	private int roundDurationInSeconds = 30;
 	private int timeAfterRoundInSeconds = 5;
+	private int timeToVoteMapInSeconds = 30;
+	private int timeBeforeChangingMapInSeconds = 5;
 
 	// Sets the starting value for each player's karma
 	private int karmaStartingValue = 1000;
@@ -181,6 +208,11 @@ public class CustomConfig {
 	};
 
 	private String playerGraveId = "Player_Grave";
+	private int roundPerMap = 1;
+	private int mapsInARowForVoting = 3;
+	private String worldTemplatesFolder = "universe/templates";
+	@Setter
+	private boolean debugMode = true;
 
 	public static List<ItemStack> parseItemEntry(String line) {
 		if (line == null || line.isBlank()) {

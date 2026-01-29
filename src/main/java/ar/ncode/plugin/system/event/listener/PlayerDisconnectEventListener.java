@@ -1,5 +1,6 @@
 package ar.ncode.plugin.system.event.listener;
 
+import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
@@ -21,8 +22,8 @@ import com.hypixel.hytale.server.core.util.EventTitleUtil;
 
 import java.util.function.Consumer;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.model.GameModeState.timeFormatter;
 import static ar.ncode.plugin.model.MessageId.THERE_ARE_NOT_ENOUGH_PLAYERS;
 import static ar.ncode.plugin.system.event.handler.FinishCurrentRoundEventHandler.roundShouldEnd;
@@ -72,7 +73,16 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 
 		Store<EntityStore> store = reference.getStore();
 		World world = store.getExternalData().getWorld();
+
+		if (world.getPlayerCount() == 0) {
+			TroubleInTrorkTownPlugin.currentInstance = null;
+		}
+
 		GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+
+		if (gameModeState == null) {
+			return;
+		}
 
 		world.execute(() -> {
 			SpectatorMode.disableSpectatorModeForPlayer(playerRef, reference);

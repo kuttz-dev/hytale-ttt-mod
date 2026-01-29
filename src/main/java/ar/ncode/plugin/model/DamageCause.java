@@ -11,6 +11,7 @@ public enum DamageCause {
 	ENVIRONMENT,
 	FALL,
 	OUT_OF_WORLD,
+	OUTOFWORLD,
 	SUFFOCATION,
 	FIRE;
 

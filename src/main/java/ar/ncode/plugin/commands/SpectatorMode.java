@@ -43,7 +43,16 @@ public class SpectatorMode extends CommandBase {
 
 	public static void disableSpectatorModeForPlayer(PlayerRef finalTargetPlayerRef, Ref<EntityStore> reference) {
 		// Remove spectator mode
+		reference.getStore().removeComponentIfExists(reference, Intangible.getComponentType());
+		reference.getStore().removeComponentIfExists(reference, Invulnerable.getComponentType());
+		showPlayerToAll(finalTargetPlayerRef, finalTargetPlayerRef.getUuid());
+
 		MovementManager movementManager = reference.getStore().getComponent(reference, MovementManager.getComponentType());
+
+		if (movementManager == null) {
+			return;
+		}
+
 		MovementSettings movementSettings = movementManager.getSettings();
 		if (movementSettings == null) {
 			return;
@@ -51,10 +60,6 @@ public class SpectatorMode extends CommandBase {
 
 		movementSettings.canFly = false;
 		movementManager.update(finalTargetPlayerRef.getPacketHandler());
-
-		reference.getStore().removeComponentIfExists(reference, Intangible.getComponentType());
-		reference.getStore().removeComponentIfExists(reference, Invulnerable.getComponentType());
-		showPlayerToAll(finalTargetPlayerRef, finalTargetPlayerRef.getUuid());
 	}
 
 	public static void setGameModeToSpectator(PlayerRef finalTargetPlayerRef, Ref<EntityStore> reference) {

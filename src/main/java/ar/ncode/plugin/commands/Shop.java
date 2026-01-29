@@ -18,7 +18,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.List;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.model.MessageId.SHOP_ONLY_FOR_TRAITORS_OR_DETECTIVES;
 
 public class Shop extends CommandBase {

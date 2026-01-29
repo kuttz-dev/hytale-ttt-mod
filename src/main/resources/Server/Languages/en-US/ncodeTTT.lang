@@ -44,5 +44,15 @@ dead_reason_drowning = Drowned
 dead_reason_environment = Environmental damage
 dead_reason_fall = Fall
 dead_reason_out_of_world = Fell out of the world
+dead_reason_outofworld = Fell out of the world
 dead_reason_suffocation = Suffocated
 dead_reason_fire = Incinerated
+
+map_vote_notification = Time to vote for the next map!
+map_vote_notification_next_map = Changing map to {map_name} in {time} seconds!
+map_vote_title = Vote for the next map
+map_vote_vote_for_map = Vote
+map_vote_votes_left = There are {players} players left to vote
+map_vote_you_voted_for = You have voted for: {map_name}
+map_vote_you_have_already_voted = You have already voted!
+map_vote_time_left = Time left: {time} seconds

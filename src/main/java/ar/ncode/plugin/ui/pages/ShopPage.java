@@ -25,7 +25,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.List;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.model.MessageId.*;
 
 public class ShopPage extends InteractiveCustomUIPage<ShopPage.ShopInteractionEvent> {
@@ -111,7 +111,6 @@ public class ShopPage extends InteractiveCustomUIPage<ShopPage.ShopInteractionEv
 			sendUpdate();
 			return;
 		}
-
 
 		store.getExternalData().getWorld().execute(() -> {
 			Player player = store.getComponent(reference, Player.getComponentType());

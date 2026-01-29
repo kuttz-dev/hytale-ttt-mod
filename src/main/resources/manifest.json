@@ -17,6 +17,6 @@
         
     },
     "DisabledByDefault": false,
-    "Main": "ar.ncode.plugin.TroubleInElfTownGameModePlugin",
+    "Main": "ar.ncode.plugin.TroubleInTrorkTownPlugin",
     "IncludesAssetPack": true
 }

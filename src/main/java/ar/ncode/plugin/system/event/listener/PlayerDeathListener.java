@@ -27,8 +27,8 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import javax.annotation.Nonnull;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.model.GameModeState.timeFormatter;
 import static ar.ncode.plugin.system.event.handler.FinishCurrentRoundEventHandler.roundShouldEnd;
 
@@ -95,6 +95,7 @@ public class PlayerDeathListener extends DeathSystems.OnDeathSystem {
 	public void onComponentAdded(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl DeathComponent deathComponent,
 	                             @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer
 	) {
+		deathComponent.setShowDeathMenu(false);
 		// Get reference to the damaged entity
 		Player player = store.getComponent(reference, Player.getComponentType());
 		PlayerRef playerRef = store.getComponent(reference, PlayerRef.getComponentType());

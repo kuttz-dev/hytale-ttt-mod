@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 
 @Getter
 @Setter
@@ -55,11 +55,13 @@ public class PlayerGameModeInfo implements Component<EntityStore> {
 	private DamageCause causeOfDeath;
 	private PlayerRole currentRoundRole;
 	private float elapsedTimeSinceLastUpdate = 0;
+	private boolean alreadyVotedMap = false;
+	private String worldInstance = null;
 
 	@NullableDecl
 	@Override
 	public Component<EntityStore> clone() {
 		return new PlayerGameModeInfo(this.karma, this.role, this.kills, this.deaths, this.credits, this.hud,
-				timeOfDeath, causeOfDeath, currentRoundRole, elapsedTimeSinceLastUpdate);
+				timeOfDeath, causeOfDeath, currentRoundRole, elapsedTimeSinceLastUpdate, alreadyVotedMap, worldInstance);
 	}
 }

@@ -44,5 +44,15 @@ dead_reason_drowning = Ahogado
 dead_reason_environment = Daño ambiental
 dead_reason_fall = Caida
 dead_reason_out_of_world = Salirse del mundo
+dead_reason_outofworld = Salirse del mundo
 dead_reason_suffocation = Ahogado
 dead_reason_fire = Incinerado
+
+map_vote_notification = Hora de votar por el siguiente mapa!
+map_vote_notification_next_map = Cambiando el mapa a {map_name} en {time} segundos!
+map_vote_title = Vota por el siguiente mapa
+map_vote_vote_for_map = Votar
+map_vote_votes_left = Faltan votar {players} jugadores
+map_vote_you_voted_for = Has votado por: {map_name}
+map_vote_you_have_already_voted = Ya has votado!
+map_vote_time_left = Tiempo restante: {time} segundos

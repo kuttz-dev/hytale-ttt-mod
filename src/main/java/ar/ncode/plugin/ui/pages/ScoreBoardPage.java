@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.component.enums.PlayerRole.SPECTATOR;
 import static ar.ncode.plugin.component.enums.PlayerRole.TRAITOR;
 import static ar.ncode.plugin.model.MessageId.*;
