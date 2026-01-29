@@ -24,6 +24,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
@@ -91,18 +92,42 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 
 			GameModeState gameModeState = gameModeStateForWorld.getOrDefault(world.getWorldConfig().getUuid(), new GameModeState());
 
+			// Handle world instance transitions
+			// These are guarded to prevent "Cannot start a fade out while a fade completion callback is pending" error
 			if (TroubleInTrorkTownPlugin.currentInstance == null && playerInfo.getWorldInstance() == null) {
+				// No current instance exists, load a new map
 				String nextMap = getNextMap(gameModeState);
 				ChangeWorldCommand.loadInstance(world, nextMap);
 				return;
 
 			} else if (Universe.get().getWorld(TroubleInTrorkTownPlugin.currentInstance) == null && playerInfo.getWorldInstance() == null) {
+				// Current instance reference exists but world doesn't, reload the instance
 				ChangeWorldCommand.loadInstance(world, TroubleInTrorkTownPlugin.currentInstance);
 				return;
 
 			} else if (playerInfo.getWorldInstance() == null) {
+				// Instance exists, teleport player to it (if no transition is in progress)
+				if (TroubleInTrorkTownPlugin.isWorldTransitionInProgress) {
+					// A transition is in progress, skip teleport - the player will be handled when transition completes
+					return;
+				}
+
 				World targetWorld = Universe.get().getWorld(TroubleInTrorkTownPlugin.currentInstance);
+				if (targetWorld == null) {
+					// Target world not found, skip to prevent NPE
+					return;
+				}
+
+				// Mark transition in progress for individual player teleport
+				TroubleInTrorkTownPlugin.isWorldTransitionInProgress = true;
 				InstancesPlugin.teleportPlayerToInstance(reference, reference.getStore(), targetWorld, new Transform());
+
+				// Reset flag after fade completes
+				HytaleServer.SCHEDULED_EXECUTOR.schedule(
+						() -> TroubleInTrorkTownPlugin.isWorldTransitionInProgress = false,
+						2000L,
+						TimeUnit.MILLISECONDS
+				);
 				return;
 			}
 

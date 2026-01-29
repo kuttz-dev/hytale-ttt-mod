@@ -58,6 +58,13 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 	public static List<WorldPreview> worldPreviews;
 	public static String currentInstance;
 	public static Config<LootBox> lootBox;
+
+	/**
+	 * Flag to track if a world transition (fade) is currently in progress.
+	 * This prevents the "Cannot start a fade out while a fade completion callback is pending" error
+	 * when multiple players trigger transitions simultaneously.
+	 */
+	public static volatile boolean isWorldTransitionInProgress = false;
 	@SuppressWarnings("rawtypes")
 	private List<EventRegistration> events = new ArrayList<>();
 	private List<CommandRegistration> commands = new ArrayList<>();
