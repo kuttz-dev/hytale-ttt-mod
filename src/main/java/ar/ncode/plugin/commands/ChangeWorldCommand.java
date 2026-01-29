@@ -87,6 +87,13 @@ public class ChangeWorldCommand extends CommandBase {
 			// safeRemoveInstance() silently fails if the world has no InstanceWorldConfig
 			HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
 				try {
+					// Don't remove the default world!
+					String defaultWorldName = HytaleServer.get().getConfig().getDefaults().getWorld();
+					if (oldWorldName.equalsIgnoreCase(defaultWorldName)) {
+						LOGGER.atInfo().log("Skipping removal of default world: " + oldWorldName);
+						return;
+					}
+
 					World oldWorld = Universe.get().getWorld(oldWorldName);
 					if (oldWorld != null && oldWorld.getPlayerCount() == 0) {
 						LOGGER.atInfo().log("Removing old world instance: " + oldWorldName);
