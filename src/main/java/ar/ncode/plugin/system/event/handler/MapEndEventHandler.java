@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 
+import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -92,8 +93,12 @@ public class MapEndEventHandler implements Consumer<MapEndEvent> {
 	}
 
 	private void endVotesAndChangeWorld(World currentWorld) {
-		var gameState = gameModeStateForWorld.get(currentWorld.getWorldConfig().getUuid());
+		UUID oldWorldId = currentWorld.getWorldConfig().getUuid();
+		var gameState = gameModeStateForWorld.get(oldWorldId);
 		String newWorldName = getNextMap(gameState);
+
+		// Remove old GameModeState to prevent memory leak when loading new instance
+		gameModeStateForWorld.remove(oldWorldId);
 
 		EventTitleUtil.showEventTitleToWorld(
 				Message.translation(MAP_VOTE_NOTIFICATION_NEXT_MAP.get())

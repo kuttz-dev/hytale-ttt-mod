@@ -2,6 +2,7 @@ package ar.ncode.plugin.commands;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
+import ar.ncode.plugin.system.scheduled.DoubleTapDetector;
 import com.hypixel.hytale.builtin.instances.InstancesPlugin;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -67,6 +68,12 @@ public class ChangeWorldCommand extends CommandBase {
 						null
 				);
 			}
+
+			// Clear all player states to prevent memory leak when changing instances
+			DoubleTapDetector.getInstance().clearAllPlayers();
+
+			// Mark old instance for removal when empty (prevents world instance memory leak)
+			InstancesPlugin.safeRemoveInstance(currentWorld);
 		});
 	}
 
