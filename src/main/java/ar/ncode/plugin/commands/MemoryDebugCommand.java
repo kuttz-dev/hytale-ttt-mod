@@ -30,7 +30,7 @@ public class MemoryDebugCommand extends CommandBase {
 		long totalBefore = rt.totalMemory() / 1024 / 1024;
 
 		commandContext.sendMessage(Message.raw("§e=== Memory Debug ==="));
-		commandContext.sendMessage(Message.raw("§7Before GC: §f" + usedBefore + "MB §7/ §f" + totalBefore + "MB"));
+		commandContext.sendMessage(Message.raw("Before GC: " + usedBefore + "MB / " + totalBefore + "MB"));
 
 		// Force garbage collection
 		System.gc();
@@ -45,18 +45,18 @@ public class MemoryDebugCommand extends CommandBase {
 		long totalAfter = rt.totalMemory() / 1024 / 1024;
 		long freed = usedBefore - usedAfter;
 
-		commandContext.sendMessage(Message.raw("§7After GC:  §f" + usedAfter + "MB §7/ §f" + totalAfter + "MB"));
-		commandContext.sendMessage(Message.raw("§7Freed:     §a" + freed + "MB"));
+		commandContext.sendMessage(Message.raw("After GC: " + usedAfter + "MB / " + totalAfter + "MB"));
+		commandContext.sendMessage(Message.raw("Freed:    " + freed + "MB"));
 
 		// Additional debug info
 		int worldCount = Universe.get().getWorlds().size();
 		int gameStateCount = TroubleInTrorkTownPlugin.gameModeStateForWorld.size();
 		int playerStateCount = DoubleTapDetector.getInstance().getPlayerStateCount();
 
-		commandContext.sendMessage(Message.raw("§e=== TTT State ==="));
-		commandContext.sendMessage(Message.raw("§7Worlds in Universe: §f" + worldCount));
-		commandContext.sendMessage(Message.raw("§7GameModeStates: §f" + gameStateCount));
-		commandContext.sendMessage(Message.raw("§7DoubleTap PlayerStates: §f" + playerStateCount));
+		commandContext.sendMessage(Message.raw("=== TTT State ==="));
+		commandContext.sendMessage(Message.raw("Worlds in Universe:     " + worldCount));
+		commandContext.sendMessage(Message.raw("GameModeStates:         " + gameStateCount));
+		commandContext.sendMessage(Message.raw("DoubleTap PlayerStates: " + playerStateCount));
 
 		// Log to console as well
 		LOGGER.atInfo().log("Memory Debug - Before: %dMB, After: %dMB, Freed: %dMB, Worlds: %d, GameStates: %d, PlayerStates: %d",
