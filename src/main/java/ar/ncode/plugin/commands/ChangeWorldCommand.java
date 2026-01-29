@@ -11,11 +11,14 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+
+import java.util.concurrent.TimeUnit;
 
 public class ChangeWorldCommand extends CommandBase {
 
@@ -27,6 +30,14 @@ public class ChangeWorldCommand extends CommandBase {
 		super("change-world", "Debug command to change the current world.");
 	}
 
+	/**
+	 * Loads a new world instance and teleports all players from the current world to it.
+	 * Note: This method does NOT check the transition flag - callers should use
+	 * scheduleWorldTransition() from PlayerReadyEventListener to ensure proper timing.
+	 *
+	 * @param currentWorld The world to teleport players from
+	 * @param newWorldName The name of the world template to spawn
+	 */
 	public static void loadInstance(World currentWorld, String newWorldName) {
 		currentWorld.execute(() -> {
 			TroubleInTrorkTownPlugin.currentInstance = newWorldName;
@@ -36,6 +47,7 @@ public class ChangeWorldCommand extends CommandBase {
 						.spawnInstance(newWorldName, currentWorld, new Transform())
 						.get();
 			} catch (Exception e) {
+				LOGGER.atSevere().withCause(e).log("Failed to spawn instance: " + newWorldName);
 				throw new RuntimeException(e);
 			}
 
