@@ -111,6 +111,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		commands.add(getCommandRegistry().registerCommand(new Debug()));
 		commands.add(getCommandRegistry().registerCommand(new ChangeWorldCommand()));
 		commands.add(getCommandRegistry().registerCommand(new DefineLootPosition()));
+		commands.add(getCommandRegistry().registerCommand(new MemoryDebugCommand()));
 
 		getCodecRegistry(Interaction.CODEC)
 				.register("show_dead_player_info", ShowDeadPlayerInteraction.class, ShowDeadPlayerInteraction.CODEC);

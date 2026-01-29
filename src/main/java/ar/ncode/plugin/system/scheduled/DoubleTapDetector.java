@@ -202,6 +202,14 @@ public class DoubleTapDetector {
 		playerStates.clear();
 	}
 
+	/**
+	 * Returns the number of player states currently tracked.
+	 * Useful for debugging memory leaks.
+	 */
+	public int getPlayerStateCount() {
+		return playerStates.size();
+	}
+
 	private static class PlayerWalkState {
 		boolean previousWalking = false;
 		long tapStartTime = 0L;
