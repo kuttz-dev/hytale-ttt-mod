@@ -32,63 +32,42 @@ public class ChangeWorldCommand extends CommandBase {
 
 	/**
 	 * Loads a new world instance and teleports all players from the current world to it.
-	 * This method is guarded by a transition flag to prevent concurrent fade transitions.
+	 * Note: This method does NOT check the transition flag - callers should use
+	 * scheduleWorldTransition() from PlayerReadyEventListener to ensure proper timing.
 	 *
 	 * @param currentWorld The world to teleport players from
 	 * @param newWorldName The name of the world template to spawn
-	 * @return true if the transition was started, false if a transition is already in progress
 	 */
-	public static boolean loadInstance(World currentWorld, String newWorldName) {
-		// Check if a transition is already in progress to prevent concurrent fades
-		if (TroubleInTrorkTownPlugin.isWorldTransitionInProgress) {
-			LOGGER.atInfo().log("World transition already in progress, skipping new transition request");
-			return false;
-		}
-
-		// Mark transition as in progress
-		TroubleInTrorkTownPlugin.isWorldTransitionInProgress = true;
-
+	public static void loadInstance(World currentWorld, String newWorldName) {
 		currentWorld.execute(() -> {
+			TroubleInTrorkTownPlugin.currentInstance = newWorldName;
+			World targetWorld = null;
 			try {
-				TroubleInTrorkTownPlugin.currentInstance = newWorldName;
-				World targetWorld = null;
-				try {
-					targetWorld = InstancesPlugin.get()
-							.spawnInstance(newWorldName, currentWorld, new Transform())
-							.get();
-				} catch (Exception e) {
-					LOGGER.atSevere().withCause(e).log("Failed to spawn instance: " + newWorldName);
-					TroubleInTrorkTownPlugin.isWorldTransitionInProgress = false;
-					throw new RuntimeException(e);
+				targetWorld = InstancesPlugin.get()
+						.spawnInstance(newWorldName, currentWorld, new Transform())
+						.get();
+			} catch (Exception e) {
+				LOGGER.atSevere().withCause(e).log("Failed to spawn instance: " + newWorldName);
+				throw new RuntimeException(e);
+			}
+
+			for (PlayerRef playerRef : currentWorld.getPlayerRefs()) {
+				Ref<EntityStore> ref = playerRef.getReference();
+				PlayerGameModeInfo playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
+
+				if (ref == null || !ref.isValid()) {
+					continue;
 				}
 
-				for (PlayerRef playerRef : currentWorld.getPlayerRefs()) {
-					Ref<EntityStore> ref = playerRef.getReference();
-					PlayerGameModeInfo playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
-
-					if (ref == null || !ref.isValid()) {
-						continue;
-					}
-
-					playerInfo.setWorldInstance(newWorldName);
-					InstancesPlugin.teleportPlayerToInstance(
-							ref,
-							ref.getStore(),
-							targetWorld,
-							null
-					);
-				}
-			} finally {
-				// Reset the transition flag after a delay to allow fade animation to complete
-				// The fade animation typically takes ~1-2 seconds
-				HytaleServer.SCHEDULED_EXECUTOR.schedule(
-						() -> TroubleInTrorkTownPlugin.isWorldTransitionInProgress = false,
-						2000L,
-						TimeUnit.MILLISECONDS
+				playerInfo.setWorldInstance(newWorldName);
+				InstancesPlugin.teleportPlayerToInstance(
+						ref,
+						ref.getStore(),
+						targetWorld,
+						null
 				);
 			}
 		});
-		return true;
 	}
 
 	@Override
