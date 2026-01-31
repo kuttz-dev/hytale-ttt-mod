@@ -22,6 +22,7 @@ import ar.ncode.plugin.system.event.StartNewRoundEvent;
 import ar.ncode.plugin.system.event.handler.FinishCurrentMapEventHandler;
 import ar.ncode.plugin.system.event.handler.FinishCurrentRoundEventHandler;
 import ar.ncode.plugin.system.event.handler.StartNewRoundEventHandler;
+import ar.ncode.plugin.system.event.listener.DeadChatListener;
 import ar.ncode.plugin.system.event.listener.*;
 import ar.ncode.plugin.system.scheduled.DoubleTapDetector;
 import ar.ncode.plugin.system.scheduled.PlayerHudUpdateSystem;
@@ -31,6 +32,7 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.registry.Registration;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.command.system.CommandRegistration;
+import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
@@ -73,6 +75,12 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 	 * when multiple players trigger transitions simultaneously.
 	 */
 	public static volatile boolean isWorldTransitionInProgress = false;
+
+	/**
+	 * Thread-safe set of player UUIDs who are spectators (dead).
+	 * Used by DeadChatListener to filter chat without accessing world thread.
+	 */
+	public static final java.util.Set<UUID> spectatorPlayers = java.util.concurrent.ConcurrentHashMap.newKeySet();
 	@SuppressWarnings("rawtypes")
 	private List<EventRegistration> events = new ArrayList<>();
 	private List<CommandRegistration> commands = new ArrayList<>();
@@ -116,6 +124,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 		events.add(getEventRegistry().registerGlobal(PlayerReadyEvent.class, new PlayerReadyEventListener()));
 		events.add(getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, new PlayerDisconnectEventListener()));
+		events.add(getEventRegistry().registerGlobal(PlayerChatEvent.class, new DeadChatListener()));
 		events.add(getEventRegistry().registerGlobal(StartNewRoundEvent.class, new StartNewRoundEventHandler()));
 		events.add(getEventRegistry().registerGlobal(FinishCurrentRoundEvent.class, new FinishCurrentRoundEventHandler()));
 		events.add(getEventRegistry().registerGlobal(FinishCurrentMapEvent.class, new FinishCurrentMapEventHandler()));

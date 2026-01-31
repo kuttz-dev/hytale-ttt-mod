@@ -74,6 +74,8 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 
 		// Remove player from DoubleTapDetector to prevent memory leak
 		DoubleTapDetector.getInstance().removePlayer(playerRef.getUuid());
+		// Remove from spectator tracking
+		TroubleInTrorkTownPlugin.spectatorPlayers.remove(playerRef.getUuid());
 
 		Store<EntityStore> store = reference.getStore();
 		World world = store.getExternalData().getWorld();

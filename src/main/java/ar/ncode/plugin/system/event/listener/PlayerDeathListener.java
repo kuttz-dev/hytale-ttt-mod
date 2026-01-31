@@ -165,6 +165,7 @@ public class PlayerDeathListener extends DeathSystems.OnDeathSystem {
 		}
 
 		playerInfo.setRole(PlayerRole.SPECTATOR);
+		TroubleInTrorkTownPlugin.spectatorPlayers.add(playerRef.getUuid()); // Track for chat filtering
 		playerInfo.getHud().update();
 
 		updatePlayerCounts(playerRole, gameModeState);

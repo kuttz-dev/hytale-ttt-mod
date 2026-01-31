@@ -173,6 +173,12 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 			PlayerRole role = getPlayerRoleBasedOnGameState(gameModeState);
 			playerInfo.setRole(role);
 			playerInfo.setCurrentRoundRole(role);
+			// Track spectator status for chat filtering
+			if (PlayerRole.SPECTATOR.equals(role)) {
+				TroubleInTrorkTownPlugin.spectatorPlayers.add(playerRef.getUuid());
+			} else {
+				TroubleInTrorkTownPlugin.spectatorPlayers.remove(playerRef.getUuid());
+			}
 
 			var hud = loadHudForPlayer(player, playerRef, playerInfo);
 			playerInfo.setHud(hud);

@@ -92,6 +92,9 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 				}
 
 
+				// Clear spectator status - player is now alive
+				TroubleInTrorkTownPlugin.spectatorPlayers.remove(playerRef.getUuid());
+
 				if (assignedTraitors < numTraitors) {
 					playerInfo.setRole(TRAITOR);
 					playerInfo.setCurrentRoundRole(TRAITOR);
