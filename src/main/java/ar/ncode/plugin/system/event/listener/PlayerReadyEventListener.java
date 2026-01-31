@@ -22,6 +22,7 @@ import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.WorldMapTracker;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
@@ -161,6 +162,11 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 			}
 
 			effectController.clearEffects(reference, reference.getStore());
+
+			// TTT: Hide ALL players from compass and worldmap (always on)
+			WorldMapTracker worldMapTracker = player.getWorldMapTracker();
+			worldMapTracker.setPlayerMapFilter(otherPlayer -> true);  // true = hide everyone
+
 			SpectatorMode.disableSpectatorModeForPlayer(playerRef, reference);
 			player.getInventory().clear();
 
