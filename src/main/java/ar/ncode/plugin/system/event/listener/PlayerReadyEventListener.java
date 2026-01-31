@@ -6,6 +6,7 @@ import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.enums.PlayerRole;
 import ar.ncode.plugin.component.enums.RoundState;
+import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.system.event.StartNewRoundEvent;
 import ar.ncode.plugin.ui.hud.PlayerCurrentRoleHud;
@@ -28,8 +29,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.system.event.handler.MapEndEventHandler.getNextMap;
+import static ar.ncode.plugin.system.event.handler.FinishCurrentMapEventHandler.getNextMap;
 import static ar.ncode.plugin.system.event.handler.StartNewRoundEventHandler.canStartNewRound;
+import static ar.ncode.plugin.system.event.listener.PlayerRespawnListener.teleportPlayerToRandomSpawnPoint;
 
 public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 
@@ -83,20 +85,18 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 
 		// Delay the transition to allow client to fully initialize after initial join
 		// 3 seconds should be enough for the client to complete any pending fade/loading
-		HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-			world.execute(() -> {
-				try {
-					transitionAction.run();
-				} finally {
-					// Reset flag after additional delay for the actual fade to complete
-					HytaleServer.SCHEDULED_EXECUTOR.schedule(
-							() -> TroubleInTrorkTownPlugin.isWorldTransitionInProgress = false,
-							3000L,
-							TimeUnit.MILLISECONDS
-					);
-				}
-			});
-		}, 3000L, TimeUnit.MILLISECONDS);
+		HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> world.execute(() -> {
+			try {
+				transitionAction.run();
+			} finally {
+				// Reset flag after additional delay for the actual fade to complete
+				HytaleServer.SCHEDULED_EXECUTOR.schedule(
+						() -> TroubleInTrorkTownPlugin.isWorldTransitionInProgress = false,
+						1500,
+						TimeUnit.MILLISECONDS
+				);
+			}
+		}), 1500, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -110,17 +110,6 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 
 		world.execute(() -> {
 			PlayerGameModeInfo playerInfo = reference.getStore().ensureAndGetComponent(reference, PlayerGameModeInfo.componentType);
-
-			PlayerRef playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
-			EffectControllerComponent effectController = reference.getStore().getComponent(reference, EffectControllerComponent.getComponentType());
-
-			if (playerRef == null || effectController == null) {
-				return;
-			}
-
-			effectController.clearEffects(reference, reference.getStore());
-			SpectatorMode.disableSpectatorModeForPlayer(playerRef, reference);
-			player.getInventory().clear();
 
 			GameModeState gameModeState = gameModeStateForWorld.getOrDefault(world.getWorldConfig().getUuid(), new GameModeState());
 
@@ -154,6 +143,26 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 				});
 				return;
 			}
+
+			if (world.getWorldConfig().getDisplayName() != null) {
+				String worldName = world.getWorldConfig().getDisplayName().replace(" ", "_").toLowerCase();
+				InstanceConfig instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName).get();
+
+				if (instanceConfig != null) {
+					teleportPlayerToRandomSpawnPoint(reference, reference.getStore(), instanceConfig, world);
+				}
+			}
+
+			PlayerRef playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
+			EffectControllerComponent effectController = reference.getStore().getComponent(reference, EffectControllerComponent.getComponentType());
+
+			if (playerRef == null || effectController == null) {
+				return;
+			}
+
+			effectController.clearEffects(reference, reference.getStore());
+			SpectatorMode.disableSpectatorModeForPlayer(playerRef, reference);
+			player.getInventory().clear();
 
 			PlayerRole role = getPlayerRoleBasedOnGameState(gameModeState);
 			playerInfo.setRole(role);

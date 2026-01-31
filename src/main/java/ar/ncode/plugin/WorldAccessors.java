@@ -18,6 +18,9 @@ public class WorldAccessors {
 	public static <T extends Component<ChunkStore>> T getBlockComponentAt(
 			World world, Vector3i position, ComponentType<ChunkStore, T> componentType
 	) {
+		if (componentType == null) {
+			return null;
+		}
 		long index = ChunkUtil.indexChunkFromBlock(position.x, position.z);
 		ChunkStore chunkStore = world.getChunkStore();
 		Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(index);

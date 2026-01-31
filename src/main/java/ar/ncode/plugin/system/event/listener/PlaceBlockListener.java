@@ -6,27 +6,31 @@ import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
-import com.hypixel.hytale.server.core.event.events.ecs.BreakBlockEvent;
+import com.hypixel.hytale.server.core.event.events.ecs.PlaceBlockEvent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 
-public class BreakBlockListener extends EntityEventSystem<EntityStore, BreakBlockEvent> {
+public class PlaceBlockListener extends EntityEventSystem<EntityStore, PlaceBlockEvent> {
 
-	public BreakBlockListener() {
-		super(BreakBlockEvent.class);
+	public PlaceBlockListener() {
+		super(PlaceBlockEvent.class);
 	}
 
 	@Override
-	public void handle(int i, @NonNullDecl ArchetypeChunk<EntityStore> archetypeChunk, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, @NonNullDecl BreakBlockEvent breakBlockEvent) {
+	public void handle(
+			int i, @NonNullDecl ArchetypeChunk<EntityStore> archetypeChunk,
+			@NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer,
+			@NonNullDecl PlaceBlockEvent event
+	) {
 		if (config.get().isDebugMode()) {
 			return;
 		}
 
 		// By default, block players from breaking blocks
-		breakBlockEvent.setCancelled(true);
+		event.setCancelled(true);
 	}
 
 	@NullableDecl

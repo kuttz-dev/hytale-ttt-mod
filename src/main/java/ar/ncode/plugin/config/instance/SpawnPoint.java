@@ -1,21 +1,20 @@
-package ar.ncode.plugin.model;
+package ar.ncode.plugin.config.instance;
 
-import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Arrays;
+@Getter()
+@Setter()
+@NoArgsConstructor()
+public class SpawnPoint {
 
-@Setter
-@NoArgsConstructor
-public class LootBox {
-
-	public static final BuilderCodec<LootBox> CODEC =
-			BuilderCodec.builder(LootBox.class, LootBox::new)
+	public static final BuilderCodec<SpawnPoint> CODEC =
+			BuilderCodec.builder(SpawnPoint.class, SpawnPoint::new)
 					.append(new KeyedCodec<>("Position", Vector3d.CODEC),
 							(c, value, extraInfo) -> c.position = value == null ? new Vector3d() :
 									c.position.assign(value),
@@ -26,15 +25,13 @@ public class LootBox {
 									c.rotation.assign(value),
 							(c, extraInfo) -> c.rotation)
 					.add()
-					.append(new KeyedCodec<>("PossibleLoot", Codec.STRING_ARRAY),
-							(c, value, extraInfo) -> c.possibleLoot = value,
-							(c, extraInfo) -> c.possibleLoot)
-					.add()
 					.build();
+
+
 	private Vector3d position = new Vector3d();
 	private Vector3f rotation = new Vector3f();
-	private String[] possibleLoot = new String[]{};
-	public LootBox(Vector3d position, Vector3f rotation) {
+
+	public SpawnPoint(Vector3d position, Vector3f rotation) {
 		this.position = position;
 		this.rotation = rotation;
 	}
@@ -44,7 +41,6 @@ public class LootBox {
 		return "LootBox{" +
 				"position={" + position.x + "," + position.y + "," + position.z + "}" +
 				", rotation={" + rotation.x + "," + rotation.y + "," + rotation.z + "}" +
-				", possibleLoot=" + Arrays.toString(possibleLoot) +
 				'}';
 	}
 }

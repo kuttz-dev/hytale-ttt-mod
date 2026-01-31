@@ -1,4 +1,4 @@
-package ar.ncode.plugin.commands;
+package ar.ncode.plugin.commands.map;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.GameModeState;
@@ -17,9 +17,9 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.worldPreviews;
 
-public class MapVote extends CommandBase {
+public class MapVoteCommand extends CommandBase {
 
-	public MapVote() {
+	public MapVoteCommand() {
 		super("vote", "Command to open the map voting menu.");
 		super.addAliases("votemap");
 	}

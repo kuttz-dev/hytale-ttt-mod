@@ -56,3 +56,8 @@ map_vote_votes_left = Faltan votar {players} jugadores
 map_vote_you_voted_for = Has votado por: {map_name}
 map_vote_you_have_already_voted = Ya has votado!
 map_vote_time_left = Tiempo restante: {time} segundos
+
+traitors_chat_only_for_traitors = Solo los traidores pueden usar este comando!
+traitors_chat_command_description = Envia un mensaje a los demás traidores (solo para traidores con vida).
+traitors_chat_command_world_error = El jugador debe estar en un mundo para usar este comando!
+traitors_chat_prefix = [TRAIDOR]

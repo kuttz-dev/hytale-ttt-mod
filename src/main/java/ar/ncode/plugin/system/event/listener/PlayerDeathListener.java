@@ -15,8 +15,10 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.entities.player.pages.PageManager;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
@@ -95,9 +97,18 @@ public class PlayerDeathListener extends DeathSystems.OnDeathSystem {
 	public void onComponentAdded(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl DeathComponent deathComponent,
 	                             @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer
 	) {
-		deathComponent.setShowDeathMenu(false);
 		// Get reference to the damaged entity
 		Player player = store.getComponent(reference, Player.getComponentType());
+
+		if (player == null) {
+			return;
+		}
+
+		// Close any open pages, including death screen
+		deathComponent.setShowDeathMenu(false);
+		PageManager pageManager = player.getPageManager();
+		pageManager.setPage(reference, store, Page.None);
+
 		PlayerRef playerRef = store.getComponent(reference, PlayerRef.getComponentType());
 		PlayerGameModeInfo playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
 

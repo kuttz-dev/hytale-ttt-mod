@@ -1,5 +1,6 @@
 package ar.ncode.plugin.system.event.handler;
 
+import ar.ncode.plugin.commands.loot.LootSpawnCommand;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.enums.PlayerRole;
 import ar.ncode.plugin.component.enums.RoundState;
@@ -143,7 +144,6 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 			}
 
 			stats.maximizeStatValue(DefaultEntityStatTypes.getHealth());
-			player.getInventory().clear();
 			player.getInventory().setActiveHotbarSlot((byte) 0);
 			addConfiguredStartingItemsToPlayer(player);
 
@@ -232,12 +232,13 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 				gameModeState.roundStateUpdatedAt = LocalDateTime.now();
 
 				gameModeStateForWorld.put(world.getWorldConfig().getUuid(), gameModeState);
+				LootSpawnCommand.LootForceSpawnCommand.spawnLootForWorld(world);
 
 				executor.schedule(() -> {
-						// Check if world is still alive before executing (prevents memory leak from stale references)
-						if (!world.isAlive()) return;
-						startNewRound(gameModeState, world);
-					},
+							// Check if world is still alive before executing (prevents memory leak from stale references)
+							if (!world.isAlive()) return;
+							startNewRound(gameModeState, world);
+						},
 						config.get().getTimeBeforeRoundInSeconds(),
 						TimeUnit.SECONDS
 				);

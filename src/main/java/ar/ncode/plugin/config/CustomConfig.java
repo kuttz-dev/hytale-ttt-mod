@@ -134,9 +134,13 @@ public class CustomConfig {
 							(config, value, extraInfo) -> config.playerGraveId = value,
 							(config, extraInfo) -> config.playerGraveId)
 					.add()
-					.append(new KeyedCodec<>("RoundPerMap", Codec.INTEGER),
-							(config, value, extraInfo) -> config.roundPerMap = value,
-							(config, extraInfo) -> config.roundPerMap)
+					.append(new KeyedCodec<>("LootBoxBlockId", Codec.STRING),
+							(config, value, extraInfo) -> config.lootBoxBlockId = value,
+							(config, extraInfo) -> config.lootBoxBlockId)
+					.add()
+					.append(new KeyedCodec<>("RoundsPerMap", Codec.INTEGER),
+							(config, value, extraInfo) -> config.roundsPerMap = value,
+							(config, extraInfo) -> config.roundsPerMap)
 					.add()
 					.append(new KeyedCodec<>("MapsInARowForVoting", Codec.INTEGER),
 							(config, value, extraInfo) -> config.mapsInARowForVoting = value,
@@ -166,7 +170,7 @@ public class CustomConfig {
 	private int maxDetectives = 10;
 	// Time in seconds before the round starts
 	private int timeBeforeRoundInSeconds = 10;
-	private int roundDurationInSeconds = 30;
+	private int roundDurationInSeconds = 10 * 60;
 	private int timeAfterRoundInSeconds = 5;
 	private int timeToVoteMapInSeconds = 30;
 	private int timeBeforeChangingMapInSeconds = 5;
@@ -209,7 +213,8 @@ public class CustomConfig {
 	};
 
 	private String playerGraveId = "Player_Grave";
-	private int roundPerMap = 1;
+	private String lootBoxBlockId = "Furniture_Human_Ruins_Chest_Small";
+	private int roundsPerMap = 8;
 	private int mapsInARowForVoting = 3;
 	private String worldTemplatesFolder = "universe/templates";
 	@Setter

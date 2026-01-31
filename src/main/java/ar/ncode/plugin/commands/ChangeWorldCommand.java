@@ -54,6 +54,7 @@ public class ChangeWorldCommand extends CommandBase {
 				targetWorld = InstancesPlugin.get()
 						.spawnInstance(newWorldName, currentWorld, new Transform())
 						.get();
+
 			} catch (Exception e) {
 				LOGGER.atSevere().withCause(e).log("Failed to spawn instance: " + newWorldName);
 				throw new RuntimeException(e);
@@ -81,6 +82,9 @@ public class ChangeWorldCommand extends CommandBase {
 
 			// Clean up old GameModeState
 			TroubleInTrorkTownPlugin.gameModeStateForWorld.remove(oldWorldUuid);
+
+			// Clean up old GameModeState
+			TroubleInTrorkTownPlugin.instanceConfig.remove(oldWorldName);
 
 			// Schedule direct world removal after teleports complete (2 seconds delay)
 			// Using Universe.removeWorld() directly instead of safeRemoveInstance() because

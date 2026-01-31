@@ -5,8 +5,8 @@ import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.enums.PlayerRole;
 import ar.ncode.plugin.component.enums.RoundState;
 import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.system.event.FinishCurrentMapEvent;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
-import ar.ncode.plugin.system.event.MapEndEvent;
 import ar.ncode.plugin.system.event.StartNewRoundEvent;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.RemoveReason;
@@ -64,6 +64,32 @@ public class FinishCurrentRoundEventHandler implements Consumer<FinishCurrentRou
 		});
 	}
 
+	private static void removeDroppedItems(GameModeState gameModeState) {
+		gameModeState.items.forEach(item -> {
+			if (item != null && item.isValid()) {
+				item.getStore().removeEntity(item, RemoveReason.REMOVE);
+			}
+		});
+
+		gameModeState.items.clear();
+	}
+
+	private static void removeGraveStones(GameModeState gameModeState, World world) {
+		gameModeState.graveStones.forEach(graveStone -> {
+			Ref<EntityStore> namePlateReference = graveStone.getNamePlateReference();
+			if (!config.get().isDebugMode()) {
+				if (namePlateReference != null && namePlateReference.isValid()) {
+					namePlateReference.getStore().removeEntity(namePlateReference, RemoveReason.REMOVE);
+				}
+
+				Vector3i graveStonePosition = graveStone.getGraveStonePosition();
+				world.breakBlock(graveStonePosition.x, graveStonePosition.y, graveStonePosition.z, 0);
+			}
+		});
+
+		gameModeState.graveStones.clear();
+	}
+
 	@Override
 	public void accept(FinishCurrentRoundEvent event) {
 		World world = Universe.get().getWorld(event.getWorldUUID());
@@ -99,17 +125,8 @@ public class FinishCurrentRoundEventHandler implements Consumer<FinishCurrentRou
 		}
 
 		world.execute(() -> {
-			gameModeState.graveStones.forEach(graveStone -> {
-				Ref<EntityStore> namePlateReference = graveStone.getNamePlateReference();
-				if (!config.get().isDebugMode()) {
-					if (namePlateReference != null && namePlateReference.isValid()) {
-						namePlateReference.getStore().removeEntity(namePlateReference, RemoveReason.REMOVE);
-					}
-
-					Vector3i graveStonePosition = graveStone.getGraveStonePosition();
-					world.breakBlock(graveStonePosition.x, graveStonePosition.y, graveStonePosition.z, 0);
-				}
-			});
+			removeGraveStones(gameModeState, world);
+			removeDroppedItems(gameModeState);
 
 			gameModeState.roundState = RoundState.AFTER_GAME;
 			gameModeState.roundStateUpdatedAt = LocalDateTime.now();
@@ -120,16 +137,16 @@ public class FinishCurrentRoundEventHandler implements Consumer<FinishCurrentRou
 
 			if (gameModeState.hasLastRoundFinished()) {
 				HytaleServer.get().getEventBus()
-						.dispatchForAsync(MapEndEvent.class)
-						.dispatch(new MapEndEvent(world.getWorldConfig().getUuid()));
+						.dispatchForAsync(FinishCurrentMapEvent.class)
+						.dispatch(new FinishCurrentMapEvent(world.getWorldConfig().getUuid()));
 				return;
 			}
 
 			executor.schedule(() -> {
-					// Check if world is still alive before executing (prevents memory leak from stale references)
-					if (!world.isAlive()) return;
-					prepareNextRound(gameModeState, world);
-				},
+						// Check if world is still alive before executing (prevents memory leak from stale references)
+						if (!world.isAlive()) return;
+						prepareNextRound(gameModeState, world);
+					},
 					config.get().getTimeAfterRoundInSeconds(),
 					TimeUnit.SECONDS
 			);

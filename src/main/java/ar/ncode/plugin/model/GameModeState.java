@@ -2,6 +2,8 @@ package ar.ncode.plugin.model;
 
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
 import ar.ncode.plugin.component.enums.RoundState;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -23,6 +25,7 @@ public class GameModeState {
 	public List<GraveStoneWithNameplate> graveStones = new ArrayList<>();
 	public int playedRounds = 0;
 	public Map<String, Integer> mapVotes = new HashMap<>();
+	public List<Ref<EntityStore>> items = new ArrayList<>();
 
 	public void addGraveStone(GraveStoneWithNameplate graveStone) {
 		this.graveStones.add(graveStone);
@@ -56,10 +59,14 @@ public class GameModeState {
 	}
 
 	public boolean hasLastRoundFinished() {
-		return config.get().isDebugMode() || playedRounds == config.get().getRoundPerMap();
+		return playedRounds == config.get().getRoundsPerMap();
 	}
 
 	public void addVoteForMap(String mapName) {
 		this.mapVotes.compute(mapName, (key, value) -> value == null ? 1 : value + 1);
+	}
+
+	public void trackItem(Ref<EntityStore> item) {
+		items.add(item);
 	}
 }

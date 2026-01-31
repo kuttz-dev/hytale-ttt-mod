@@ -3,7 +3,7 @@ package ar.ncode.plugin.system.event.handler;
 import ar.ncode.plugin.commands.ChangeWorldCommand;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.system.event.MapEndEvent;
+import ar.ncode.plugin.system.event.FinishCurrentMapEvent;
 import ar.ncode.plugin.ui.pages.MapVotePage;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -26,7 +26,7 @@ import static ar.ncode.plugin.TroubleInTrorkTownPlugin.*;
 import static ar.ncode.plugin.model.MessageId.MAP_VOTE_NOTIFICATION;
 import static ar.ncode.plugin.model.MessageId.MAP_VOTE_NOTIFICATION_NEXT_MAP;
 
-public class MapEndEventHandler implements Consumer<MapEndEvent> {
+public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEvent> {
 
 	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
@@ -50,8 +50,8 @@ public class MapEndEventHandler implements Consumer<MapEndEvent> {
 	}
 
 	@Override
-	public void accept(MapEndEvent mapEndEvent) {
-		World world = Universe.get().getWorld(mapEndEvent.getOldWorldUUID());
+	public void accept(FinishCurrentMapEvent finishCurrentMapEvent) {
+		World world = Universe.get().getWorld(finishCurrentMapEvent.getOldWorldUUID());
 		if (world == null) {
 			return;
 		}
@@ -90,10 +90,10 @@ public class MapEndEventHandler implements Consumer<MapEndEvent> {
 			}
 
 			executor.schedule(() -> {
-					// Check if world is still alive before executing (prevents memory leak from stale references)
-					if (!world.isAlive()) return;
-					endVotesAndChangeWorld(world);
-				},
+						// Check if world is still alive before executing (prevents memory leak from stale references)
+						if (!world.isAlive()) return;
+						endVotesAndChangeWorld(world);
+					},
 					config.get().getTimeToVoteMapInSeconds(),
 					TimeUnit.SECONDS
 			);
@@ -119,10 +119,10 @@ public class MapEndEventHandler implements Consumer<MapEndEvent> {
 		);
 
 		executor.schedule(() -> {
-				// Check if world is still alive before executing (prevents memory leak from stale references)
-				if (!currentWorld.isAlive()) return;
-				ChangeWorldCommand.loadInstance(currentWorld, newWorldName);
-			},
+					// Check if world is still alive before executing (prevents memory leak from stale references)
+					if (!currentWorld.isAlive()) return;
+					ChangeWorldCommand.loadInstance(currentWorld, newWorldName);
+				},
 				config.get().getTimeBeforeChangingMapInSeconds(),
 				TimeUnit.SECONDS
 		);

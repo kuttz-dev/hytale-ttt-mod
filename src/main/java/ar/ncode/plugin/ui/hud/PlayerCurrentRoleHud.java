@@ -24,6 +24,7 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 	public static final String PLAYER_CURRENT_ROLE_CONTAINER = "#PlayerCurrentRoleContainer";
 	public static final String PLAYER_CURRENT_ROLE_BACKGROUND = PLAYER_CURRENT_ROLE_CONTAINER + ".Background";
 	public static final String GRAY_BACKGROUND = "#838D9C";
+	public static final String TRAITOR_COLOR = "#B01515";
 	private final PlayerRef playerRef;
 	private final PlayerGameModeInfo playerInfo;
 	private MessageId messageId;
@@ -73,7 +74,7 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 		switch (playerRole) {
 			case INNOCENT ->
 					setUpMessageAndBackground(MessageId.HUD_CURRENT_ROLE_INNOCENT, TroubleInTrorkTownPlugin.config.get().getInnocentColor());
-			case TRAITOR -> setUpMessageAndBackground(HUD_CURRENT_ROLE_TRAITOR, "#B01515");
+			case TRAITOR -> setUpMessageAndBackground(HUD_CURRENT_ROLE_TRAITOR, TRAITOR_COLOR);
 			case DETECTIVE -> setUpMessageAndBackground(MessageId.HUD_CURRENT_ROLE_DETECTIVE, "#1F5CC4");
 			case SPECTATOR -> setUpMessageAndBackground(MessageId.HUD_CURRENT_ROLE_SPECTATOR, GRAY_BACKGROUND);
 			default -> setUpMessageAndBackground(MessageId.HUD_CURRENT_ROLE_PREPARING, GRAY_BACKGROUND);
