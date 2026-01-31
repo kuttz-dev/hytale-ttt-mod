@@ -22,7 +22,6 @@ import ar.ncode.plugin.system.event.StartNewRoundEvent;
 import ar.ncode.plugin.system.event.handler.FinishCurrentMapEventHandler;
 import ar.ncode.plugin.system.event.handler.FinishCurrentRoundEventHandler;
 import ar.ncode.plugin.system.event.handler.StartNewRoundEventHandler;
-import ar.ncode.plugin.system.event.listener.DeadChatListener;
 import ar.ncode.plugin.system.event.listener.*;
 import ar.ncode.plugin.system.scheduled.DoubleTapDetector;
 import ar.ncode.plugin.system.scheduled.PlayerHudUpdateSystem;
@@ -51,6 +50,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -61,7 +61,13 @@ import java.util.stream.Stream;
 public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 	public static final Path UNIVERSE_TEMPLATES_PATH = Paths.get("universe/templates");
+	/**
+	 * Thread-safe set of player UUIDs who are spectators (dead).
+	 * Used by DeadChatListener to filter chat without accessing world thread.
+	 */
+	public static final Set<UUID> spectatorPlayers = ConcurrentHashMap.newKeySet();
 	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+	public static Set<UUID> traitorPlayers = ConcurrentHashMap.newKeySet();
 	public static TroubleInTrorkTownPlugin instance;
 	public static Map<UUID, GameModeState> gameModeStateForWorld = new HashMap<>();
 	public static Config<CustomConfig> config;
@@ -75,12 +81,6 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 	 * when multiple players trigger transitions simultaneously.
 	 */
 	public static volatile boolean isWorldTransitionInProgress = false;
-
-	/**
-	 * Thread-safe set of player UUIDs who are spectators (dead).
-	 * Used by DeadChatListener to filter chat without accessing world thread.
-	 */
-	public static final java.util.Set<UUID> spectatorPlayers = java.util.concurrent.ConcurrentHashMap.newKeySet();
 	@SuppressWarnings("rawtypes")
 	private List<EventRegistration> events = new ArrayList<>();
 	private List<CommandRegistration> commands = new ArrayList<>();

@@ -1,5 +1,6 @@
 package ar.ncode.plugin.commands.traitor;
 
+import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.enums.PlayerRole;
 import ar.ncode.plugin.model.MessageId;
@@ -11,10 +12,12 @@ import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static ar.ncode.plugin.ui.hud.PlayerCurrentRoleHud.TRAITOR_COLOR;
@@ -65,22 +68,13 @@ public class TraitorChatCommand extends AbstractAsyncCommand {
 				return;
 			}
 
-			for (PlayerRef playerRef : player.getWorld().getPlayerRefs()) {
-				Ref<EntityStore> targetRef = playerRef.getReference();
-				if (targetRef == null || !targetRef.isValid()) {
+			for (UUID playerUUID : TroubleInTrorkTownPlugin.traitorPlayers) {
+				PlayerRef playerRef = Universe.get().getPlayer(playerUUID);
+				if (playerRef == null) {
 					continue;
 				}
 
-				PlayerGameModeInfo targetPlayerInfo = targetRef.getStore().getComponent(targetRef, PlayerGameModeInfo.componentType);
-				PlayerRef targetPlayerRef = targetRef.getStore().getComponent(targetRef, PlayerRef.getComponentType());
-				Player targetPlayer = targetRef.getStore().getComponent(targetRef, Player.getComponentType());
-
-				if (targetPlayerInfo == null || targetPlayerRef == null || targetPlayer == null ||
-						!PlayerRole.TRAITOR.equals(targetPlayerInfo.getCurrentRoundRole())) {
-					continue;
-				}
-
-				targetPlayerRef.sendMessage(
+				playerRef.sendMessage(
 						Message.join(
 								Message.translation(MessageId.TRAITORS_CHAT_PREFIX.get())
 										.color(TRAITOR_COLOR),

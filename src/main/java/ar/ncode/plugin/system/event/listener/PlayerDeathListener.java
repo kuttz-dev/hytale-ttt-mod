@@ -1,5 +1,6 @@
 package ar.ncode.plugin.system.event.listener;
 
+import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
 import ar.ncode.plugin.component.PlayerGameModeInfo;

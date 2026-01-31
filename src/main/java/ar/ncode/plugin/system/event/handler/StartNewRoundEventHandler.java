@@ -1,5 +1,6 @@
 package ar.ncode.plugin.system.event.handler;
 
+import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.commands.loot.LootSpawnCommand;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.enums.PlayerRole;
@@ -67,6 +68,11 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 			List<PlayerRef> playerRefs = new ArrayList<>(world.getPlayerRefs());
 			Collections.shuffle(playerRefs); // Shuffle for random role assignment
 
+
+			// Clear spectator status - player is now alive
+			TroubleInTrorkTownPlugin.spectatorPlayers.clear();
+			TroubleInTrorkTownPlugin.traitorPlayers.clear();
+
 			for (PlayerRef playerRef : playerRefs) {
 				Ref<EntityStore> reference = playerRef.getReference();
 				if (reference == null) {
@@ -91,14 +97,11 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 					spawnController.setTimeToNextRunSeconds(0);
 				}
 
-
-				// Clear spectator status - player is now alive
-				TroubleInTrorkTownPlugin.spectatorPlayers.remove(playerRef.getUuid());
-
 				if (assignedTraitors < numTraitors) {
 					playerInfo.setRole(TRAITOR);
 					playerInfo.setCurrentRoundRole(TRAITOR);
 					assignedTraitors++;
+					TroubleInTrorkTownPlugin.traitorPlayers.add(playerRef.getUuid()); // Track for chat filtering
 
 				} else if (assignedDetectives < numDetectives) {
 					playerInfo.setRole(DETECTIVE);

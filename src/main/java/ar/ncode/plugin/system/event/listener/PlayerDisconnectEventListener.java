@@ -2,7 +2,6 @@ package ar.ncode.plugin.system.event.listener;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.commands.SpectatorMode;
-import ar.ncode.plugin.system.scheduled.DoubleTapDetector;
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
@@ -11,6 +10,7 @@ import ar.ncode.plugin.component.enums.RoundState;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.system.GraveSystem;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
+import ar.ncode.plugin.system.scheduled.DoubleTapDetector;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.HytaleServer;
@@ -76,6 +76,7 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 		DoubleTapDetector.getInstance().removePlayer(playerRef.getUuid());
 		// Remove from spectator tracking
 		TroubleInTrorkTownPlugin.spectatorPlayers.remove(playerRef.getUuid());
+		TroubleInTrorkTownPlugin.traitorPlayers.remove(playerRef.getUuid());
 
 		Store<EntityStore> store = reference.getStore();
 		World world = store.getExternalData().getWorld();

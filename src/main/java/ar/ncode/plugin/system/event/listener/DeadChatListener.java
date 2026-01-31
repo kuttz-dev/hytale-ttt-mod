@@ -13,42 +13,42 @@ import java.util.stream.Collectors;
  * Separates chat between alive and dead (spectator) players.
  * - Dead players can only see messages from other dead players
  * - Alive players can only see messages from alive players
- *
+ * <p>
  * Uses thread-safe spectator tracking to avoid world thread access issues.
- *
+ * <p>
  * Closes #8
  */
 public class DeadChatListener implements Consumer<PlayerChatEvent> {
 
-    @Override
-    public void accept(PlayerChatEvent event) {
-        PlayerRef sender = event.getSender();
-        if (sender == null) return;
+	@Override
+	public void accept(PlayerChatEvent event) {
+		PlayerRef sender = event.getSender();
 
-        // Check if sender is a spectator using thread-safe set
-        boolean isSenderDead = TroubleInTrorkTownPlugin.spectatorPlayers.contains(sender.getUuid());
+		// Check if sender is a spectator using thread-safe set
+		boolean isSenderDead = TroubleInTrorkTownPlugin.spectatorPlayers.contains(sender.getUuid());
 
-        // Filter targets to only include players with same alive/dead status
-        List<PlayerRef> filteredTargets = event.getTargets().stream()
-            .filter(target -> {
-                if (target == null) return false;
+		// Filter targets to only include players with same alive/dead status
+		List<PlayerRef> filteredTargets = event.getTargets().stream()
+				.filter(target -> {
+					if (target == null) return false;
 
-                // Check if target is spectator using thread-safe set
-                boolean isTargetDead = TroubleInTrorkTownPlugin.spectatorPlayers.contains(target.getUuid());
-                return isSenderDead == isTargetDead;
-            })
-            .collect(Collectors.toList());
+					// Check if target is spectator using thread-safe set
+					boolean isTargetDead = TroubleInTrorkTownPlugin.spectatorPlayers.contains(target.getUuid());
+					return isSenderDead == isTargetDead;
+				})
+				.collect(Collectors.toList());
 
-        event.setTargets(filteredTargets);
+		event.setTargets(filteredTargets);
 
-        // Add [DEAD] prefix for dead player messages
-        if (isSenderDead) {
-            event.setFormatter((playerRef, msg) ->
-                Message.join(
-                    Message.raw("[DEAD] ").color("#888888"),
-                    Message.raw(playerRef.getUsername() + ": " + msg)
-                )
-            );
-        }
-    }
+		// Add [DEAD] prefix for dead player messages
+		if (isSenderDead) {
+			event.setFormatter((playerRef, msg) ->
+					Message.join(
+							Message.raw("[DEAD]").color("#888888"),
+							Message.raw(" - "),
+							Message.raw(playerRef.getUsername() + ": " + msg)
+					)
+			);
+		}
+	}
 }

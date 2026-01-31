@@ -183,7 +183,6 @@ public class FinishCurrentRoundEventHandler implements Consumer<FinishCurrentRou
 
 				targetPlayer.getInventory().clear();
 				targetPlayerInfo.setRole(PlayerRole.PREPARING);
-				TroubleInTrorkTownPlugin.spectatorPlayers.remove(playerRef.getUuid()); // No longer spectator
 				targetPlayerInfo.getHud().update();
 
 				gameModeState.roundState = RoundState.PREPARING;

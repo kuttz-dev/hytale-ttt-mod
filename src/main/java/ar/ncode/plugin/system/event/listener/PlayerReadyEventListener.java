@@ -60,7 +60,8 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 				HudComponent.ObjectivePanel,
 				HudComponent.PortalPanel,
 				HudComponent.BuilderToolsLegend,
-				HudComponent.KillFeed
+				HudComponent.KillFeed,
+				HudComponent.PlayerList
 		);
 
 		return hud;
