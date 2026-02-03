@@ -3,7 +3,8 @@ package ar.ncode.plugin.ui.pages;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
-import ar.ncode.plugin.component.enums.PlayerRole;
+import ar.ncode.plugin.model.PlayerComponents;
+import ar.ncode.plugin.model.enums.PlayerRole;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.util.MathUtil;
@@ -17,19 +18,17 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
-import static ar.ncode.plugin.component.enums.PlayerRole.SPECTATOR;
-import static ar.ncode.plugin.component.enums.PlayerRole.TRAITOR;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
+import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
 import static ar.ncode.plugin.model.MessageId.*;
+import static ar.ncode.plugin.model.enums.PlayerRole.*;
 
 public class ScoreBoardPage extends BasicCustomUIPage {
 
@@ -43,7 +42,6 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 	@NonNullDecl
 	public static Message getRoleTranslation(PlayerRole role) {
 		return switch (role) {
-			case PREPARING -> Message.translation(HUD_CURRENT_ROLE_PREPARING.get());
 			case INNOCENT -> Message.translation(HUD_CURRENT_ROLE_INNOCENT.get());
 			case DETECTIVE -> Message.translation(HUD_CURRENT_ROLE_DETECTIVE.get());
 			case TRAITOR -> Message.translation(HUD_CURRENT_ROLE_TRAITOR.get());
@@ -61,36 +59,66 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 		builder.append("Pages/Scoreboard/scoreboard.ui");
 		builder.set("#ScoreBoardTitle.Text", Message.translation(SCOREBOARD_TITLE.get()));
 		builder.set("#titlePlayer.Text", Message.translation(SCOREBOARD_TITLES_PLAYER.get()));
-		builder.set("#titleRole.Text", Message.translation(SCOREBOARD_TITLES_ROLE.get()));
 		builder.set("#titleKarma.Text", Message.translation(SCOREBOARD_TITLES_KARMA.get()));
 		builder.set("#titleKills.Text", Message.translation(SCOREBOARD_TITLES_KILLS.get()));
 		builder.set("#titleDeaths.Text", Message.translation(SCOREBOARD_TITLES_DEATHS.get()));
 		builder.set("#titlePing.Text", Message.translation(SCOREBOARD_TITLES_PING.get()));
 	}
 
-	private void buildRow(@NonNullDecl UICommandBuilder builder, PlayerRef targetPlayerRef, PlayerGameModeInfo targetPlayerInfo, boolean showTraitors) {
-		builder.append("#Content", "Pages/Scoreboard/scoreboard-row.ui");
-		String rowPrefix = "#Content[" + rowNumber + "]";
+	public static ScoreBoardTable getTableRows(Collection<PlayerComponents> players, boolean showLostInCombat) {
+		ScoreBoardTable result = new ScoreBoardTable();
+		for (var player : players) {
+			Ref<EntityStore> reference = player.reference();
+			if (!reference.isValid() || player.info() == null) {
+				continue;
+			}
 
-		PlayerRole targetPlayerRole = targetPlayerInfo.getCurrentRoundRole() == null ?
-				targetPlayerInfo.getRole() : targetPlayerInfo.getCurrentRoundRole();
+			boolean confirmedDeath = reference.getStore().getComponent(reference, ConfirmedDeath.componentType) != null;
+			if (confirmedDeath) {
+				result.confirmedDeaths.add(player);
+				continue;
+			}
 
-		if (showTraitors && TRAITOR.equals(targetPlayerRole)) {
-			String backgroundColor = config.get().getTraitorColor();
-			builder.set(rowPrefix + ".Background", backgroundColor);
+			boolean lostInCombat = reference.getStore().getComponent(reference, LostInCombat.componentType) != null;
+
+			if (lostInCombat && showLostInCombat) {
+				result.lostInCombat.add(player);
+				continue;
+			}
+
+			if (player.info().getCurrentRoundRole() == null) {
+				result.spectators.add(player);
+				continue;
+			}
+
+			result.alivePlayers.add(player);
 		}
 
-		builder.set(rowPrefix + " #rowPlayerName.Text", targetPlayerRef.getUsername());
-		builder.set(rowPrefix + " #rowRole.Text", getRoleTranslation(targetPlayerRole));
-		builder.set(rowPrefix + " #rowKarma.Text", String.valueOf(targetPlayerInfo.getKarma()));
-
-		int ping = getAvgPing(targetPlayerRef);
-		builder.set(rowPrefix + " #rowPing.Text", String.valueOf(ping));
+		return result;
 	}
 
-	private void buildTableRecords(@NonNullDecl UICommandBuilder builder, List<TableRecord> confirmedDeaths, boolean showTraitors) {
-		for (TableRecord record : confirmedDeaths) {
-			buildRow(builder, record.playerRef, record.playerInfo, showTraitors);
+	private void buildTableRecords(@NonNullDecl UICommandBuilder builder, List<PlayerComponents> group, boolean showTraitors) {
+		for (var player : group) {
+			builder.append("#Content", "Pages/Scoreboard/scoreboard-row.ui");
+			String rowPrefix = "#Content[" + rowNumber + "]";
+
+			PlayerRole targetPlayerRole = player.info().getCurrentRoundRole() == null ?
+					player.info().getRole() : player.info().getCurrentRoundRole();
+
+			if (showTraitors && TRAITOR.equals(targetPlayerRole)) {
+				String backgroundColor = config.get().getTraitorColor();
+				builder.set(rowPrefix + ".Background", backgroundColor);
+
+			} else if (DETECTIVE.equals(targetPlayerRole)) {
+				builder.set(rowPrefix + ".Background", "#1F5CC4");
+			}
+
+			builder.set(rowPrefix + " #rowPlayerName.Text", player.component().getDisplayName());
+			builder.set(rowPrefix + " #rowKarma.Text", String.valueOf(player.info().getKarma()));
+
+			int ping = getAvgPing(player.refComponent());
+			builder.set(rowPrefix + " #rowPing.Text", String.valueOf(ping));
+
 			rowNumber++;
 		}
 	}
@@ -99,29 +127,19 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 	public void build(@NonNullDecl UICommandBuilder builder) {
 		buildBaseScoreBoard(builder);
 
-		Collection<PlayerRef> players = getPlayerRefs();
-		if (players == null) return;
+		if (super.playerRef.getWorldUuid() == null) {
+			return;
+		}
 
-		addRowForEachPlayerToScoreBoard(builder, players);
+		World world = Universe.get().getWorld(super.playerRef.getWorldUuid());
+		if (world == null) return;
+
+		addRowForEachPlayerToScoreBoard(builder, getPlayersAt(world));
 
 		LOGGER.at(Level.FINER).log("Custom scoreboard build");
 	}
 
-	@NullableDecl
-	private Collection<PlayerRef> getPlayerRefs() {
-		if (super.playerRef.getWorldUuid() == null) {
-			return null;
-		}
-
-		World world = Universe.get().getWorld(super.playerRef.getWorldUuid());
-		if (world == null) {
-			return null;
-		}
-
-		return world.getPlayerRefs();
-	}
-
-	private void addRowForEachPlayerToScoreBoard(@NonNullDecl UICommandBuilder builder, Collection<PlayerRef> players) {
+	private void addRowForEachPlayerToScoreBoard(@NonNullDecl UICommandBuilder builder, Collection<PlayerComponents> players) {
 		Ref<EntityStore> reference = playerRef.getReference();
 		if (reference == null || !reference.isValid()) {
 			return;
@@ -133,70 +151,38 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 		}
 
 		boolean showTraitors = TRAITOR.equals(playerInfo.getCurrentRoundRole());
-		List<TableRecord> lostsInCombat = new ArrayList<>();
-		List<TableRecord> confirmedDeaths = new ArrayList<>();
-		List<TableRecord> trueSpectators = new ArrayList<>();
+		boolean showLostInCombat = SPECTATOR.equals(playerInfo.getRole());
+		ScoreBoardTable table = getTableRows(players, showLostInCombat);
 
-		for (PlayerRef targetPlayerRef : players) {
-			Ref<EntityStore> targetReference = targetPlayerRef.getReference();
-			PlayerGameModeInfo targetPlayerInfo = targetReference.getStore().getComponent(targetReference,
-					PlayerGameModeInfo.componentType);
+		buildTableRecords(builder, table.alivePlayers, showTraitors);
 
-			if (!targetReference.isValid() || targetPlayerInfo == null) {
-				continue;
-			}
-
-			ConfirmedDeath confirmedDeath = targetReference.getStore().getComponent(targetReference,
-					ConfirmedDeath.componentType);
-
-			if (confirmedDeath != null) {
-				confirmedDeaths.add(new TableRecord(targetPlayerRef, targetPlayerInfo));
-				continue;
-			}
-
-			LostInCombat lostInCombat = targetReference.getStore().getComponent(targetReference,
-					LostInCombat.componentType);
-
-			if (lostInCombat != null && SPECTATOR.equals(playerInfo.getRole())) {
-				lostsInCombat.add(new TableRecord(targetPlayerRef, targetPlayerInfo));
-				continue;
-			}
-
-			if (SPECTATOR.equals(targetPlayerInfo.getRole())) {
-				trueSpectators.add(new TableRecord(targetPlayerRef, targetPlayerInfo));
-				continue;
-			}
-
-			buildRow(builder, targetPlayerRef, targetPlayerInfo, showTraitors);
-			rowNumber++;
-		}
-
-		if (SPECTATOR.equals(playerInfo.getRole())) {
+		if (showLostInCombat) {
 			builder.append("#Content", "Pages/Scoreboard/scoreboard-lost-in-combat.ui");
 			rowNumber++;
 
-			buildTableRecords(builder, lostsInCombat, showTraitors);
+			buildTableRecords(builder, table.lostInCombat, showTraitors);
 		}
 
-		if (!confirmedDeaths.isEmpty()) {
+		if (!table.confirmedDeaths.isEmpty()) {
 			builder.append("#Content", "Pages/Scoreboard/scoreboard-confirmed-death.ui");
 			rowNumber++;
 
-			buildTableRecords(builder, confirmedDeaths, true);
+			buildTableRecords(builder, table.confirmedDeaths, true);
 		}
 
-		if (!trueSpectators.isEmpty()) {
+		if (!table.spectators.isEmpty()) {
 			builder.append("#Content", "Pages/Scoreboard/scoreboard-spectators.ui");
 			rowNumber++;
 
-			buildTableRecords(builder, trueSpectators, showTraitors);
+			buildTableRecords(builder, table.spectators, showTraitors);
 		}
 	}
 
-	@RequiredArgsConstructor
-	private static class TableRecord {
-		private final PlayerRef playerRef;
-		private final PlayerGameModeInfo playerInfo;
+	public static class ScoreBoardTable {
+		public final List<PlayerComponents> alivePlayers = new ArrayList<>();
+		public final List<PlayerComponents> lostInCombat = new ArrayList<>();
+		public final List<PlayerComponents> confirmedDeaths = new ArrayList<>();
+		public final List<PlayerComponents> spectators = new ArrayList<>();
 	}
 
 }

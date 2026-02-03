@@ -1,14 +1,17 @@
-package ar.ncode.plugin.system.event.listener;
+package ar.ncode.plugin.system.event.listener.player;
 
+import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
-import ar.ncode.plugin.component.enums.RoundState;
 import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.system.GraveSystem;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
+import ar.ncode.plugin.system.player.PlayerDeathSystem;
+import ar.ncode.plugin.system.scheduled.DoubleTapDetector;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.HytaleServer;
@@ -21,11 +24,10 @@ import com.hypixel.hytale.server.core.util.EventTitleUtil;
 
 import java.util.function.Consumer;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.model.GameModeState.timeFormatter;
 import static ar.ncode.plugin.model.MessageId.THERE_ARE_NOT_ENOUGH_PLAYERS;
-import static ar.ncode.plugin.system.event.handler.FinishCurrentRoundEventHandler.roundShouldEnd;
 
 public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectEvent> {
 
@@ -37,7 +39,7 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 
 		PlayerGameModeInfo playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
 		if (playerInfo != null) {
-			PlayerDeathListener.updatePlayerCounts(playerInfo.getRole(), gameModeState);
+			PlayerDeathSystem.updatePlayerCounts(playerInfo.getRole(), gameModeState);
 			graveStone.setDeadPlayerRole(playerInfo.getRole());
 			graveStone.setTimeOfDeath(gameModeState.getRoundRemainingTime().format(timeFormatter));
 		}
@@ -66,24 +68,38 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 	public void accept(PlayerDisconnectEvent event) {
 		PlayerRef playerRef = event.getPlayerRef();
 		Ref<EntityStore> reference = playerRef.getReference();
-		if (reference == null) {
+		if (reference == null || !reference.isValid()) {
 			return;
 		}
 
+		// Remove component from DoubleTapDetector to prevent memory leak
+		DoubleTapDetector.getInstance().removePlayer(playerRef.getUuid());
+		// Remove from spectator tracking
+		TroubleInTrorkTownPlugin.spectatorPlayers.remove(playerRef.getUuid());
+		TroubleInTrorkTownPlugin.traitorPlayers.remove(playerRef.getUuid());
+
 		Store<EntityStore> store = reference.getStore();
 		World world = store.getExternalData().getWorld();
+
+		if (world.getPlayerCount() == 0) {
+			TroubleInTrorkTownPlugin.currentInstance = null;
+		}
+
 		GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
 
+		if (gameModeState == null) {
+			return;
+		}
+
 		world.execute(() -> {
+			if (!reference.isValid()) return;
+
 			SpectatorMode.disableSpectatorModeForPlayer(playerRef, reference);
 			store.removeComponentIfExists(reference, LostInCombat.componentType);
 			store.removeComponentIfExists(reference, ConfirmedDeath.componentType);
 
 			boolean thereAreEnoughPlayers = world.getPlayerCount() < config.get().getRequiredPlayersToStartRound();
-			if (RoundState.STARTING.equals(gameModeState.roundState) && thereAreEnoughPlayers) {
-				gameModeState.roundState = RoundState.PREPARING;
-
-			} else if (RoundState.IN_GAME.equals(gameModeState.roundState) && roundShouldEnd(gameModeState)) {
+			if (RoundState.IN_GAME.equals(gameModeState.roundState) && thereAreEnoughPlayers) {
 				notEnoughPlayersLogic(store, world);
 
 			} else if (RoundState.IN_GAME.equals(gameModeState.roundState)) {

@@ -1,6 +1,6 @@
 package ar.ncode.plugin.system;
 
-import ar.ncode.plugin.WorldAccessors;
+import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
 import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.Holder;
@@ -20,8 +20,8 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 
 public class GraveSystem {
 
@@ -64,7 +64,7 @@ public class GraveSystem {
 
 			world.execute(() -> addBlockAndNameplateToWorld(world, chunk, emptyPosition, graveStone, transform));
 		} catch (Exception exception) {
-			LOGGER.atSevere().log("Could not create gravestone for player, exception: {}", exception);
+			LOGGER.atSevere().log("Could not create gravestone for component, exception: {}", exception);
 		}
 	}
 
@@ -118,7 +118,7 @@ public class GraveSystem {
 		return chunk.setBlock(x, y, z, blockIndex, asset, rotationIndex, 0, 0);
 	}
 
-	private static Vector3i findEmptyPlaceNearPosition(World world, Vector3d vec, int radius) {
+	public static Vector3i findEmptyPlaceNearPosition(World world, Vector3d vec, int radius) {
 		Vector3i position = new Vector3i((int) vec.x, (int) vec.y, (int) vec.z);
 
 		if (world.getBlock(position.x, position.y, position.z) == 0) {

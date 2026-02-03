@@ -1,7 +1,7 @@
 package ar.ncode.plugin.system.scheduled;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.component.enums.RoundState;
+import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.model.GameModeState;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -13,7 +13,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 
 public class PlayerHudUpdateSystem extends EntityTickingSystem<EntityStore> {
 

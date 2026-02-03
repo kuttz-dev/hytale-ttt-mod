@@ -1,9 +1,8 @@
-package ar.ncode.plugin.component.enums;
+package ar.ncode.plugin.model.enums;
 
 public enum RoundState {
 
 	PREPARING,
-	STARTING,
 	IN_GAME,
 	AFTER_GAME,
 	;

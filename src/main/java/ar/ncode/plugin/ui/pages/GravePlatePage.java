@@ -89,7 +89,7 @@ public class GravePlatePage extends InteractiveCustomUIPage<GravePlatePage.Inter
 				return;
 			}
 
-			store.addComponent(deadPlayerReference, ConfirmedDeath.componentType);
+			store.ensureComponent(deadPlayerReference, ConfirmedDeath.componentType);
 		}
 
 		close();

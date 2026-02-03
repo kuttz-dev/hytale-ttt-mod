@@ -1,6 +1,6 @@
 package ar.ncode.plugin.interaction;
 
-import ar.ncode.plugin.WorldAccessors;
+import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
 import ar.ncode.plugin.ui.pages.GravePlatePage;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -23,9 +23,11 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 public class ShowDeadPlayerInteraction extends SimpleInstantInteraction {
 
-	public static final BuilderCodec<ShowDeadPlayerInteraction> CODEC = BuilderCodec.builder(ShowDeadPlayerInteraction.class,
-					ShowDeadPlayerInteraction::new, SimpleInstantInteraction.CODEC)
-			.build();
+	public static final BuilderCodec<ShowDeadPlayerInteraction> CODEC = BuilderCodec.builder(
+			ShowDeadPlayerInteraction.class,
+			ShowDeadPlayerInteraction::new, SimpleInstantInteraction.CODEC
+	).build();
+
 	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
 	@Override

@@ -1,7 +1,6 @@
 package ar.ncode.plugin.system.scheduled;
 
-import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.component.enums.RoundState;
+import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
 import com.hypixel.hytale.component.Store;
@@ -15,19 +14,12 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.time.LocalTime;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.model.MessageId.ROUND_TIME_FINISHED;
 
 public class WorldRoundTimeSystem extends TickingSystem<EntityStore> {
 
 	float elapsedTime = 0;
-
-
-	private static void updatePlayerHud(PlayerGameModeInfo playerInfo) {
-		if (playerInfo != null) {
-			playerInfo.getHud().update();
-		}
-	}
 
 	@Override
 	public void tick(float dt, int index, @NonNullDecl Store<EntityStore> store) {

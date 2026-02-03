@@ -1,10 +1,8 @@
-package ar.ncode.plugin.component.enums;
+package ar.ncode.plugin.model.enums;
 
 public enum PlayerRole {
-	PREPARING,
 	INNOCENT,
 	TRAITOR,
 	DETECTIVE,
 	SPECTATOR
-
 }

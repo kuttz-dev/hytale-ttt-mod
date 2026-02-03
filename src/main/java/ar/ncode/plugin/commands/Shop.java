@@ -1,7 +1,7 @@
 package ar.ncode.plugin.commands;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.component.enums.PlayerRole;
+import ar.ncode.plugin.model.enums.PlayerRole;
 import ar.ncode.plugin.ui.pages.ShopPage;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
@@ -18,7 +18,8 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.List;
 
-import static ar.ncode.plugin.TroubleInElfTownGameModePlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
+import static ar.ncode.plugin.model.CustomPermissions.TTT_SHOP_OPEN;
 import static ar.ncode.plugin.model.MessageId.SHOP_ONLY_FOR_TRAITORS_OR_DETECTIVES;
 
 public class Shop extends CommandBase {
@@ -28,6 +29,7 @@ public class Shop extends CommandBase {
 	public Shop() {
 		super("shop", "Command to open a special store, available only for traitors or detectives");
 		super.addAliases("store", "buy");
+		requirePermission(TTT_SHOP_OPEN);
 	}
 
 	private static void openShopForPlayer(@NonNullDecl CommandContext ctx, Ref<EntityStore> reference) {
@@ -36,7 +38,7 @@ public class Shop extends CommandBase {
 		var playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
 
 		if (playerInfo == null || player == null || playerRef == null) {
-			ctx.sendMessage(Message.raw("An error occurred while trying to access your player information."));
+			ctx.sendMessage(Message.raw("An error occurred while trying to access your component information."));
 			return;
 		}
 

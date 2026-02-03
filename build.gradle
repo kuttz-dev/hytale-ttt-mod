@@ -39,6 +39,10 @@ dependencies {
 
     testCompileOnly("org.projectlombok:lombok:1.18.42")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
+    testImplementation(platform('org.junit:junit-bom:5.14.2'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation "org.mockito:mockito-core:5.+"
 }
 
 // Create the working directory to run the server if it does not already exist.
@@ -75,12 +79,15 @@ idea.project.settings.runConfigurations {
         mainClass = 'com.hypixel.hytale.Main'
         moduleName = project.idea.module.name + '.main'
         programParameters = "--allow-op --assets=$hytaleHome/install/$patchline/package/game/latest/Assets.zip"
+
         if (includes_pack.toBoolean()) {
             programParameters += " --mods=${sourceSets.main.java.srcDirs.first().parentFile.absolutePath}"
         }
+
         if (load_user_mods.toBoolean()) {
             programParameters += " --mods=$hytaleHome/UserData/Mods"
         }
+
         workingDirectory = serverRunDir.absolutePath
     }
 }
@@ -94,4 +101,14 @@ hytale {
 
     // Load mods from the local Hytale installation
     includeLocalMods.set(true)
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+
+    // Configure HytaleLogManager before any test classes are loaded
+    jvmArgs = ["-Djava.util.logging.manager=com.hypixel.hytale.logger.backend.HytaleLogManager"]
 }

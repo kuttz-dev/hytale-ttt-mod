@@ -184,6 +184,31 @@ public class DoubleTapDetector {
 		}
 	}
 
+	/**
+	 * Removes a component's walk state from the detector.
+	 * Should be called when a component disconnects to prevent memory leaks.
+	 *
+	 * @param playerId The UUID of the component to remove
+	 */
+	public void removePlayer(UUID playerId) {
+		playerStates.remove(playerId);
+	}
+
+	/**
+	 * Clears all component states from the detector.
+	 * Should be called when transitioning to a new world instance to prevent memory leaks.
+	 */
+	public void clearAllPlayers() {
+		playerStates.clear();
+	}
+
+	/**
+	 * Returns the number of component states currently tracked.
+	 * Useful for debugging memory leaks.
+	 */
+	public int getPlayerStateCount() {
+		return playerStates.size();
+	}
 
 	private static class PlayerWalkState {
 		boolean previousWalking = false;

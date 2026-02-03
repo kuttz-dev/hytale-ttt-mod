@@ -1,10 +1,13 @@
 package ar.ncode.plugin.commands;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.component.enums.PlayerRole;
+import ar.ncode.plugin.model.enums.PlayerRole;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.MovementSettings;
+import com.hypixel.hytale.protocol.MovementStates;
+import com.hypixel.hytale.protocol.SavedMovementStates;
+import com.hypixel.hytale.protocol.packets.player.SetMovementStates;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
@@ -12,6 +15,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.CommandBase;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.movement.MovementManager;
+import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.Intangible;
 import com.hypixel.hytale.server.core.modules.entity.component.Invulnerable;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -23,10 +27,10 @@ import java.util.UUID;
 
 public class SpectatorMode extends CommandBase {
 
-	OptionalArg<PlayerRef> playerArg = this.withOptionalArg("targetPlayer", "Target player to change game mode from/to spectator", ArgTypes.PLAYER_REF);
+	OptionalArg<PlayerRef> playerArg = this.withOptionalArg("targetPlayer", "Target component to change game mode from/to spectator", ArgTypes.PLAYER_REF);
 
 	public SpectatorMode() {
-		super("spectator", "Command to toggle spectator mode for a player");
+		super("spectator", "Command to toggle spectator mode for a component");
 	}
 
 	public static boolean toggleSpectatorMode(PlayerRef targetPlayerRef, Ref<EntityStore> reference) {
@@ -41,20 +45,43 @@ public class SpectatorMode extends CommandBase {
 		}
 	}
 
-	public static void disableSpectatorModeForPlayer(PlayerRef finalTargetPlayerRef, Ref<EntityStore> reference) {
+	public static void disableSpectatorModeForPlayer(PlayerRef player, Ref<EntityStore> reference) {
+		if (!reference.isValid()) return;
 		// Remove spectator mode
-		MovementManager movementManager = reference.getStore().getComponent(reference, MovementManager.getComponentType());
+		Store<EntityStore> store = reference.getStore();
+		store.removeComponentIfExists(reference, Intangible.getComponentType());
+		store.removeComponentIfExists(reference, Invulnerable.getComponentType());
+		showPlayerToAll(player, player.getUuid());
+
+		MovementManager movementManager = store.getComponent(reference, MovementManager.getComponentType());
+		MovementStatesComponent statesComponent = store.getComponent(reference, MovementStatesComponent.getComponentType());
+
+		if (movementManager == null) {
+			return;
+		}
+
 		MovementSettings movementSettings = movementManager.getSettings();
 		if (movementSettings == null) {
 			return;
 		}
 
 		movementSettings.canFly = false;
-		movementManager.update(finalTargetPlayerRef.getPacketHandler());
+		movementManager.update(player.getPacketHandler());
 
-		reference.getStore().removeComponentIfExists(reference, Intangible.getComponentType());
-		reference.getStore().removeComponentIfExists(reference, Invulnerable.getComponentType());
-		showPlayerToAll(finalTargetPlayerRef, finalTargetPlayerRef.getUuid());
+		if (statesComponent == null) {
+			return;
+		}
+
+		MovementStates currentStates = statesComponent.getMovementStates();
+		if (currentStates != null && currentStates.flying) {
+			// MovementStates has a public boolean field 'flying'
+			currentStates.flying = false;
+
+			// The client manages the physics state, so we tell it to stop flying.
+			// SavedMovementStates(boolean flying) constructor exists in source.
+			// SetMovementStates(SavedMovementStates) constructor exists in source.
+			player.getPacketHandler().writeNoCache(new SetMovementStates(new SavedMovementStates(false)));
+		}
 	}
 
 	public static void setGameModeToSpectator(PlayerRef finalTargetPlayerRef, Ref<EntityStore> reference) {
@@ -67,7 +94,7 @@ public class SpectatorMode extends CommandBase {
 //
 //                boolean applied = controller.addEffect(reference, effect, reference.getStore());
 //                if (!applied) {
-//                    ctx.sendMessage(Message.raw("Failed to apply spectator effect to target player."));
+//                    ctx.sendMessage(Message.raw("Failed to apply spectator effect to target component."));
 //                    return;
 //                }
 		MovementManager movementManager = reference.getStore().getComponent(reference, MovementManager.getComponentType());
@@ -137,7 +164,7 @@ public class SpectatorMode extends CommandBase {
 		if (targetPlayerRef == null) {
 			reference = ctx.senderAsPlayerRef();
 			if (reference == null || !reference.isValid()) {
-				ctx.sendMessage(Message.raw("You must specify a target player when using this command from the console."));
+				ctx.sendMessage(Message.raw("You must specify a target component when using this command from the console."));
 				return;
 			}
 
