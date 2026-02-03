@@ -10,6 +10,8 @@ everything together—before it’s too late.
 The project was prototyped during Hytale’s first week and is designed to be **modular, configurable, and extensible**,
 making it easy for the community to build on top of it.
 
+To set up this mod on a server please follow the guide at: [CONFIG.md](CONFIG.md#configuration)
+
 ***
 
 ## Current Features
