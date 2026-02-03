@@ -7,7 +7,7 @@ Players are assigned hidden roles each round and must rely on deduction, investi
 Innocents attempt to uncover the truth, traitors sow chaos from the shadows, and detectives use special tools to piece
 everything together—before it’s too late.
 
-The project was prototyped during Hytale’s first week and is designed to be**modular, configurable, and extensible**,
+The project was prototyped during Hytale’s first week and is designed to be **modular, configurable, and extensible**,
 making it easy for the community to build on top of it.
 
 ***
@@ -29,7 +29,7 @@ making it easy for the community to build on top of it.
 
 ### 🔫 Weapons & Equipment
 
-![Image showing the traitor special shop](https://media.forgecdn.net/attachments/description/null/description_ec3f1b76-8cdf-49b7-beb6-5e7b061b243e.png)
+![img.png](docs/images/traitor_shop.png)
 
 * **Configurable equipment store** for traitors and detectives.
 * Items can be purchased with credits or looted from dead players.
@@ -40,19 +40,32 @@ making it easy for the community to build on top of it.
     * Traitor Knife
 * Weapon spawning integrated directly into maps.
 
+![weapon_spawns.png](docs/images/weapon_spawns.png)
+
 ***
 
 ### 🗺️ Custom Map System
 
-Work In Progress...
+- Templates folder inside universe are interpreted as instances of maps that can be voted and played.
+- Player spawn positions are configurable.
+- Weapons spawn positions are configurable.
+- Amount of rounds per map configurable.
+- Preview images of the map you are voting.
 
+![map_vote.png](docs/images/map_vote.png)
+![img.png](docs/images/templates.png)
 ***
+
+#### Weapon Spawning on Maps
+
+* **Custom Weapon Spawn Points:** Define weapon spawn locations directly in map templates.
+* **Weapon Categories & Ammunition:** Support weapon types (e.g. melee, ranged, utility) and associated ammo pools.
 
 ### 🔁 Round & Phase System
 
-![Image showing the starting state](https://media.forgecdn.net/attachments/description/null/description_2abaec02-a468-458b-b7b1-3bea76bd5f49.png)
+![img.png](docs/images/the_round_will_begin.png)
 
-![Image showing a traitor player](https://media.forgecdn.net/attachments/description/null/description_ac62be34-af26-4a04-86c8-afdec3413289.png)
+![img.png](docs/images/the_round_has_begun.png)
 
 Rounds are event-driven and divided into clear phases:
 
@@ -96,9 +109,9 @@ Planned automatic punishments:
 
 ### 🪦 Graves & Body Confirmation
 
-![Image showing a gravestone](https://media.forgecdn.net/attachments/description/null/description_df4cc89e-7af8-440f-9cd6-092265f87706.png)
+![img.png](docs/images/grave.png)
 
-![Image showing the gravestone GUI](https://media.forgecdn.net/attachments/description/null/description_e7843cd2-1cdd-43a1-abf1-b30d054317c3.png)
+![img.png](docs/images/grave_gui.png)
 
 * Dead players leave behind**graves**.
 * Graves can be inspected to:
@@ -110,7 +123,7 @@ Planned automatic punishments:
 
 ### 📊 Scoreboard
 
-![Image showing the scoreboard](https://media.forgecdn.net/attachments/description/null/description_2971fff6-6c2f-40aa-a5a6-8daa54d6aaca.png)
+![scoreboard.png](docs/images/scoreboard.png)
 
 * Displays:
     * Kills / deaths
@@ -128,49 +141,12 @@ Planned automatic punishments:
 
 ***
 
-## 🗺️ Roadmap
+## 🗺️ Backlog & Planned Features
 
 This project is under active development. The short-term roadmap focuses on **core infrastructure** needed to support
 richer gameplay and community-made content.
 
-### Phase 1 – Map System (Next Priority)
-
-The first major milestone is a fully featured **custom map system**, allowing servers to define, rotate, and manage maps
-independently of the gamemode logic.
-
-Planned features:
-
-* **Template Worlds as Maps:** Support using predefined world templates as playable maps.
-* **Rounds per Map Configuration:** Configure how many rounds are played before switching maps.
-* **Map Voting:** Allow players to vote for the next map at the end of a match.
-* **Map Instantiation:** Dynamically load and initialize map instances from templates.
-* **Player Teleportation on Round Preparation:** Automatically teleport players to the correct spawn points when a new
-  round or map starts.
-
-This phase lays the foundation for scalable servers, custom content, and smooth round transitions.
-
-***
-
-### Phase 2 – Weapon Spawning on Maps
-
-Once the map system is stable, development will focus on **map-driven weapon distribution**, enabling more dynamic and
-balanced gameplay.
-
-Planned features:
-
-* **Custom Weapon Spawn Points:** Define weapon spawn locations directly in map templates.
-* **Weapon Categories & Ammunition:** Support weapon types (e.g. melee, ranged, utility) and associated ammo pools.
-* **Loot Chest Integration:** weapon and ammo distribution through loot chests placed in maps.
-
-This phase enables map authors to fully control how and where equipment enters the game.
-
-***
-
-## Backlog & Planned Features
-
 * Expanded detective and traitor equipment
-* More weapon variety
-* Map voting system
 * Separate chat channels (alive / dead / spectator)
 * Karma-based punishments and reputation system
 * Improved UI/UX polish

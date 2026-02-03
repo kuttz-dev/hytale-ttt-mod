@@ -1,28 +1,26 @@
 package ar.ncode.plugin.system.event.handler;
 
 import ar.ncode.plugin.commands.ChangeWorldCommand;
-import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.system.event.FinishCurrentMapEvent;
 import ar.ncode.plugin.ui.pages.MapVotePage;
-import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 
+import java.util.Comparator;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.*;
+import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
 import static ar.ncode.plugin.model.MessageId.MAP_VOTE_NOTIFICATION;
 import static ar.ncode.plugin.model.MessageId.MAP_VOTE_NOTIFICATION_NEXT_MAP;
 
@@ -41,7 +39,7 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 		} else {
 			// Choose the map with the most votes
 			newWorldName = gameState.mapVotes.entrySet().stream()
-					.max((entry1, entry2) -> Integer.compare(entry1.getValue(), entry2.getValue()))
+					.max(Comparator.comparingInt(Map.Entry::getValue))
 					.get()
 					.getKey();
 		}
@@ -52,9 +50,8 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 	@Override
 	public void accept(FinishCurrentMapEvent finishCurrentMapEvent) {
 		World world = Universe.get().getWorld(finishCurrentMapEvent.getOldWorldUUID());
-		if (world == null) {
-			return;
-		}
+		if (world == null) return;
+
 		world.execute(() -> {
 			EventTitleUtil.showEventTitleToWorld(
 					Message.translation(MAP_VOTE_NOTIFICATION.get()),
@@ -64,26 +61,20 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 					world.getEntityStore().getStore()
 			);
 
-			for (PlayerRef playerRef : world.getPlayerRefs()) {
-				Ref<EntityStore> reference = playerRef.getReference();
-				if (reference == null) {
-					continue;
-				}
+			var players = getPlayersAt(world);
 
-				Player player = reference.getStore().getComponent(reference, Player.getComponentType());
-				PlayerGameModeInfo playerInfo = reference.getStore().getComponent(reference, PlayerGameModeInfo.componentType);
-
-				if (player == null || playerInfo == null) {
-					continue;
-				}
-
-				playerInfo.getHud().update();
+			for (var player : players) {
+				player.info().getHud().update();
 
 				HytaleServer.SCHEDULED_EXECUTOR.schedule(() ->
 						world.execute(() ->
-								player.getPageManager().openCustomPage(
-										reference, reference.getStore(),
-										new MapVotePage(playerRef, CustomPageLifetime.CantClose, worldPreviews, playerInfo)
+								player.component().getPageManager().openCustomPage(
+										player.reference(),
+										player.reference().getStore(),
+										new MapVotePage(
+												player.refComponent(), CustomPageLifetime.CantClose,
+												worldPreviews, player.info()
+										)
 								)
 						), 2, TimeUnit.SECONDS
 				);

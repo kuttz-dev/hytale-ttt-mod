@@ -1,9 +1,8 @@
 package ar.ncode.plugin.model;
 
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
-import ar.ncode.plugin.component.enums.RoundState;
-import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import ar.ncode.plugin.model.enums.RoundState;
+import lombok.ToString;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -14,6 +13,7 @@ import java.util.*;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 
+@ToString
 public class GameModeState {
 
 	public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("mm:ss");
@@ -25,7 +25,8 @@ public class GameModeState {
 	public List<GraveStoneWithNameplate> graveStones = new ArrayList<>();
 	public int playedRounds = 0;
 	public Map<String, Integer> mapVotes = new HashMap<>();
-	public List<Ref<EntityStore>> items = new ArrayList<>();
+	public List<UUID> spectatorPlayers = new ArrayList<>();
+	public List<UUID> traitorPlayers = new ArrayList<>();
 
 	public void addGraveStone(GraveStoneWithNameplate graveStone) {
 		this.graveStones.add(graveStone);
@@ -66,7 +67,8 @@ public class GameModeState {
 		this.mapVotes.compute(mapName, (key, value) -> value == null ? 1 : value + 1);
 	}
 
-	public void trackItem(Ref<EntityStore> item) {
-		items.add(item);
+	public void updateRoundState(RoundState state) {
+		roundState = state;
+		roundStateUpdatedAt = LocalDateTime.now();
 	}
 }

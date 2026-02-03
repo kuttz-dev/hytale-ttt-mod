@@ -43,11 +43,7 @@ Group {
             Text: "Player";
           Padding: (Left: 5);
         }
-        Label #titleRole {
-          Style: @CustomLabelStyle;
-          Anchor: (Horizontal: 1, Width: 130);
-          Text: "Role";
-        }
+
         Label #titleKarma {
           Style: @CustomLabelStyle;
           Anchor: (Horizontal: 1, Width: 130);

@@ -3,7 +3,7 @@ package ar.ncode.plugin.commands.loot;
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.config.instance.SpawnPoint;
-import ar.ncode.plugin.config.instance.loot.LootSpawnPoint;
+import ar.ncode.plugin.config.loot.LootSpawnPoint;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Vector3i;

@@ -1,7 +1,7 @@
 package ar.ncode.plugin.system.event.listener;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.component.enums.PlayerRole;
+import ar.ncode.plugin.model.enums.PlayerRole;
 import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
@@ -38,7 +38,7 @@ public class SpectatorModeDamageListener extends DamageEventSystem {
 		}
 		Ref<EntityStore> attackerRef = ((Damage.EntitySource) damage.getSource()).getRef();
 
-		// Check if attacker is a player
+		// Check if attacker is a component
 		PlayerRef attackerPlayerRef = store.getComponent(attackerRef, PlayerRef.getComponentType());
 		if (attackerPlayerRef == null) {
 			return;

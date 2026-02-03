@@ -48,14 +48,14 @@ public class ShowSpawnPoints extends AbstractAsyncCommand {
 		Ref<EntityStore> reference = player.getReference();
 
 		if (reference == null || !reference.isValid()) {
-			commandContext.sendMessage(Message.raw("Could not get player reference!"));
+			commandContext.sendMessage(Message.raw("Could not get component reference!"));
 			return null;
 		}
 
 		World world = player.getWorld();
 
 		if (world == null) {
-			commandContext.sendMessage(Message.raw("Could not get world from player!"));
+			commandContext.sendMessage(Message.raw("Could not get world from component!"));
 			return null;
 		}
 

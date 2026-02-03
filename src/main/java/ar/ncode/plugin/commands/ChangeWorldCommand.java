@@ -43,8 +43,6 @@ public class ChangeWorldCommand extends CommandBase {
 	 */
 	public static void loadInstance(World currentWorld, String newWorldName) {
 		currentWorld.execute(() -> {
-			TroubleInTrorkTownPlugin.currentInstance = newWorldName;
-
 			// Store old world info before spawning new instance
 			String oldWorldName = currentWorld.getName();
 			UUID oldWorldUuid = currentWorld.getWorldConfig().getUuid();
@@ -60,15 +58,18 @@ public class ChangeWorldCommand extends CommandBase {
 				throw new RuntimeException(e);
 			}
 
+			TroubleInTrorkTownPlugin.currentInstance = targetWorld.getWorldConfig().getUuid();
+
 			for (PlayerRef playerRef : currentWorld.getPlayerRefs()) {
 				Ref<EntityStore> ref = playerRef.getReference();
 				PlayerGameModeInfo playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
 
 				if (!ref.isValid()) {
 					continue;
+				} else if (playerInfo != null) {
+					playerInfo.setWorldInstance(targetWorld.getWorldConfig().getUuid());
 				}
 
-				playerInfo.setWorldInstance(newWorldName);
 				InstancesPlugin.teleportPlayerToInstance(
 						ref,
 						ref.getStore(),
@@ -77,7 +78,7 @@ public class ChangeWorldCommand extends CommandBase {
 				);
 			}
 
-			// Clear all player states to prevent memory leak when changing instances
+			// Clear all component states to prevent memory leak when changing instances
 			DoubleTapDetector.getInstance().clearAllPlayers();
 
 			// Clean up old GameModeState

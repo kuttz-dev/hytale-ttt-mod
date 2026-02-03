@@ -6,10 +6,14 @@ import ar.ncode.plugin.commands.map.MapCommand;
 import ar.ncode.plugin.commands.spawn.SpawnCommand;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 
+import static ar.ncode.plugin.model.CustomPermissions.TTT_USER_GROUP;
+
 public class TttCommand extends AbstractCommandCollection {
 
 	public TttCommand() {
 		super("ttt", "Gamemode specific commands for Trouble in Trork Town.");
+		setPermissionGroups(TTT_USER_GROUP);
+
 		this.addSubCommand(new Debug());
 		this.addSubCommand(new LootCommand());
 		this.addSubCommand(new SpawnCommand());

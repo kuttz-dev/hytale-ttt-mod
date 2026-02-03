@@ -2,10 +2,10 @@ package ar.ncode.plugin.ui.hud;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.component.enums.PlayerRole;
-import ar.ncode.plugin.component.enums.RoundState;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.MessageId;
+import ar.ncode.plugin.model.enums.PlayerRole;
+import ar.ncode.plugin.model.enums.RoundState;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
@@ -16,7 +16,6 @@ import java.time.LocalTime;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.model.GameModeState.timeFormatter;
-import static ar.ncode.plugin.model.MessageId.HUD_CURRENT_ROLE_TRAITOR;
 
 public class PlayerCurrentRoleHud extends CustomUIHud {
 
@@ -71,13 +70,34 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 	}
 
 	private void setUpMessageAndBackgroundByPlayerRole(PlayerRole playerRole) {
+		if (playerRole == null) {
+			setUpMessageAndBackground(
+					MessageId.HUD_CURRENT_ROLE_PREPARING,
+					GRAY_BACKGROUND
+			);
+			return;
+		}
+
 		switch (playerRole) {
-			case INNOCENT ->
-					setUpMessageAndBackground(MessageId.HUD_CURRENT_ROLE_INNOCENT, TroubleInTrorkTownPlugin.config.get().getInnocentColor());
-			case TRAITOR -> setUpMessageAndBackground(HUD_CURRENT_ROLE_TRAITOR, TRAITOR_COLOR);
-			case DETECTIVE -> setUpMessageAndBackground(MessageId.HUD_CURRENT_ROLE_DETECTIVE, "#1F5CC4");
-			case SPECTATOR -> setUpMessageAndBackground(MessageId.HUD_CURRENT_ROLE_SPECTATOR, GRAY_BACKGROUND);
-			default -> setUpMessageAndBackground(MessageId.HUD_CURRENT_ROLE_PREPARING, GRAY_BACKGROUND);
+			case INNOCENT -> setUpMessageAndBackground(
+					MessageId.HUD_CURRENT_ROLE_INNOCENT,
+					TroubleInTrorkTownPlugin.config.get().getInnocentColor()
+			);
+
+			case TRAITOR -> setUpMessageAndBackground(
+					MessageId.HUD_CURRENT_ROLE_TRAITOR,
+					TRAITOR_COLOR
+			);
+
+			case DETECTIVE -> setUpMessageAndBackground(
+					MessageId.HUD_CURRENT_ROLE_DETECTIVE,
+					"#1F5CC4"
+			);
+
+			case SPECTATOR -> setUpMessageAndBackground(
+					MessageId.HUD_CURRENT_ROLE_SPECTATOR,
+					GRAY_BACKGROUND
+			);
 		}
 	}
 

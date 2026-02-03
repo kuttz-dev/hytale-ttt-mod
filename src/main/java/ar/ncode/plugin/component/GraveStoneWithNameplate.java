@@ -1,7 +1,7 @@
 package ar.ncode.plugin.component;
 
-import ar.ncode.plugin.component.enums.PlayerRole;
 import ar.ncode.plugin.model.DamageCause;
+import ar.ncode.plugin.model.enums.PlayerRole;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -16,10 +16,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 @Getter
 @Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class GraveStoneWithNameplate implements Component<ChunkStore> {

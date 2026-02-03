@@ -2,7 +2,7 @@ package ar.ncode.plugin.commands.traitor;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.component.enums.PlayerRole;
+import ar.ncode.plugin.model.enums.PlayerRole;
 import ar.ncode.plugin.model.MessageId;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.Message;

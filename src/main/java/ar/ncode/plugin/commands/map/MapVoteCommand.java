@@ -16,12 +16,14 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.worldPreviews;
+import static ar.ncode.plugin.model.CustomPermissions.TTT_MAP_VOTE;
 
 public class MapVoteCommand extends CommandBase {
 
 	public MapVoteCommand() {
 		super("vote", "Command to open the map voting menu.");
 		super.addAliases("votemap");
+		requirePermission(TTT_MAP_VOTE);
 	}
 
 	private static void openGuiForPlayer(@NonNullDecl CommandContext ctx, Ref<EntityStore> reference) {
@@ -30,7 +32,7 @@ public class MapVoteCommand extends CommandBase {
 		var playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
 
 		if (playerInfo == null || player == null || playerRef == null) {
-			ctx.sendMessage(Message.raw("An error occurred while trying to access your player information."));
+			ctx.sendMessage(Message.raw("An error occurred while trying to access your component information."));
 			return;
 		}
 

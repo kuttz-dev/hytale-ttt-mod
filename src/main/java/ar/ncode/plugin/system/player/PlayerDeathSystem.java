@@ -1,0 +1,180 @@
+package ar.ncode.plugin.system.player;
+
+import ar.ncode.plugin.commands.SpectatorMode;
+import ar.ncode.plugin.component.GraveStoneWithNameplate;
+import ar.ncode.plugin.component.death.LostInCombat;
+import ar.ncode.plugin.model.DamageCause;
+import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.model.PlayerComponents;
+import ar.ncode.plugin.model.enums.PlayerRole;
+import ar.ncode.plugin.model.enums.RoundState;
+import ar.ncode.plugin.system.GraveSystem;
+import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
+import com.hypixel.hytale.common.util.CompletableFutureUtil;
+import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.component.dependency.Dependency;
+import com.hypixel.hytale.component.dependency.Order;
+import com.hypixel.hytale.component.dependency.OrderPriority;
+import com.hypixel.hytale.component.dependency.SystemDependency;
+import com.hypixel.hytale.component.query.Query;
+import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
+import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
+import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import lombok.Getter;
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+
+import javax.annotation.Nonnull;
+import java.util.Set;
+
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.accessors.PlayerAccessors.getPlayerFrom;
+import static ar.ncode.plugin.model.GameModeState.timeFormatter;
+import static ar.ncode.plugin.system.GameModeSystem.updatePlayerRole;
+import static ar.ncode.plugin.system.event.handler.FinishCurrentRoundEventHandler.roundShouldEnd;
+
+@Getter
+public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
+
+	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+
+	private final Set<Dependency<EntityStore>> dependencies = Set.of(new SystemDependency<>(Order.BEFORE,
+			DeathSystems.PlayerDeathScreen.class, OrderPriority.NORMAL));
+
+	public static void updatePlayerCounts(PlayerRole playerRole, GameModeState gameModeState) {
+		if (PlayerRole.TRAITOR.equals(playerRole)) {
+			gameModeState.traitorsAlive -= 1;
+
+		} else if (PlayerRole.INNOCENT.equals(playerRole) || PlayerRole.DETECTIVE.equals(playerRole)) {
+			gameModeState.innocentsAlive -= 1;
+		}
+	}
+
+	private static int calculateKarmaForAttacker(PlayerRole attackerPlayerRole, PlayerRole playerRole) {
+		int value = 0;
+		if (PlayerRole.TRAITOR.equals(attackerPlayerRole)) {
+			if (PlayerRole.INNOCENT.equals(playerRole)) {
+				value = config.get().getKaramPointsForTraitorKillingInnocent();
+
+			} else if (PlayerRole.TRAITOR.equals(playerRole)) {
+				value = config.get().getKaramPointsForTraitorKillingTraitor();
+
+			} else if (PlayerRole.DETECTIVE.equals(playerRole)) {
+				value = config.get().getKaramPointsForTraitorKillingDetective();
+			}
+
+		} else if (PlayerRole.INNOCENT.equals(attackerPlayerRole)) {
+			if (PlayerRole.TRAITOR.equals(playerRole)) {
+				value = config.get().getKarmaPointsForInnocentKillingTraitor();
+
+			} else if (PlayerRole.INNOCENT.equals(playerRole)) {
+				value = config.get().getKarmaPointsForInnocentKillingInnocent();
+
+			} else {
+				value = config.get().getKarmaPointsForInnocentKillingDetective();
+
+			}
+
+		} else if (PlayerRole.DETECTIVE.equals(attackerPlayerRole)) {
+			if (PlayerRole.TRAITOR.equals(playerRole)) {
+				value = config.get().getKarmaPointsForDetectiveKillingTraitor();
+
+			} else if (PlayerRole.INNOCENT.equals(playerRole)) {
+				value = config.get().getKarmaPointsForDetectiveKillingInnocent();
+
+			} else {
+				value = config.get().getKarmaPointsForDetectiveKillingDetective();
+			}
+
+		}
+		return value;
+	}
+
+	private static void updateAttackerKarma(@NonNullDecl DeathComponent deathComponent, PlayerComponents player, GameModeState gameModeState) {
+		if (deathComponent.getDeathInfo() == null) {
+			return;
+		}
+
+		Damage.Source source = deathComponent.getDeathInfo().getSource();
+
+		if (source instanceof Damage.EntitySource attackerRef) {
+			var attacker = getPlayerFrom(attackerRef.getRef()).orElse(null);
+			if (attacker == null) return;
+
+			if (attacker.refComponent() != null && attacker.info() != null) {
+				PlayerRole attackerPlayerRole = attacker.info().getRole();
+				int value = calculateKarmaForAttacker(attackerPlayerRole, player.info().getRole());
+				gameModeState.karmaUpdates.merge(attacker.refComponent().getUuid(), value, Integer::sum);
+			}
+		}
+	}
+
+	private static void spawnGraveStone(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl DeathComponent deathComponent, GameModeState gameModeState, PlayerComponents player, World world) {
+		GraveStoneWithNameplate graveStone = GraveStoneWithNameplate.builder()
+				.timeOfDeath(gameModeState.getRoundRemainingTime().format(timeFormatter))
+				.deadPlayerReference(reference)
+				.deadPlayerRole(player.info().getRole())
+				.deadPlayerName(player.component().getDisplayName())
+				.build();
+
+		if (deathComponent.getDeathCause() != null) {
+			DamageCause damageCause = DamageCause.valueOf(deathComponent.getDeathCause().getId().toUpperCase());
+			graveStone.setCauseOfDeath(damageCause);
+		}
+
+		GraveSystem.spawnGraveAtPlayerDeath(world, graveStone, reference);
+	}
+
+	@Nonnull
+	@Override
+	public Query<EntityStore> getQuery() {
+		return Query.and(PlayerRef.getComponentType(), Player.getComponentType());
+	}
+
+	@Override
+	public void onComponentAdded(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl DeathComponent deathComponent,
+	                             @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer
+	) {
+		// Get reference to the damaged entity
+		var player = getPlayerFrom(reference).orElse(null);
+		if (player == null) return;
+
+		// Disable death screen
+		deathComponent.setShowDeathMenu(false);
+		CompletableFutureUtil._catch(DeathComponent.respawn(store, reference));
+
+		World world = player.component().getWorld();
+		if (world == null) return;
+
+		GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+		if (gameModeState == null || !RoundState.IN_GAME.equals(gameModeState.roundState)) {
+			return;
+		}
+
+		world.execute(() -> {
+			player.reference().getStore().ensureComponent(player.reference(), LostInCombat.componentType);
+			player.component().getInventory().clear();
+			SpectatorMode.setGameModeToSpectator(player.refComponent(), player.reference());
+			updatePlayerRole(player, PlayerRole.SPECTATOR, player.refComponent().getUuid(), gameModeState);
+			player.info().getHud().update();
+
+			updateAttackerKarma(deathComponent, player, gameModeState);
+			spawnGraveStone(reference, deathComponent, gameModeState, player, world);
+
+			if (roundShouldEnd(gameModeState)) {
+				HytaleServer.get().getEventBus()
+						.dispatchForAsync(FinishCurrentRoundEvent.class)
+						.dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
+			}
+		});
+	}
+
+}

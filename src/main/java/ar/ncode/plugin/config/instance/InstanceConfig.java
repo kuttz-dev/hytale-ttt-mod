@@ -1,6 +1,6 @@
 package ar.ncode.plugin.config.instance;
 
-import ar.ncode.plugin.config.instance.loot.LootSpawnPoint;
+import ar.ncode.plugin.config.loot.LootSpawnPoint;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;

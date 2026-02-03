@@ -24,12 +24,6 @@ Group #row {
       Text: "Gian Guly";
     }
 
-    Label #rowRole {
-      Style: @CustomLabelStyleWithHorizontalAlignment;
-      Anchor: (Horizontal: 1, Width: 130);
-      Text: "Preparing";
-    }
-
     Label #rowKarma {
       Style: @CustomLabelStyleWithHorizontalAlignment;
       Anchor: (Horizontal: 1, Width: 130);

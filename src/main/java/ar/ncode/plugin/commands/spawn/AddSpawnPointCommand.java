@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class AddSpawnPointCommand extends AbstractAsyncCommand {
 	public AddSpawnPointCommand() {
-		super("add", "Add spawn point for player.");
+		super("add", "Add spawn point for component.");
 	}
 
 	@NonNullDecl
@@ -33,7 +33,7 @@ public class AddSpawnPointCommand extends AbstractAsyncCommand {
 			world.execute(() -> {
 				var transformComponent = reference.getStore().getComponent(reference, TransformComponent.getComponentType());
 				if (transformComponent == null) {
-					ctx.sendMessage(Message.raw("An error occurred while trying to access your player information."));
+					ctx.sendMessage(Message.raw("An error occurred while trying to access your component information."));
 					return;
 				}
 

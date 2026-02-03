@@ -5,7 +5,6 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,10 +149,6 @@ public class CustomConfig {
 							(config, value, extraInfo) -> config.worldTemplatesFolder = value,
 							(config, extraInfo) -> config.worldTemplatesFolder)
 					.add()
-					.append(new KeyedCodec<>("DebugMode", Codec.BOOLEAN),
-							(config, value, extraInfo) -> config.debugMode = value,
-							(config, extraInfo) -> config.debugMode)
-					.add()
 					.build();
 
 	// Sets Player's hud background color for current role
@@ -162,7 +157,7 @@ public class CustomConfig {
 	private String traitorColor = "#B01515";
 
 	// Sets required amount of players to start a round
-	private int requiredPlayersToStartRound = 1;
+	private int requiredPlayersToStartRound = 3;
 	private int minAmountOfTraitors = 1;
 	private int traitorsRatio = 4;
 	private int minAmountOfDetectives = 0;
@@ -175,7 +170,7 @@ public class CustomConfig {
 	private int timeToVoteMapInSeconds = 30;
 	private int timeBeforeChangingMapInSeconds = 5;
 
-	// Sets the starting value for each player's karma
+	// Sets the starting value for each component's karma
 	private int karmaStartingValue = 1000;
 
 	private int karmaForDisconnectingMiddleRound = -100;
@@ -217,8 +212,6 @@ public class CustomConfig {
 	private int roundsPerMap = 8;
 	private int mapsInARowForVoting = 3;
 	private String worldTemplatesFolder = "universe/templates";
-	@Setter
-	private boolean debugMode = true;
 
 	public static List<ItemStack> parseItemEntry(String line) {
 		if (line == null || line.isBlank()) {

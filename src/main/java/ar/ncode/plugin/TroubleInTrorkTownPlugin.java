@@ -10,19 +10,31 @@ import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
 import ar.ncode.plugin.config.CustomConfig;
+import ar.ncode.plugin.config.WeaponTypeConfigs;
 import ar.ncode.plugin.config.instance.InstanceConfig;
-import ar.ncode.plugin.config.instance.loot.LootTables;
+import ar.ncode.plugin.config.loot.LootTables;
+import ar.ncode.plugin.interaction.PickUpWeaponInteraction;
 import ar.ncode.plugin.interaction.ShowDeadPlayerInteraction;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.WorldPreview;
 import ar.ncode.plugin.packet.filter.GuiPacketsFilter;
+import ar.ncode.plugin.system.ItemPickUpSystem;
 import ar.ncode.plugin.system.event.FinishCurrentMapEvent;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
 import ar.ncode.plugin.system.event.StartNewRoundEvent;
 import ar.ncode.plugin.system.event.handler.FinishCurrentMapEventHandler;
 import ar.ncode.plugin.system.event.handler.FinishCurrentRoundEventHandler;
 import ar.ncode.plugin.system.event.handler.StartNewRoundEventHandler;
-import ar.ncode.plugin.system.event.listener.*;
+import ar.ncode.plugin.system.event.listener.ChatListener;
+import ar.ncode.plugin.system.event.listener.InteractiveItemPickUpListener;
+import ar.ncode.plugin.system.event.listener.SpectatorModeDamageListener;
+import ar.ncode.plugin.system.event.listener.block.BreakBlockListener;
+import ar.ncode.plugin.system.event.listener.block.DamageBlockListener;
+import ar.ncode.plugin.system.event.listener.block.PlaceBlockListener;
+import ar.ncode.plugin.system.event.listener.player.PlayerDisconnectEventListener;
+import ar.ncode.plugin.system.event.listener.player.PlayerReadyEventListener;
+import ar.ncode.plugin.system.player.PlayerDeathSystem;
+import ar.ncode.plugin.system.player.PlayerRespawnSystem;
 import ar.ncode.plugin.system.scheduled.DoubleTapDetector;
 import ar.ncode.plugin.system.scheduled.PlayerHudUpdateSystem;
 import ar.ncode.plugin.system.scheduled.WorldRoundTimeSystem;
@@ -61,18 +73,19 @@ import java.util.stream.Stream;
 public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 	public static final Path UNIVERSE_TEMPLATES_PATH = Paths.get("universe/templates");
+	public static final Set<UUID> spectatorPlayers = ConcurrentHashMap.newKeySet();
 	/**
-	 * Thread-safe set of player UUIDs who are spectators (dead).
+	 * Thread-safe set of component UUIDs who are spectators (dead).
 	 * Used by DeadChatListener to filter chat without accessing world thread.
 	 */
-	public static final Set<UUID> spectatorPlayers = ConcurrentHashMap.newKeySet();
 	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 	public static Set<UUID> traitorPlayers = ConcurrentHashMap.newKeySet();
 	public static TroubleInTrorkTownPlugin instance;
 	public static Map<UUID, GameModeState> gameModeStateForWorld = new HashMap<>();
 	public static Config<CustomConfig> config;
+	public static Config<WeaponTypeConfigs> weaponTypesConfig;
 	public static List<WorldPreview> worldPreviews;
-	public static String currentInstance;
+	public static UUID currentInstance;
 	public static Map<String, Config<InstanceConfig>> instanceConfig = new HashMap<>();
 	public static Config<LootTables> lootTables;
 	/**
@@ -91,6 +104,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		instance = this;
 		config = this.withConfig("config", CustomConfig.CODEC);
 		lootTables = this.withConfig("loot_tables", LootTables.CODEC);
+		weaponTypesConfig = this.withConfig("weapon_types", WeaponTypeConfigs.CODEC);
 
 		Path templates = Paths.get("universe/templates");
 
@@ -124,7 +138,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 		events.add(getEventRegistry().registerGlobal(PlayerReadyEvent.class, new PlayerReadyEventListener()));
 		events.add(getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, new PlayerDisconnectEventListener()));
-		events.add(getEventRegistry().registerGlobal(PlayerChatEvent.class, new DeadChatListener()));
+		events.add(getEventRegistry().registerGlobal(PlayerChatEvent.class, new ChatListener()));
 		events.add(getEventRegistry().registerGlobal(StartNewRoundEvent.class, new StartNewRoundEventHandler()));
 		events.add(getEventRegistry().registerGlobal(FinishCurrentRoundEvent.class, new FinishCurrentRoundEventHandler()));
 		events.add(getEventRegistry().registerGlobal(FinishCurrentMapEvent.class, new FinishCurrentMapEventHandler()));
@@ -136,7 +150,8 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		commands.add(getCommandRegistry().registerCommand(new TraitorChatCommand()));
 
 		getCodecRegistry(Interaction.CODEC)
-				.register("show_dead_player_info", ShowDeadPlayerInteraction.class, ShowDeadPlayerInteraction.CODEC);
+				.register("show_dead_player_info", ShowDeadPlayerInteraction.class, ShowDeadPlayerInteraction.CODEC)
+				.register("pickup_weapon_interaction", PickUpWeaponInteraction.class, PickUpWeaponInteraction.CODEC);
 
 		HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
 			try {
@@ -156,12 +171,12 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		if (!Files.exists(getDataDirectory()) || !Files.exists(configFilePath)) {
 			config.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
 		}
-		config.load().thenRun(() -> LOGGER.atInfo().log("Config loaded."));
+		config.load().thenRun(() -> LOGGER.atInfo().log("Gamemode config loaded."));
 
 		if (!Files.exists(Paths.get(getDataDirectory().toString(), "/loot_tables.json"))) {
 			lootTables.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
 		}
-		lootTables.load().thenRun(() -> LOGGER.atInfo().log("Config loaded."));
+		lootTables.load().thenRun(() -> LOGGER.atInfo().log("Loot tables config loaded."));
 
 		instanceConfig.forEach((world, instanceCfg) -> {
 			String instanceConfigFile = "/" + world + "_config.json";
@@ -186,17 +201,26 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 			instanceCfg.load().thenRun(() -> LOGGER.atInfo().log("Instance config loaded for {}", world));
 		});
+
+		configFilePath = Paths.get(getDataDirectory().toString(), "/weapon_types.json");
+		if (!Files.exists(configFilePath)) {
+			weaponTypesConfig.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
+		}
+		weaponTypesConfig.load().thenRun(() -> LOGGER.atInfo().log("Config loaded."));
 	}
 
 	@Override
 	protected void start() {
 		getEntityStoreRegistry().registerSystem(new SpectatorModeDamageListener());
-		getEntityStoreRegistry().registerSystem(new PlayerDeathListener());
-		getEntityStoreRegistry().registerSystem(new PlayerRespawnListener());
+		getEntityStoreRegistry().registerSystem(new PlayerDeathSystem());
+		getEntityStoreRegistry().registerSystem(new PlayerRespawnSystem());
 		getEntityStoreRegistry().registerSystem(new PlayerHudUpdateSystem());
 		getEntityStoreRegistry().registerSystem(new WorldRoundTimeSystem());
 		getEntityStoreRegistry().registerSystem(new BreakBlockListener());
+		getEntityStoreRegistry().registerSystem(new DamageBlockListener());
 		getEntityStoreRegistry().registerSystem(new PlaceBlockListener());
+		getEntityStoreRegistry().registerSystem(new InteractiveItemPickUpListener());
+		getEntityStoreRegistry().registerSystem(new ItemPickUpSystem());
 
 		inboundPacketFilters.add(PacketAdapters.registerInbound(new GuiPacketsFilter()));
 

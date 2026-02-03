@@ -1,7 +1,7 @@
 package ar.ncode.plugin.component;
 
-import ar.ncode.plugin.component.enums.PlayerRole;
 import ar.ncode.plugin.model.DamageCause;
+import ar.ncode.plugin.model.enums.PlayerRole;
 import ar.ncode.plugin.ui.hud.PlayerCurrentRoleHud;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -9,16 +9,17 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+
+import java.util.UUID;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 
 @Getter
 @Setter
+@ToString
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlayerGameModeInfo implements Component<EntityStore> {
@@ -56,7 +57,7 @@ public class PlayerGameModeInfo implements Component<EntityStore> {
 	private PlayerRole currentRoundRole;
 	private float elapsedTimeSinceLastUpdate = 0;
 	private boolean alreadyVotedMap = false;
-	private String worldInstance = null;
+	private UUID worldInstance = null;
 
 	@NullableDecl
 	@Override
@@ -64,4 +65,6 @@ public class PlayerGameModeInfo implements Component<EntityStore> {
 		return new PlayerGameModeInfo(this.karma, this.role, this.kills, this.deaths, this.credits, this.hud,
 				timeOfDeath, causeOfDeath, currentRoundRole, elapsedTimeSinceLastUpdate, alreadyVotedMap, worldInstance);
 	}
+
+
 }

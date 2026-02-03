@@ -1,0 +1,34 @@
+{
+  "Parent": "Furniture_Village_Tombstone",
+  "Interactions": {
+    "Use": {
+      "Interactions": [
+        {
+          "Type": "show_dead_player_info"
+        }
+      ]
+    }
+  },
+  "BlockType": {
+    "Parent": "Furniture_Village_Tombstone",
+    "Flags": {
+      "IsUsable": true
+    },
+    "AllowsMultipleUsers": true,
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "show_dead_player_info"
+          }
+        ]
+      }
+    },
+    "Gathering": {
+      "Breaking": {
+        "GatherType": "Rocks",
+        "Quality": 11
+      }
+    }
+  }
+}

@@ -40,7 +40,7 @@ public class ExampleCommand extends CommandBase {
 			return;
 		}
 
-		String message = messageArg.get(ctx); // get the argument text by the player+
+		String message = messageArg.get(ctx); // get the argument text by the component+
 		CommandSender sender = ctx.sender();
 
 		if (sender instanceof Player player) {
@@ -54,7 +54,7 @@ public class ExampleCommand extends CommandBase {
 				//var asd = reference.getStore().removeComponentIfExists(reference, EntityTrackerSystems.Visible.getComponentType());
 				var asd = reference.getStore().addComponent(reference, Intangible.getComponentType());
 				LOGGER.atInfo().log("Effect applied: " + asd);
-//                PlayerRef playerRef = world.getEntityStore().getStore().getComponent(reference, PlayerRef.getComponentType());
+//                PlayerRef refComponent = world.getEntityStore().getStore().getComponent(reference, PlayerRef.getComponentType());
 //                EffectControllerComponent controller = reference.getStore().getComponent(reference, EffectControllerComponent.getComponentType());
 //                // Get effect from asset store
 //                EntityEffect effect = EntityEffect.getAssetMap().getAsset(message);

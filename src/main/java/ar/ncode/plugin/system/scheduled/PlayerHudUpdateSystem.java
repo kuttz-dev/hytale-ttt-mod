@@ -1,7 +1,7 @@
 package ar.ncode.plugin.system.scheduled;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.component.enums.RoundState;
+import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.model.GameModeState;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;

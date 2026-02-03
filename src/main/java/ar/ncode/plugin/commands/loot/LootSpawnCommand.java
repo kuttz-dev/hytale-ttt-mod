@@ -3,14 +3,17 @@ package ar.ncode.plugin.commands.loot;
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.config.instance.SpawnPoint;
-import ar.ncode.plugin.config.instance.loot.IncludedLootItem;
-import ar.ncode.plugin.config.instance.loot.LootItem;
-import ar.ncode.plugin.config.instance.loot.LootSpawnPoint;
-import ar.ncode.plugin.config.instance.loot.LootTable;
+import ar.ncode.plugin.config.loot.IncludedLootItem;
+import ar.ncode.plugin.config.loot.LootItem;
+import ar.ncode.plugin.config.loot.LootSpawnPoint;
+import ar.ncode.plugin.config.loot.LootTable;
 import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.math.vector.Vector3d;
+import com.hypixel.hytale.math.vector.Vector3f;
+import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
@@ -30,6 +33,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.lootTables;
+import static ar.ncode.plugin.accessors.WorldAccessors.getWorldNameForInstance;
+import static ar.ncode.plugin.system.GraveSystem.findEmptyPlaceNearPosition;
 
 public class LootSpawnCommand extends AbstractCommandCollection {
 
@@ -60,26 +65,38 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 						continue;
 					}
 
-					spawnItemInWorld(world, lootSpawnPoint, item.getItemId(), item.getAmount());
+					Vector3d position = lootSpawnPoint.getSpawnPoint().getPosition().clone();
+					position.x += ThreadLocalRandom.current().nextDouble(-2.0, 2.0);
+					position.z += ThreadLocalRandom.current().nextDouble(-2.0, 2.0);
+
+					Vector3i emptyPosition = findEmptyPlaceNearPosition(world, position, 3);
+
+					if (emptyPosition == null) {
+						continue;
+					}
+
+					spawnItemInWorld(world, emptyPosition, lootSpawnPoint.getSpawnPoint().getRotation(), item.getItemId(), item.getAmount());
 
 					for (IncludedLootItem included : item.getIncludes()) {
-						spawnItemInWorld(world, lootSpawnPoint, included.getItemId(), included.getAmount());
+						spawnItemInWorld(world, emptyPosition, lootSpawnPoint.getSpawnPoint().getRotation(), included.getItemId(), included.getAmount());
 					}
 				}
 			}
 		}
 
-		private static void spawnItemInWorld(World world, LootSpawnPoint lootSpawnPoint, String itemId, int amount) {
+		private static void spawnItemInWorld(World world, Vector3i position, Vector3f rotation, String itemId,
+		                                     int amount) {
 			var gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
 
 			ItemStack itemToSpawn = new ItemStack(itemId, amount);
+//			itemToSpawn.getItem().getInteractions().put(InteractionType.Pickup, "pickup_weapon_interaction");
 
 			// Magic numbers to spread items around a bit
 			Holder<EntityStore> itemEntityHolder = ItemComponent.generateItemDrop(
 					world.getEntityStore().getStore(),
 					itemToSpawn,
-					lootSpawnPoint.getSpawnPoint().getPosition().clone(),
-					lootSpawnPoint.getSpawnPoint().getRotation().clone(),
+					position.toVector3d().clone(),
+					rotation.clone(),
 					0,
 					0,
 					0
@@ -97,7 +114,6 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 			}
 
 			Ref<EntityStore> item = world.getEntityStore().getStore().addEntity(itemEntityHolder, AddReason.SPAWN);
-			gameModeState.trackItem(item);
 		}
 
 		public static boolean chance(int probability) {
@@ -111,7 +127,8 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 
 		public static void spawnLootForWorld(World world) {
 			world.execute(() -> {
-				String worldName = world.getWorldConfig().getDisplayName().replace(" ", "_").toLowerCase();
+				if (world.getWorldConfig().getDisplayName() == null) return;
+				String worldName = getWorldNameForInstance(world);
 				InstanceConfig instanceConfig =
 						TroubleInTrorkTownPlugin.instanceConfig.get(worldName).get();
 
@@ -152,7 +169,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 				" spawning", ArgTypes.INTEGER);
 
 		public LootAddSpawnPositionCommand() {
-			super("add", "Adds a loot position at the player's current location.");
+			super("add", "Adds a loot position at the component's current location.");
 		}
 
 		protected void executeSync(@NonNullDecl CommandContext ctx) {
@@ -167,7 +184,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 			world.execute(() -> {
 				var transformComponent = reference.getStore().getComponent(reference, TransformComponent.getComponentType());
 				if (transformComponent == null) {
-					ctx.sendMessage(Message.raw("An error occurred while trying to access your player information."));
+					ctx.sendMessage(Message.raw("An error occurred while trying to access your component information."));
 					return;
 				}
 
