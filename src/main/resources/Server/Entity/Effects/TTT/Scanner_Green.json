@@ -1,0 +1,12 @@
+{
+  "ApplicationEffects": {
+    "EntityTopTint": "#00FF00",
+    "EntityBottomTint": "#00AA00",
+    "ModelVFXId": "Drop_Rare",
+    "WorldSoundEventId": "SFX_UI_Success"
+  },
+  "Duration": 3.0,
+  "OverlapBehavior": "Overwrite",
+  "RemovalBehavior": "Duration",
+  "Debuff": false
+}

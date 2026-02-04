@@ -1,0 +1,17 @@
+{
+  "ApplicationEffects": {
+    "EntityTopTint": "#FF0000",
+    "EntityBottomTint": "#AA0000",
+    "ModelVFXId": "Drop_Legendary",
+    "Particles": [
+      {
+        "SystemId": "Effect_Death"
+      }
+    ],
+    "WorldSoundEventId": "SFX_UI_Error"
+  },
+  "Duration": 3.0,
+  "OverlapBehavior": "Overwrite",
+  "RemovalBehavior": "Duration",
+  "Debuff": false
+}

@@ -1,1 +1,198 @@
-{"meta":{"format_version":"5.0","model_format":"hytale_character","box_uv":false},"name":"metal detector","visible_box":[1,1,0],"variable_placeholders":"","variable_placeholder_buttons":[],"timeline_setups":[],"unhandled_root_fields":{},"resolution":{"width":64,"height":64},"elements":[{"name":"Crossguard","box_uv":false,"render_order":"default","locked":false,"allow_mirror_modeling":true,"shading_mode":"flat","double_sided":false,"from":[89.99959,-8.5,-6.5],"to":[92.99959,38.5,6.5],"autouv":1,"color":2,"stretch":[1,0.93136,1],"origin":[92.99959,10,4],"faces":{"north":{"uv":[47,2,0,5],"rotation":270,"texture":0},"east":{"uv":[47,13,0,0],"rotation":90,"texture":0},"south":{"uv":[47,5,0,2],"rotation":270,"texture":0},"west":{"uv":[47,13,0,0],"rotation":90,"texture":0},"up":{"uv":[4,0,7,13],"texture":0},"down":{"uv":[4,0,7,13],"texture":0}},"type":"cube","uuid":"b18d160f-bceb-6226-9d20-a8fca6d2a34c"},{"name":"Sword Base","box_uv":false,"render_order":"default","locked":false,"allow_mirror_modeling":true,"shading_mode":"flat","double_sided":false,"from":[-13.00041,-12.5,-1.5],"to":[92.99959,0.5,1.5],"autouv":1,"color":8,"rotation":[-92.5,0,0],"origin":[1.99959,-6,0],"faces":{"north":{"uv":[64,0,0,13],"texture":0},"east":{"uv":[22,0,25,13],"texture":0},"south":{"uv":[0,0,64,13],"texture":0},"west":{"uv":[0,0,3,13],"texture":null},"up":{"uv":[0,0,64,3],"texture":0},"down":{"uv":[0,13,64,16],"texture":0}},"type":"cube","uuid":"631e5a1c-3b2d-fc0f-906b-b170e0865ee9"},{"name":"Sword Base","box_uv":false,"render_order":"default","locked":false,"allow_mirror_modeling":true,"shading_mode":"flat","double_sided":false,"from":[-13.00041,30.5,-1.5],"to":[92.99959,43.5,1.5],"autouv":1,"color":8,"rotation":[-92.5,0,0],"origin":[1.99959,37,0],"faces":{"north":{"uv":[64,0,0,13],"texture":0},"east":{"uv":[22,0,25,13],"texture":0},"south":{"uv":[0,0,64,13],"texture":0},"west":{"uv":[0,0,3,13],"texture":null},"up":{"uv":[0,0,64,3],"texture":0},"down":{"uv":[0,13,64,16],"texture":0}},"type":"cube","uuid":"f02e8878-2e32-01a0-effd-f41a9019c53c"},{"name":"Sword Base","box_uv":false,"render_order":"default","locked":false,"allow_mirror_modeling":true,"shading_mode":"flat","double_sided":false,"from":[-13.00041,-5.5,-1.5],"to":[92.99959,7.5,1.5],"autouv":1,"color":8,"visibility":false,"rotation":[-92.5,0,0],"origin":[1.99959,1,0],"faces":{"north":{"uv":[64,0,0,13],"texture":0},"east":{"uv":[22,0,25,13],"texture":0},"south":{"uv":[0,0,64,13],"texture":0},"west":{"uv":[0,0,3,13],"texture":null},"up":{"uv":[0,0,64,3],"texture":0},"down":{"uv":[0,13,64,16],"texture":0}},"type":"cube","uuid":"99229038-7b9e-f600-7821-cc9112044012"}],"groups":[{"uuid":"e9d03c16-c1ac-4907-66df-f349f45badea","export":true,"locked":false,"origin":[0,13,0],"rotation":[0,0,0],"color":0,"is_piece":true,"name":"R-Attachment","children":[],"reset":false,"shade":true,"mirror_uv":false,"selected":false,"visibility":true,"autouv":1,"isOpen":true,"primary_selected":false},{"uuid":"1b06817c-b4d3-6358-accd-92204ef2288d","export":true,"locked":false,"origin":[0,77,0],"rotation":[0,0,0],"color":0,"is_piece":true,"name":"Origin_Projectile","children":[],"reset":false,"shade":true,"mirror_uv":false,"selected":false,"visibility":true,"autouv":1,"isOpen":true,"primary_selected":false},{"uuid":"493411c2-677c-a24d-9d45-54be53657794","export":true,"locked":false,"origin":[0,55,0],"rotation":[0,0,0],"color":0,"is_piece":false,"name":"Origin_Blade","children":[],"reset":false,"shade":true,"mirror_uv":false,"selected":false,"visibility":true,"autouv":1,"isOpen":true,"primary_selected":false},{"uuid":"dd64d0ad-c657-064f-a387-c29f18a5a819","export":true,"locked":false,"origin":[0,45,0],"rotation":[0,0,0],"color":0,"is_piece":false,"name":"Origin_Item","children":[],"reset":false,"shade":true,"mirror_uv":false,"selected":false,"visibility":true,"autouv":1,"isOpen":true,"primary_selected":false},{"uuid":"ae2b9f3d-d8f7-39ff-b17e-d337fd39cfce","export":true,"locked":false,"origin":[0.00007,13,0],"rotation":[-90,0,90],"color":5,"is_piece":false,"name":"Handle","children":[],"reset":false,"shade":true,"mirror_uv":false,"selected":false,"visibility":true,"autouv":1,"isOpen":true,"primary_selected":false},{"uuid":"1826cfde-e321-17ef-9e25-1f78f30a7c60","export":true,"locked":false,"origin":[-10.00041,13,0],"rotation":[0,0,0],"color":1,"is_piece":false,"name":"Pommel","children":[],"reset":false,"shade":true,"mirror_uv":false,"selected":false,"visibility":true,"autouv":1,"isOpen":true,"primary_selected":false},{"uuid":"93f3ed2f-5e97-46ae-1a61-ad0204d1b717","export":true,"locked":false,"origin":[11.99959,13,0],"rotation":[0,0,0],"color":2,"is_piece":false,"name":"Crossguard","children":[],"reset":false,"shade":true,"mirror_uv":false,"selected":false,"visibility":true,"autouv":1,"isOpen":true,"primary_selected":false},{"uuid":"c1fcd3df-e9c6-b188-27b0-f8a09c2ce88a","export":true,"locked":false,"origin":[16.99959,13,0],"rotation":[0,0,0],"color":8,"is_piece":false,"name":"Sword Base","children":[],"reset":false,"shade":true,"mirror_uv":false,"selected":false,"visibility":true,"autouv":1,"isOpen":true,"primary_selected":false},{"uuid":"e2703bcd-a09d-2be5-8601-13c112788207","export":true,"locked":false,"origin":[45.99959,13,0],"rotation":[0,0,0],"color":7,"is_piece":false,"name":"Sword Middle","children":[],"reset":false,"shade":true,"mirror_uv":false,"selected":false,"visibility":true,"autouv":1,"isOpen":true,"primary_selected":false},{"uuid":"4a791efa-38cc-e82c-8036-e304efa0bd85","export":true,"locked":false,"origin":[71.99958,13,0],"rotation":[0,0,0],"color":0,"is_piece":false,"name":"Sword Tip","children":[],"reset":false,"shade":true,"mirror_uv":false,"selected":false,"visibility":true,"autouv":1,"isOpen":false,"primary_selected":false}],"outliner":[{"uuid":"e9d03c16-c1ac-4907-66df-f349f45badea","isOpen":true,"children":[{"uuid":"1b06817c-b4d3-6358-accd-92204ef2288d","isOpen":true,"children":[{"uuid":"493411c2-677c-a24d-9d45-54be53657794","isOpen":true,"children":[{"uuid":"dd64d0ad-c657-064f-a387-c29f18a5a819","isOpen":true,"children":[{"uuid":"ae2b9f3d-d8f7-39ff-b17e-d337fd39cfce","isOpen":true,"children":[{"uuid":"1826cfde-e321-17ef-9e25-1f78f30a7c60","isOpen":true,"children":[]},{"uuid":"93f3ed2f-5e97-46ae-1a61-ad0204d1b717","isOpen":true,"children":["b18d160f-bceb-6226-9d20-a8fca6d2a34c"]},{"uuid":"c1fcd3df-e9c6-b188-27b0-f8a09c2ce88a","isOpen":true,"children":["631e5a1c-3b2d-fc0f-906b-b170e0865ee9","f02e8878-2e32-01a0-effd-f41a9019c53c","99229038-7b9e-f600-7821-cc9112044012",{"uuid":"e2703bcd-a09d-2be5-8601-13c112788207","isOpen":true,"children":[{"uuid":"4a791efa-38cc-e82c-8036-e304efa0bd85","isOpen":false,"children":[]}]}]}]}]}]}]}]}],"textures":[{"name":"Iron_Texture.png","relative_path":"../../../../Downloads/Hytale Model Examples/Iron Sword/Iron_Texture.png","folder":"","namespace":"","id":"0","group":"","width":64,"height":32,"uv_width":64,"uv_height":32,"particle":false,"use_as_default":true,"layers_enabled":false,"sync_to_project":"","render_mode":"default","render_sides":"auto","pbr_channel":"color","frame_time":1,"frame_order_type":"loop","frame_order":"","frame_interpolate":false,"visible":true,"internal":true,"saved":true,"uuid":"136a3221-dd4f-b78a-705a-d25620b256f7","source":"data:image/png;base64,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"}]}
+{
+	"meta": {
+		"format_version": "4.10",
+		"model_format": "free",
+		"box_uv": false
+	},
+	"name": "MetalDetector",
+	"model_identifier": "metal_detector",
+	"visible_box": [1, 1, 0],
+	"variable_placeholders": "",
+	"variable_placeholder_buttons": [],
+	"timeline_setups": [],
+	"unhandled_root_fields": {},
+	"resolution": {
+		"width": 64,
+		"height": 64
+	},
+	"elements": [
+		{
+			"name": "base_plate",
+			"box_uv": false,
+			"rescale": false,
+			"locked": false,
+			"light_emission": 0,
+			"render_order": "default",
+			"allow_mirror_modeling": true,
+			"from": [-18, 0, -4],
+			"to": [18, 2, 4],
+			"autouv": 0,
+			"color": 4,
+			"origin": [0, 0, 0],
+			"faces": {
+				"north": {"uv": [0, 0, 36, 2], "texture": 0},
+				"east": {"uv": [0, 2, 8, 4], "texture": 0},
+				"south": {"uv": [0, 4, 36, 6], "texture": 0},
+				"west": {"uv": [0, 6, 8, 8], "texture": 0},
+				"up": {"uv": [0, 8, 36, 16], "texture": 0},
+				"down": {"uv": [0, 16, 36, 24], "texture": 0}
+			},
+			"type": "cube",
+			"uuid": "base-plate-001"
+		},
+		{
+			"name": "left_pillar",
+			"box_uv": false,
+			"rescale": false,
+			"locked": false,
+			"light_emission": 0,
+			"render_order": "default",
+			"allow_mirror_modeling": true,
+			"from": [-18, 2, -3],
+			"to": [-14, 50, 3],
+			"autouv": 0,
+			"color": 0,
+			"origin": [0, 0, 0],
+			"faces": {
+				"north": {"uv": [36, 0, 40, 48], "texture": 0},
+				"east": {"uv": [40, 0, 46, 48], "texture": 0},
+				"south": {"uv": [46, 0, 50, 48], "texture": 0},
+				"west": {"uv": [50, 0, 56, 48], "texture": 0},
+				"up": {"uv": [36, 48, 40, 54], "texture": 0},
+				"down": {"uv": [40, 48, 44, 54], "texture": 0}
+			},
+			"type": "cube",
+			"uuid": "left-pillar-001"
+		},
+		{
+			"name": "right_pillar",
+			"box_uv": false,
+			"rescale": false,
+			"locked": false,
+			"light_emission": 0,
+			"render_order": "default",
+			"allow_mirror_modeling": true,
+			"from": [14, 2, -3],
+			"to": [18, 50, 3],
+			"autouv": 0,
+			"color": 0,
+			"origin": [0, 0, 0],
+			"faces": {
+				"north": {"uv": [36, 0, 40, 48], "texture": 0},
+				"east": {"uv": [40, 0, 46, 48], "texture": 0},
+				"south": {"uv": [46, 0, 50, 48], "texture": 0},
+				"west": {"uv": [50, 0, 56, 48], "texture": 0},
+				"up": {"uv": [36, 48, 40, 54], "texture": 0},
+				"down": {"uv": [40, 48, 44, 54], "texture": 0}
+			},
+			"type": "cube",
+			"uuid": "right-pillar-001"
+		},
+		{
+			"name": "top_bar",
+			"box_uv": false,
+			"rescale": false,
+			"locked": false,
+			"light_emission": 0,
+			"render_order": "default",
+			"allow_mirror_modeling": true,
+			"from": [-14, 46, -3],
+			"to": [14, 50, 3],
+			"autouv": 0,
+			"color": 0,
+			"origin": [0, 0, 0],
+			"faces": {
+				"north": {"uv": [0, 24, 28, 28], "texture": 0},
+				"east": {"uv": [28, 24, 34, 28], "texture": 0},
+				"south": {"uv": [0, 28, 28, 32], "texture": 0},
+				"west": {"uv": [28, 28, 34, 32], "texture": 0},
+				"up": {"uv": [0, 32, 28, 38], "texture": 0},
+				"down": {"uv": [0, 38, 28, 44], "texture": 0}
+			},
+			"type": "cube",
+			"uuid": "top-bar-001"
+		},
+		{
+			"name": "left_panel",
+			"box_uv": false,
+			"rescale": false,
+			"locked": false,
+			"light_emission": 0,
+			"render_order": "default",
+			"allow_mirror_modeling": true,
+			"from": [-14, 6, -2],
+			"to": [-12, 42, 2],
+			"autouv": 0,
+			"color": 1,
+			"origin": [0, 0, 0],
+			"faces": {
+				"north": {"uv": [56, 0, 58, 36], "texture": 0},
+				"east": {"uv": [58, 0, 62, 36], "texture": 0},
+				"south": {"uv": [56, 0, 58, 36], "texture": 0},
+				"west": {"uv": [58, 0, 62, 36], "texture": 0},
+				"up": {"uv": [56, 36, 58, 40], "texture": 0},
+				"down": {"uv": [56, 40, 58, 44], "texture": 0}
+			},
+			"type": "cube",
+			"uuid": "left-panel-001"
+		},
+		{
+			"name": "right_panel",
+			"box_uv": false,
+			"rescale": false,
+			"locked": false,
+			"light_emission": 0,
+			"render_order": "default",
+			"allow_mirror_modeling": true,
+			"from": [12, 6, -2],
+			"to": [14, 42, 2],
+			"autouv": 0,
+			"color": 1,
+			"origin": [0, 0, 0],
+			"faces": {
+				"north": {"uv": [56, 0, 58, 36], "texture": 0},
+				"east": {"uv": [58, 0, 62, 36], "texture": 0},
+				"south": {"uv": [56, 0, 58, 36], "texture": 0},
+				"west": {"uv": [58, 0, 62, 36], "texture": 0},
+				"up": {"uv": [56, 36, 58, 40], "texture": 0},
+				"down": {"uv": [56, 40, 58, 44], "texture": 0}
+			},
+			"type": "cube",
+			"uuid": "right-panel-001"
+		},
+		{
+			"name": "led_indicator",
+			"box_uv": false,
+			"rescale": false,
+			"locked": false,
+			"light_emission": 15,
+			"render_order": "default",
+			"allow_mirror_modeling": true,
+			"from": [-2, 50, -1],
+			"to": [2, 52, 1],
+			"autouv": 0,
+			"color": 5,
+			"origin": [0, 0, 0],
+			"faces": {
+				"north": {"uv": [60, 56, 64, 58], "texture": 0},
+				"east": {"uv": [60, 58, 62, 60], "texture": 0},
+				"south": {"uv": [60, 60, 64, 62], "texture": 0},
+				"west": {"uv": [62, 58, 64, 60], "texture": 0},
+				"up": {"uv": [60, 52, 64, 54], "texture": 0},
+				"down": {"uv": [60, 54, 64, 56], "texture": 0}
+			},
+			"type": "cube",
+			"uuid": "led-indicator-001"
+		}
+	],
+	"outliner": [
+		"base-plate-001",
+		"left-pillar-001",
+		"right-pillar-001",
+		"top-bar-001",
+		"left-panel-001",
+		"right-panel-001",
+		"led-indicator-001"
+	],
+	"textures": []
+}
