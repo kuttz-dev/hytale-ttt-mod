@@ -1,0 +1,92 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Furniture_Village_Chest_Small.name"
+  },
+  "PlayerAnimationsId": "Block",
+  "Categories": [
+    "Blocks.Deco"
+  ],
+  "Set": "TTT",
+  "Icon": "Icons/ItemsGenerated/TTT_Traitor_Detector.png",
+  "Interactions": {
+    "Use": {
+      "Interactions": [
+        {
+          "Type": "test_player_role"
+        }
+      ]
+    }
+  },
+  "BlockType": {
+    "BlockParticleSetId": "Metal",
+    "BlockSoundSetId": "Metal",
+    "CustomModel": "Blocks/TTT/TraitorDetector/TraitorDetector.blockymodel",
+    "DrawType": "Model",
+    "Flags": {
+      "IsUsable": true
+    },
+    "Material": "Solid",
+    "Opacity": "Transparent",
+    "Supporting": {
+      "Up": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "Support": {
+      "Down": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "VariantRotation": "NESW",
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "test_player_role"
+          }
+        ]
+      }
+    },
+    "ParticleColor": "#5b3222",
+    "TextureSideMask": "Blocks/TTT/TraitorDetector/MetalDetector_Texture.png",
+    "CubeShadingMode": "Standard",
+    "CustomModelTexture": [
+      {
+        "Texture": "Blocks/TTT/TraitorDetector/MetalDetector_Texture.png"
+      }
+    ],
+    "RequiresAlphaBlending": false,
+    "PlacementSettings": {
+      "AllowRotationKey": true,
+      "PlaceInEmptyBlocks": true
+    },
+    "HitboxType": "TTT_Traitor_Detector_Hitbox",
+    "InteractionHint": "asdasdasdasd",
+    "IsDoor": false
+  },
+  "Tags": {
+    "Type": [
+      "Furniture"
+    ]
+  },
+  "IconProperties": {
+    "Scale": 0.3,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      -7,
+      -44
+    ]
+  },
+  "ItemSoundSetId": "ISS_Items_Metal",
+  "ItemLevel": 5,
+  "MaxStack": 1,
+  "Model": "Blocks/TTT/TraitorDetector/TraitorDetector.blockymodel"
+}
