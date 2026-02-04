@@ -107,7 +107,7 @@ public class TestPlayerRole extends SimpleInstantInteraction {
 					: "[SCANNER] Cleared - Innocent";
 
 			// Send result to operator (who clicked the scanner)
-			var operatorRef = ctx.getOwnerRef();
+			var operatorRef = ctx.getOwningEntity();
 			if (operatorRef != null && operatorRef.isValid()) {
 				var operatorOpt = PlayerAccessors.getPlayerFrom(operatorRef);
 				operatorOpt.ifPresent(op ->
@@ -115,7 +115,7 @@ public class TestPlayerRole extends SimpleInstantInteraction {
 				);
 			}
 
-			LOGGER.atInfo().log("Scanner result for " + player.component().getName() + ": " + role.getId());
+			LOGGER.atInfo().log("Scanner result for " + player.component().getDisplayName() + ": " + role.getId());
 		});
 	}
 
