@@ -84,7 +84,7 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 			NotificationUtil.sendNotification(
 					player.refComponent().getPacketHandler(),
 					Message.translation(PLAYER_ASSIGNED_ROLE_NOTIFICATION.get())
-							.param("role", player.info().getCurrentRoundRole().getTranslationKey()),
+							.param("role", Message.translation(player.info().getCurrentRoundRole().getTranslationKey())),
 					notificationStyle
 			);
 		}

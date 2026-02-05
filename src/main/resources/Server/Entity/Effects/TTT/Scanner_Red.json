@@ -8,7 +8,7 @@
         "SystemId": "Effect_Death"
       }
     ],
-    "WorldSoundEventId": "SFX_UI_Error"
+    "WorldSoundEventId": "SFX_Deployable_Totem_Heal_Spawn"
   },
   "Duration": 3.0,
   "OverlapBehavior": "Overwrite",

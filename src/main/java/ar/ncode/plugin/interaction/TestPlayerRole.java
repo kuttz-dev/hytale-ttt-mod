@@ -21,6 +21,7 @@ import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
+import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -100,7 +101,8 @@ public class TestPlayerRole extends SimpleInstantInteraction {
 
 			// Apply visual effect to the scanned player
 			applyEffectToPlayer(closest, effectId, store);
-
+			ParticleUtil.spawnParticleEffect("hytale:fx_block_scan", blockPosition, world.getEntityStore().getStore());
+			
 			// Broadcast scan result to nearby players
 			String resultMessage = isTraitor
 					? "[SCANNER] TRAITOR DETECTED!"

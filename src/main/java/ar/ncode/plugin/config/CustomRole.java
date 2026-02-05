@@ -1,13 +1,11 @@
 package ar.ncode.plugin.config;
 
+import ar.ncode.plugin.model.TranslationKey;
 import ar.ncode.plugin.model.enums.RoleGroup;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @Builder
@@ -63,6 +61,7 @@ public class CustomRole {
 			.build();
 
 	private String id;
+	@Getter(AccessLevel.NONE)
 	private String translationKey;
 	private String customGuiColor;
 	@Builder.Default
@@ -79,6 +78,10 @@ public class CustomRole {
 
 	public boolean hasStore() {
 		return storeItems != null && storeItems.length > 0;
+	}
+
+	public String getTranslationKey() {
+		return TranslationKey.getWithPrefix(translationKey);
 	}
 
 }
