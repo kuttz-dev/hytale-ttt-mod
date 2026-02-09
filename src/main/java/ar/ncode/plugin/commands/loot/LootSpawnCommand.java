@@ -31,8 +31,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.lootTables;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.*;
 import static ar.ncode.plugin.accessors.WorldAccessors.getWorldNameForInstance;
 import static ar.ncode.plugin.system.GraveSystem.findEmptyPlaceNearPosition;
 
@@ -54,7 +53,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 
 		private static void addLoot(World world, LootSpawnPoint lootSpawnPoint) {
 			for (String lootTableId : lootSpawnPoint.getLootTables()) {
-				LootTable lootTable = lootTables.get().getLootTableById(lootTableId);
+				LootTable lootTable = weaponsConfig.get().getLootTableById(lootTableId);
 
 				if (lootTable == null) {
 					continue;

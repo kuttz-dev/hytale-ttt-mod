@@ -1,0 +1,45 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Memory_ImplosionStart",
+      "PositionOffset": {
+        "X": 0,
+        "Z": 0
+      },
+      "StartDelay": 0.0,
+      "RotationOffset": {
+        "Roll": -90
+      }
+    },
+    {
+      "SpawnerId": "Memory_Circle",
+      "RotationOffset": {
+        "Roll": 0
+      }
+    },
+    {
+      "SpawnerId": "Memory_Spiral2",
+      "PositionOffset": {
+        "Z": 0.0
+      },
+      "StartDelay": 1.1,
+      "RotationOffset": {
+        "Roll": 0
+      }
+    },
+    {
+      "SpawnerId": "Memory_Sparks_Linger",
+      "StartDelay": 1.1,
+      "RotationOffset": {
+        "Roll": 0
+      }
+    },
+    {
+      "SpawnerId": "Memory_Glow",
+      "RotationOffset": {
+        "Roll": 0
+      }
+    }
+  ],
+  "IsImportant": false
+}

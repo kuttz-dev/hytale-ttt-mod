@@ -47,9 +47,13 @@ public class PlayerGameModeInfo implements Component<EntityStore> {
 
 	public static ComponentType<EntityStore, PlayerGameModeInfo> componentType;
 
+	@Builder.Default
 	private int karma = config.get().getKarmaStartingValue();
+	@Builder.Default
 	private int kills = 0;
+	@Builder.Default
 	private int deaths = 0;
+	@Builder.Default
 	private int credits = 0;
 	private PlayerCurrentRoleHud hud;
 	private String timeOfDeath;
@@ -58,6 +62,7 @@ public class PlayerGameModeInfo implements Component<EntityStore> {
 	private boolean spectator;
 	@Builder.Default
 	private float elapsedTimeSinceLastUpdate = 0;
+	@Builder.Default
 	private boolean alreadyVotedMap = false;
 	private UUID worldInstance = null;
 

@@ -7,11 +7,11 @@
       "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
       "shape": {
         "type": "box",
-        "offset": {"x": 0, "y": 1, "z": 0},
+        "offset": {"x": 0, "y": 2, "z": 0},
         "stretch": {"x": 1, "y": 1, "z": 1},
         "settings": {
           "isPiece": false,
-          "size": {"x": 36, "y": 2, "z": 8},
+          "size": {"x": 72, "y": 4, "z": 16},
           "isStaticBox": true
         },
         "textureLayout": {
@@ -59,11 +59,11 @@
       "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
       "shape": {
         "type": "box",
-        "offset": {"x": -16, "y": 26, "z": 0},
+        "offset": {"x": -32, "y": 52, "z": 0},
         "stretch": {"x": 1, "y": 1, "z": 1},
         "settings": {
           "isPiece": false,
-          "size": {"x": 4, "y": 48, "z": 6},
+          "size": {"x": 8, "y": 96, "z": 12},
           "isStaticBox": true
         },
         "textureLayout": {
@@ -111,11 +111,11 @@
       "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
       "shape": {
         "type": "box",
-        "offset": {"x": 16, "y": 26, "z": 0},
+        "offset": {"x": 32, "y": 52, "z": 0},
         "stretch": {"x": 1, "y": 1, "z": 1},
         "settings": {
           "isPiece": false,
-          "size": {"x": 4, "y": 48, "z": 6},
+          "size": {"x": 8, "y": 96, "z": 12},
           "isStaticBox": true
         },
         "textureLayout": {
@@ -163,11 +163,11 @@
       "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
       "shape": {
         "type": "box",
-        "offset": {"x": 0, "y": 48, "z": 0},
+        "offset": {"x": 0, "y": 96, "z": 0},
         "stretch": {"x": 1, "y": 1, "z": 1},
         "settings": {
           "isPiece": false,
-          "size": {"x": 28, "y": 4, "z": 6},
+          "size": {"x": 56, "y": 8, "z": 12},
           "isStaticBox": true
         },
         "textureLayout": {
@@ -215,11 +215,11 @@
       "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
       "shape": {
         "type": "box",
-        "offset": {"x": -13, "y": 24, "z": 0},
+        "offset": {"x": -26, "y": 48, "z": 0},
         "stretch": {"x": 1, "y": 1, "z": 1},
         "settings": {
           "isPiece": false,
-          "size": {"x": 2, "y": 36, "z": 4},
+          "size": {"x": 4, "y": 72, "z": 8},
           "isStaticBox": true
         },
         "textureLayout": {
@@ -267,11 +267,11 @@
       "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
       "shape": {
         "type": "box",
-        "offset": {"x": 13, "y": 24, "z": 0},
+        "offset": {"x": 26, "y": 48, "z": 0},
         "stretch": {"x": 1, "y": 1, "z": 1},
         "settings": {
           "isPiece": false,
-          "size": {"x": 2, "y": 36, "z": 4},
+          "size": {"x": 4, "y": 72, "z": 8},
           "isStaticBox": true
         },
         "textureLayout": {
@@ -314,17 +314,16 @@
     },
     {
       "id": "7",
-      "name": "led_indicator",
+      "name": "Led",
       "position": {"x": 0, "y": 0, "z": 0},
       "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
       "shape": {
         "type": "box",
-        "offset": {"x": 0, "y": 51, "z": 0},
+        "offset": {"x": 0, "y": 102, "z": 0},
         "stretch": {"x": 1, "y": 1, "z": 1},
         "settings": {
           "isPiece": false,
-          "size": {"x": 4, "y": 2, "z": 2},
-          "isStaticBox": true
+          "size": {"x": 8, "y": 4, "z": 4}
         },
         "textureLayout": {
           "back": {

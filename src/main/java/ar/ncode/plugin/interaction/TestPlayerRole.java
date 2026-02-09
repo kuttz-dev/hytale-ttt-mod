@@ -69,8 +69,8 @@ public class TestPlayerRole extends SimpleInstantInteraction {
 		Store<EntityStore> store = world.getEntityStore().getStore();
 
 		world.execute(() -> {
-			var transformComponent = commandBuffer.getComponent(closest, TransformComponent.getComponentType());
-			if (transformComponent == null) {
+			var targetPlayerTransform = commandBuffer.getComponent(closest, TransformComponent.getComponentType());
+			if (targetPlayerTransform == null) {
 				return;
 			}
 
@@ -80,7 +80,7 @@ public class TestPlayerRole extends SimpleInstantInteraction {
 			}
 
 			var player = playerOpt.get();
-			var distance = blockPosition.distanceTo(transformComponent.getPosition());
+			var distance = blockPosition.distanceTo(targetPlayerTransform.getPosition());
 
 			// Check if player is within scanner range
 			if (distance > SCAN_DISTANCE) {
@@ -100,8 +100,8 @@ public class TestPlayerRole extends SimpleInstantInteraction {
 			String effectId = isTraitor ? "Scanner_Red" : "Scanner_Green";
 
 			// Apply visual effect to the scanned player
-			applyEffectToPlayer(closest, effectId, store);
-			ParticleUtil.spawnParticleEffect("hytale:fx_block_scan", blockPosition, world.getEntityStore().getStore());
+			// applyEffectToPlayer(closest, effectId, store);
+			ParticleUtil.spawnParticleEffect("TTT_Innocent_Particle", targetPlayerTransform.getPosition(), world.getEntityStore().getStore());
 			
 			// Broadcast scan result to nearby players
 			String resultMessage = isTraitor
@@ -110,7 +110,7 @@ public class TestPlayerRole extends SimpleInstantInteraction {
 
 			// Send result to operator (who clicked the scanner)
 			var operatorRef = ctx.getOwningEntity();
-			if (operatorRef != null && operatorRef.isValid()) {
+			if (operatorRef.isValid()) {
 				var operatorOpt = PlayerAccessors.getPlayerFrom(operatorRef);
 				operatorOpt.ifPresent(op ->
 						op.component().sendMessage(Message.raw(resultMessage))

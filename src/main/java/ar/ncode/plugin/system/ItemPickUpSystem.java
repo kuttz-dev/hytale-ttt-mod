@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.weaponTypesConfig;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.weaponsConfig;
 import static com.hypixel.hytale.common.util.ArrayUtil.contains;
 
 @Getter
@@ -114,7 +114,7 @@ public class ItemPickUpSystem extends EntityTickingSystem<EntityStore> {
 			}
 
 
-			Optional<WeaponTypeConfig> config = weaponTypesConfig.get().getByItemId(itemComponent.getItemStack().getItemId());
+			Optional<WeaponTypeConfig> config = weaponsConfig.get().getByItemId(itemComponent.getItemStack().getItemId());
 			if (config.isEmpty()) {
 				// By default, all items should be blocked from picking up
 				commandBuffer.ensureComponent(itemRef, PreventPickup.getComponentType());

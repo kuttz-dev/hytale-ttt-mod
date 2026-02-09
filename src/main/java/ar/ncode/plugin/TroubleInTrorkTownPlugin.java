@@ -10,9 +10,8 @@ import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
 import ar.ncode.plugin.config.CustomConfig;
-import ar.ncode.plugin.config.WeaponTypeConfigs;
+import ar.ncode.plugin.config.WeaponsConfig;
 import ar.ncode.plugin.config.instance.InstanceConfig;
-import ar.ncode.plugin.config.loot.LootTables;
 import ar.ncode.plugin.interaction.PickUpWeaponInteraction;
 import ar.ncode.plugin.interaction.ShowDeadPlayerInteraction;
 import ar.ncode.plugin.interaction.TestPlayerRole;
@@ -83,11 +82,10 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 	public static TroubleInTrorkTownPlugin instance;
 	public static Map<UUID, GameModeState> gameModeStateForWorld = new HashMap<>();
 	public static Config<CustomConfig> config;
-	public static Config<WeaponTypeConfigs> weaponTypesConfig;
+	public static Config<WeaponsConfig> weaponsConfig;
 	public static List<WorldPreview> worldPreviews;
 	public static UUID currentInstance;
 	public static Map<String, Config<InstanceConfig>> instanceConfig = new HashMap<>();
-	public static Config<LootTables> lootTables;
 	/**
 	 * Flag to track if a world transition (fade) is currently in progress.
 	 * This prevents the "Cannot start a fade out while a fade completion callback is pending" error
@@ -103,8 +101,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		super(init);
 		instance = this;
 		config = this.withConfig("config", CustomConfig.CODEC);
-		lootTables = this.withConfig("loot_tables", LootTables.CODEC);
-		weaponTypesConfig = this.withConfig("weapon_types", WeaponTypeConfigs.CODEC);
+		weaponsConfig = this.withConfig("weapons_config", WeaponsConfig.CODEC);
 
 		Path templates = Paths.get("universe/templates");
 
@@ -127,6 +124,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		prepareConfigs();
 
 		worldPreviews = WorldPreviewLoader.load(UNIVERSE_TEMPLATES_PATH, getDataDirectory());
+
 
 		PlayerGameModeInfo.componentType = getEntityStoreRegistry().registerComponent(PlayerGameModeInfo.class, "PlayerGameModeInfo", PlayerGameModeInfo.CODEC);
 		GraveStoneWithNameplate.componentType = getChunkStoreRegistry().registerComponent(GraveStoneWithNameplate.class,
@@ -174,11 +172,6 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		}
 		config.load().thenRun(() -> LOGGER.atInfo().log("Gamemode config loaded."));
 
-		if (!Files.exists(Paths.get(getDataDirectory().toString(), "/loot_tables.json"))) {
-			lootTables.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
-		}
-		lootTables.load().thenRun(() -> LOGGER.atInfo().log("Loot tables config loaded."));
-
 		instanceConfig.forEach((world, instanceCfg) -> {
 			String instanceConfigFile = "/" + world + "_config.json";
 			Path worldConfigPath = Paths.get(getDataDirectory().toString(), instanceConfigFile);
@@ -205,9 +198,9 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 		configFilePath = Paths.get(getDataDirectory().toString(), "/weapon_types.json");
 		if (!Files.exists(configFilePath)) {
-			weaponTypesConfig.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
+			weaponsConfig.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
 		}
-		weaponTypesConfig.load().thenRun(() -> LOGGER.atInfo().log("Config loaded."));
+		weaponsConfig.load().thenRun(() -> LOGGER.atInfo().log("Config loaded."));
 	}
 
 	@Override

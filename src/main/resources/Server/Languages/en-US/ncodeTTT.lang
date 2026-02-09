@@ -61,3 +61,6 @@ traitors_chat_only_for_traitors = Only traitors can use this command!-
 traitors_chat_command_description = Send a message to all traitors (only for alive traitors).
 traitors_chat_command_world_error = The player must be in a world to use this command.
 traitors_chat_prefix = [TRAITOR]
+
+veritaserum_plant_name = Veritaserum Plant
+veritaserum_plant_description = Makes who eats it tell the <color is="#33CC76">truth</color>

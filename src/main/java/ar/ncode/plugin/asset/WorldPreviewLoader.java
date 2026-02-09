@@ -74,7 +74,11 @@ public class WorldPreviewLoader {
 			AssetModule.get().registerPack("worlds_assets", assetsRoot, manifest);
 
 		} catch (Exception ignored) {
-			LOGGER.atSevere().log("Failed to load worlds assets - {}", ignored);
+			LOGGER.atSevere().log("Failed to load worlds assets -8 {}", ignored);
+		}
+
+		if (result.isEmpty()) {
+			throw new RuntimeException("There are no maps configured, gamemode can not start.");
 		}
 
 		return result;
