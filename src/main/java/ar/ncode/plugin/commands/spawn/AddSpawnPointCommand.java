@@ -1,6 +1,7 @@
 package ar.ncode.plugin.commands.spawn;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.config.instance.SpawnPoint;
 import com.hypixel.hytale.component.Ref;
@@ -9,6 +10,7 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.util.Config;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.concurrent.CompletableFuture;
@@ -43,8 +45,7 @@ public class AddSpawnPointCommand extends AbstractAsyncCommand {
 						transformComponent.getRotation().clone()
 				);
 
-				String worldName = world.getWorldConfig().getDisplayName().replace(" ", "_").toLowerCase();
-				InstanceConfig instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName).get();
+				var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
 				SpawnPoint[] playerSpawnPoints = instanceConfig.getPlayerSpawnPoints();
 				if (playerSpawnPoints == null) {
 					playerSpawnPoints = new SpawnPoint[0];
@@ -55,8 +56,7 @@ public class AddSpawnPointCommand extends AbstractAsyncCommand {
 				newPlayerSpawnPoints[playerSpawnPoints.length] = spawnPoint;
 				instanceConfig.setPlayerSpawnPoints(newPlayerSpawnPoints);
 
-				TroubleInTrorkTownPlugin.instanceConfig.get(worldName).save();
-
+				WorldAccessors.getWorldInstanceConfigFile(world).ifPresent(Config::save);
 				ctx.sendMessage(Message.raw("Spawn position added at your current location."));
 			});
 		});

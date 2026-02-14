@@ -1,9 +1,10 @@
 {
   "Parent": "Potion_Template",
   "TranslationProperties": {
-    "Name": "server.items.Potion_Morph_Mouse.name"
+    "Name": "veritaserum_potion_name",
+    "Description": "veritaserum_potion_description"
   },
-  "Icon": "Icons/ItemsGenerated/Potion_Poison_Minor.png",
+  "Icon": "Icons/ItemsGenerated/TTT_Potion_Veritaserum_II.png",
   "Interactions": {
     "Primary": "Block_Primary",
     "Secondary": "Root_Secondary_Consume_Potion_Veritaserum"
@@ -19,7 +20,7 @@
     "Effect": {
       "Interactions": [
         {
-          "Type": "test_player_role"
+          "Type": "test_player_role_potion"
         }
       ]
     },
@@ -61,9 +62,21 @@
         "Weight": 1
       }
     ],
-    "ParticleColor": "#33cc76"
+    "ParticleColor": "#0000b9"
   },
-  "MaxStack": 10,
-  "ItemLevel": 53,
-  "DropOnDeath": true
+  "MaxStack": 30,
+  "ItemLevel": 50,
+  "DropOnDeath": true,
+  "IconProperties": {
+    "Scale": 0.58823,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -13.5
+    ]
+  }
 }

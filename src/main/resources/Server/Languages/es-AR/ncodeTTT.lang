@@ -62,5 +62,5 @@ traitors_chat_command_description = Envia un mensaje a los demás traidores (sol
 traitors_chat_command_world_error = El jugador debe estar en un mundo para usar este comando!
 traitors_chat_prefix = [TRAIDOR]
 
-veritaserum_plant_name = Planta Veritaserum
-veritaserum_plant_description = Obliga a quien la consuma a revelar la <color is="#33CC76">verdad</color>
+veritaserum_potion_name = Poción Veritaserum
+veritaserum_potion_description = Obliga a quien la consuma a revelar la <color is="#33CC76">verdad</color>

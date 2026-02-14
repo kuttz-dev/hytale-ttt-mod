@@ -6,11 +6,14 @@ import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
+import com.hypixel.hytale.common.util.StringUtil;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 public class CustomConfig {
@@ -18,67 +21,67 @@ public class CustomConfig {
 	public static final BuilderCodec<CustomConfig> CODEC =
 			BuilderCodec.builder(CustomConfig.class, CustomConfig::new)
 					.append(new KeyedCodec<>("RequiredPlayersToStartRound", Codec.INTEGER),
-							(config, value, _) -> config.requiredPlayersToStartRound = value,
+							(config, v, _) -> config.requiredPlayersToStartRound = v,
 							(config, _) -> config.requiredPlayersToStartRound)
 					.add()
 					.append(new KeyedCodec<>("TimeBeforeRoundInSeconds", Codec.INTEGER),
-							(config, value, _) -> config.timeBeforeRoundInSeconds = value,
+							(config, v, _) -> config.timeBeforeRoundInSeconds = v,
 							(config, _) -> config.timeBeforeRoundInSeconds)
 					.add()
 					.append(new KeyedCodec<>("RoundDurationInSeconds", Codec.INTEGER),
-							(config, value, _) -> config.roundDurationInSeconds = value,
+							(config, v, _) -> config.roundDurationInSeconds = v,
 							(config, _) -> config.roundDurationInSeconds)
 					.add()
 					.append(new KeyedCodec<>("TimeAfterRoundInSeconds", Codec.INTEGER),
-							(config, value, _) -> config.timeAfterRoundInSeconds = value,
+							(config, v, _) -> config.timeAfterRoundInSeconds = v,
 							(config, _) -> config.timeAfterRoundInSeconds)
 					.add()
 					.append(new KeyedCodec<>("TimeToVoteMapInSeconds", Codec.INTEGER),
-							(config, value, _) -> config.timeToVoteMapInSeconds = value,
+							(config, v, _) -> config.timeToVoteMapInSeconds = v,
 							(config, _) -> config.timeToVoteMapInSeconds)
 					.add()
 					.append(new KeyedCodec<>("TimeBeforeChangingMapInSeconds", Codec.INTEGER),
-							(config, value, _) -> config.timeBeforeChangingMapInSeconds = value,
+							(config, v, _) -> config.timeBeforeChangingMapInSeconds = v,
 							(config, _) -> config.timeBeforeChangingMapInSeconds)
 					.add()
 					.append(new KeyedCodec<>("KarmaStartingValue", Codec.INTEGER),
-							(config, value, _) -> config.karmaStartingValue = value,
+							(config, v, _) -> config.karmaStartingValue = v,
 							(config, _) -> config.karmaStartingValue)
 					.add()
 					.append(new KeyedCodec<>("KarmaForDisconnectingMiddleRound", Codec.INTEGER),
-							(config, value, _) -> config.karmaForDisconnectingMiddleRound = value,
+							(config, v, _) -> config.karmaForDisconnectingMiddleRound = v,
 							(config, _) -> config.karmaForDisconnectingMiddleRound)
 					.add()
 					.append(new KeyedCodec<>("KaramPointsForKillingSameRoleGroup", Codec.INTEGER),
-							(config, value, _) -> config.karamPointsForKillingSameRoleGroup = value,
+							(config, v, _) -> config.karamPointsForKillingSameRoleGroup = v,
 							(config, _) -> config.karamPointsForKillingSameRoleGroup)
 					.add()
 					.append(new KeyedCodec<>("KaramPointsForKillingOppositeRoleGroup", Codec.INTEGER),
-							(config, value, _) -> config.karamPointsForKillingOppositeRoleGroup = value,
+							(config, v, _) -> config.karamPointsForKillingOppositeRoleGroup = v,
 							(config, _) -> config.karamPointsForKillingOppositeRoleGroup)
 					.add()
 					.append(new KeyedCodec<>("PlayerGraveId", Codec.STRING),
-							(config, value, _) -> config.playerGraveId = value,
+							(config, v, _) -> config.playerGraveId = v,
 							(config, _) -> config.playerGraveId)
 					.add()
 					.append(new KeyedCodec<>("LootBoxBlockId", Codec.STRING),
-							(config, value, _) -> config.lootBoxBlockId = value,
+							(config, v, _) -> config.lootBoxBlockId = v,
 							(config, _) -> config.lootBoxBlockId)
 					.add()
 					.append(new KeyedCodec<>("RoundsPerMap", Codec.INTEGER),
-							(config, value, _) -> config.roundsPerMap = value,
+							(config, v, _) -> config.roundsPerMap = v,
 							(config, _) -> config.roundsPerMap)
 					.add()
 					.append(new KeyedCodec<>("MapsInARowForVoting", Codec.INTEGER),
-							(config, value, _) -> config.mapsInARowForVoting = value,
+							(config, v, _) -> config.mapsInARowForVoting = v,
 							(config, _) -> config.mapsInARowForVoting)
 					.add()
 					.append(new KeyedCodec<>("WorldTemplatesFolder", Codec.STRING),
-							(config, value, _) -> config.worldTemplatesFolder = value,
+							(config, v, _) -> config.worldTemplatesFolder = v,
 							(config, _) -> config.worldTemplatesFolder)
 					.add()
 					.append(new KeyedCodec<>("Roles", ArrayCodec.ofBuilderCodec(CustomRole.CODEC, CustomRole[]::new)),
-							(config, value, _) -> config.roles = value,
+							(config, v, _) -> config.roles = v,
 							(config, _) -> config.roles)
 					.add()
 					.build();
@@ -109,7 +112,7 @@ public class CustomConfig {
 					.secretRole(false)
 					.roleGroup(RoleGroup.INNOCENT)
 					.storeItems(new String[]{
-							"Weapon_Staff_Frost:1",
+							"TTT_Potion_Veritaserum:30",
 							"Weapon_Deployable_Healing_Totem:1"
 					})
 					.build(),
@@ -203,6 +206,14 @@ public class CustomConfig {
 		}
 
 		return stacks;
+	}
+
+	public Optional<CustomRole> getRoleByName(String name) {
+		if (name == null || "".equalsIgnoreCase(name.trim())) {
+			return Optional.empty();
+		}
+
+		return Arrays.stream(this.roles).filter(r -> name.equalsIgnoreCase(r.getId())).findFirst();
 	}
 
 }

@@ -62,5 +62,5 @@ traitors_chat_command_description = Send a message to all traitors (only for ali
 traitors_chat_command_world_error = The player must be in a world to use this command.
 traitors_chat_prefix = [TRAITOR]
 
-veritaserum_plant_name = Veritaserum Plant
-veritaserum_plant_description = Makes who eats it tell the <color is="#33CC76">truth</color>
+veritaserum_potion_name = Veritaserum Potion
+veritaserum_potion_description = Makes who drinks it tell the <color is="#33CC76">truth</color>

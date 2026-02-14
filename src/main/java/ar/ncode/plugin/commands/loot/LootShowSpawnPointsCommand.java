@@ -1,6 +1,7 @@
 package ar.ncode.plugin.commands.loot;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.config.instance.SpawnPoint;
 import ar.ncode.plugin.config.loot.LootSpawnPoint;
@@ -68,9 +69,7 @@ public class LootShowSpawnPointsCommand extends AbstractAsyncCommand {
 
 			world.execute(() -> {
 
-				String worldName = world.getWorldConfig().getDisplayName().replace(" ", "_").toLowerCase();
-				InstanceConfig instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName).get();
-
+				var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
 
 				for (LootSpawnPoint lootSpawnPoint : instanceConfig.getLootSpawnPoints()) {
 					SpawnPoint spawnPoint = lootSpawnPoint.getSpawnPoint();

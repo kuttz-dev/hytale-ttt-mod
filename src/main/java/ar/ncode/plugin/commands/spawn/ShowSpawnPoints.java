@@ -1,6 +1,7 @@
 package ar.ncode.plugin.commands.spawn;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.config.instance.SpawnPoint;
 import com.hypixel.hytale.component.Ref;
@@ -71,8 +72,7 @@ public class ShowSpawnPoints extends AbstractAsyncCommand {
 
 			world.execute(() -> {
 
-				String worldName = world.getWorldConfig().getDisplayName().replace(" ", "_").toLowerCase();
-				InstanceConfig instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName).get();
+				var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
 				SpawnPoint[] playerSpawnPoints = instanceConfig.getPlayerSpawnPoints();
 
 				for (SpawnPoint spawnPoint : playerSpawnPoints) {
