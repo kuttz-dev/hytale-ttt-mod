@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    uses: kuttz-dev/hytale-plugin-workflows/.github/workflows/gradle-plugin-ci.yml@main
+    uses: kuttz-dev/hytale-plugin-workflows/.github/workflows/gradle-plugin-ci.yml@v1
     secrets:
       MODTALE_API_KEY: ${{ secrets.MODTALE_API_KEY }}
       MODTALE_PROJECT_ID: ${{ secrets.MODTALE_PROJECT_ID }}
