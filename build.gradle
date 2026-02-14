@@ -55,10 +55,6 @@ javadoc {
     options.addStringOption('Xdoclint:-missing', '-quiet')
 }
 
-jar {
-    destinationDirectory.set(file("$buildDir/out"))
-}
-
 repositories {
     mavenCentral()
 }
