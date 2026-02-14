@@ -1,10 +1,8 @@
 package ar.ncode.plugin.ui.hud;
 
-import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.MessageId;
-import ar.ncode.plugin.model.enums.PlayerRole;
+import ar.ncode.plugin.model.TranslationKey;
 import ar.ncode.plugin.model.enums.RoundState;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
@@ -22,11 +20,9 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 	public static final String PLAYER_CURRENT_ROLE_TEXT = "#PlayerCurrentRole.Text";
 	public static final String PLAYER_CURRENT_ROLE_CONTAINER = "#PlayerCurrentRoleContainer";
 	public static final String PLAYER_CURRENT_ROLE_BACKGROUND = PLAYER_CURRENT_ROLE_CONTAINER + ".Background";
-	public static final String GRAY_BACKGROUND = "#838D9C";
-	public static final String TRAITOR_COLOR = "#B01515";
 	private final PlayerRef playerRef;
 	private final PlayerGameModeInfo playerInfo;
-	private MessageId messageId;
+	private String messageId;
 	private String backgroundColor;
 
 	public PlayerCurrentRoleHud(@NonNullDecl PlayerRef playerRef, PlayerGameModeInfo playerInfo) {
@@ -37,9 +33,46 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 
 	@Override
 	protected void build(@NonNullDecl UICommandBuilder builder) {
+		GameModeState gameModeState = gameModeStateForWorld.get(playerRef.getWorldUuid());
 		builder.append("Hud/hud.ui");
-		setUpMessageAndBackgroundByPlayerRole(playerInfo.getRole());
-		setUpHudValues(builder);
+		setHudRoleValues(builder, gameModeState);
+	}
+
+	private void setHudRoleValues(@NonNullDecl UICommandBuilder builder, GameModeState gameModeState) {
+		if (RoundState.PREPARING.equals(gameModeState.roundState)) {
+			this.messageId = TranslationKey.HUD_CURRENT_STATUS_PREPARING.get();
+			this.backgroundColor = TranslationKey.HUD_CURRENT_STATUS_PREPARING.getMessageColor();
+		}
+
+		if (playerInfo.getCurrentRoundRole() == null) {
+			setHudRoleValues(builder);
+			return;
+		}
+
+		if (playerInfo.isSpectator()) {
+			this.messageId = TranslationKey.HUD_CURRENT_STATUS_SPECTATOR.get();
+			this.backgroundColor = TranslationKey.HUD_CURRENT_STATUS_SPECTATOR.getMessageColor();
+
+		} else {
+			this.messageId = playerInfo.getCurrentRoundRole().getTranslationKey();
+
+			if (playerInfo.getCurrentRoundRole().getCustomGuiColor() != null) {
+				this.backgroundColor = playerInfo.getCurrentRoundRole().getCustomGuiColor();
+
+			} else {
+				this.backgroundColor = playerInfo.getCurrentRoundRole().getRoleGroup().guiColor;
+
+			}
+		}
+
+		setHudRoleValues(builder);
+	}
+
+	private void setHudRoleValues(@NonNullDecl UICommandBuilder builder) {
+		if (messageId != null && backgroundColor != null) {
+			builder.set(PLAYER_CURRENT_ROLE_TEXT, Message.translation(messageId));
+			builder.set(PLAYER_CURRENT_ROLE_BACKGROUND, backgroundColor);
+		}
 	}
 
 	public void update() {
@@ -49,8 +82,7 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 		}
 
 		var builder = new UICommandBuilder();
-		setUpMessageAndBackgroundByPlayerRole(playerInfo.getRole());
-		setUpHudValues(builder);
+		setHudRoleValues(builder, gameModeState);
 
 		if (RoundState.IN_GAME.equals(gameModeState.roundState)) {
 			LocalTime roundRemainingTime = gameModeState.getRoundRemainingTime();
@@ -63,46 +95,4 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 		update(false, builder);
 	}
 
-
-	private void setUpHudValues(UICommandBuilder builder) {
-		builder.set(PLAYER_CURRENT_ROLE_TEXT, Message.translation(messageId.get()));
-		builder.set(PLAYER_CURRENT_ROLE_BACKGROUND, backgroundColor);
-	}
-
-	private void setUpMessageAndBackgroundByPlayerRole(PlayerRole playerRole) {
-		if (playerRole == null) {
-			setUpMessageAndBackground(
-					MessageId.HUD_CURRENT_ROLE_PREPARING,
-					GRAY_BACKGROUND
-			);
-			return;
-		}
-
-		switch (playerRole) {
-			case INNOCENT -> setUpMessageAndBackground(
-					MessageId.HUD_CURRENT_ROLE_INNOCENT,
-					TroubleInTrorkTownPlugin.config.get().getInnocentColor()
-			);
-
-			case TRAITOR -> setUpMessageAndBackground(
-					MessageId.HUD_CURRENT_ROLE_TRAITOR,
-					TRAITOR_COLOR
-			);
-
-			case DETECTIVE -> setUpMessageAndBackground(
-					MessageId.HUD_CURRENT_ROLE_DETECTIVE,
-					"#1F5CC4"
-			);
-
-			case SPECTATOR -> setUpMessageAndBackground(
-					MessageId.HUD_CURRENT_ROLE_SPECTATOR,
-					GRAY_BACKGROUND
-			);
-		}
-	}
-
-	private void setUpMessageAndBackground(MessageId message, String color) {
-		this.messageId = message;
-		this.backgroundColor = color;
-	}
 }

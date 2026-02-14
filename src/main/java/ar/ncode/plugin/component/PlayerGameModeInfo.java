@@ -1,7 +1,7 @@
 package ar.ncode.plugin.component;
 
+import ar.ncode.plugin.config.CustomRole;
 import ar.ncode.plugin.model.DamageCause;
-import ar.ncode.plugin.model.enums.PlayerRole;
 import ar.ncode.plugin.ui.hud.PlayerCurrentRoleHud;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -38,32 +38,40 @@ public class PlayerGameModeInfo implements Component<EntityStore> {
 							c -> c.causeOfDeath == null ? "" : c.causeOfDeath.name()
 					)
 					.add()
-					.append(new KeyedCodec<>("CurrentRoundRole", Codec.STRING),
-							(c, v) -> c.currentRoundRole = "".equals(v) ? null : PlayerRole.valueOf(v), c -> c.currentRoundRole == null ? "" :
-									c.currentRoundRole.name())
+					.append(new KeyedCodec<>("CurrentRoundRole", CustomRole.CODEC),
+							(c, v) -> c.currentRoundRole = v,
+							c -> c.currentRoundRole
+					)
 					.add()
 					.build();
 
 	public static ComponentType<EntityStore, PlayerGameModeInfo> componentType;
 
+	@Builder.Default
 	private int karma = config.get().getKarmaStartingValue();
-	private PlayerRole role = PlayerRole.SPECTATOR;
+	@Builder.Default
 	private int kills = 0;
+	@Builder.Default
 	private int deaths = 0;
+	@Builder.Default
 	private int credits = 0;
 	private PlayerCurrentRoleHud hud;
 	private String timeOfDeath;
 	private DamageCause causeOfDeath;
-	private PlayerRole currentRoundRole;
+	private CustomRole currentRoundRole;
+	private boolean spectator;
+	@Builder.Default
 	private float elapsedTimeSinceLastUpdate = 0;
+	@Builder.Default
 	private boolean alreadyVotedMap = false;
 	private UUID worldInstance = null;
 
 	@NullableDecl
 	@Override
 	public Component<EntityStore> clone() {
-		return new PlayerGameModeInfo(this.karma, this.role, this.kills, this.deaths, this.credits, this.hud,
-				timeOfDeath, causeOfDeath, currentRoundRole, elapsedTimeSinceLastUpdate, alreadyVotedMap, worldInstance);
+		return new PlayerGameModeInfo(this.karma, this.kills, this.deaths, this.credits, this.hud,
+				timeOfDeath, causeOfDeath, currentRoundRole, spectator, elapsedTimeSinceLastUpdate, alreadyVotedMap,
+				worldInstance);
 	}
 
 

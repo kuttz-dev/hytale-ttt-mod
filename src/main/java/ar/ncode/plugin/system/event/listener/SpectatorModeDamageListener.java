@@ -1,7 +1,6 @@
 package ar.ncode.plugin.system.event.listener;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.model.enums.PlayerRole;
 import com.hypixel.hytale.component.*;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
@@ -49,7 +48,7 @@ public class SpectatorModeDamageListener extends DamageEventSystem {
 			return;
 		}
 
-		if (PlayerRole.SPECTATOR.equals(playerGameModeInfo.getRole())) {
+		if (playerGameModeInfo.isSpectator()) {
 			damage.setCancelled(true);
 		}
 	}

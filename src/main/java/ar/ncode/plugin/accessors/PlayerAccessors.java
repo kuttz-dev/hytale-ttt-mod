@@ -7,12 +7,13 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class PlayerAccessors {
 
-	public static Optional<PlayerComponents> getPlayerFrom(Ref<EntityStore> reference) {
-		if (!reference.isValid()) {
+	public static Optional<PlayerComponents> getPlayerFrom(@Nullable Ref<EntityStore> reference) {
+		if (reference == null || !reference.isValid()) {
 			return Optional.empty();
 		}
 

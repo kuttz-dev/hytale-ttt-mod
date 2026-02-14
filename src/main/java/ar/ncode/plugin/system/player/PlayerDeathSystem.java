@@ -3,10 +3,11 @@ package ar.ncode.plugin.system.player;
 import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
 import ar.ncode.plugin.component.death.LostInCombat;
+import ar.ncode.plugin.config.CustomRole;
 import ar.ncode.plugin.model.DamageCause;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.PlayerRole;
+import ar.ncode.plugin.model.enums.RoleGroup;
 import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.system.GraveSystem;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
@@ -38,7 +39,6 @@ import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.accessors.PlayerAccessors.getPlayerFrom;
 import static ar.ncode.plugin.model.GameModeState.timeFormatter;
-import static ar.ncode.plugin.system.GameModeSystem.updatePlayerRole;
 import static ar.ncode.plugin.system.event.handler.FinishCurrentRoundEventHandler.roundShouldEnd;
 
 @Getter
@@ -49,52 +49,30 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 	private final Set<Dependency<EntityStore>> dependencies = Set.of(new SystemDependency<>(Order.BEFORE,
 			DeathSystems.PlayerDeathScreen.class, OrderPriority.NORMAL));
 
-	public static void updatePlayerCounts(PlayerRole playerRole, GameModeState gameModeState) {
-		if (PlayerRole.TRAITOR.equals(playerRole)) {
-			gameModeState.traitorsAlive -= 1;
+	public static void updatePlayerCountsOnPlayerDeath(PlayerRef playerRef, CustomRole role, GameModeState gameModeState) {
+		if (RoleGroup.TRAITOR.equals(role.getRoleGroup())) {
+			gameModeState.traitorsAlive.remove(playerRef.getUuid());
 
-		} else if (PlayerRole.INNOCENT.equals(playerRole) || PlayerRole.DETECTIVE.equals(playerRole)) {
-			gameModeState.innocentsAlive -= 1;
+		} else if (RoleGroup.INNOCENT.equals(role.getRoleGroup())) {
+			gameModeState.innocentsAlice.remove(playerRef.getUuid());
 		}
+
+		gameModeState.spectators.add(playerRef.getUuid());
 	}
 
-	private static int calculateKarmaForAttacker(PlayerRole attackerPlayerRole, PlayerRole playerRole) {
-		int value = 0;
-		if (PlayerRole.TRAITOR.equals(attackerPlayerRole)) {
-			if (PlayerRole.INNOCENT.equals(playerRole)) {
-				value = config.get().getKaramPointsForTraitorKillingInnocent();
+	private static int calculateKarmaForAttacker(CustomRole attackerRole, CustomRole attackedRole) {
+		int value;
 
-			} else if (PlayerRole.TRAITOR.equals(playerRole)) {
-				value = config.get().getKaramPointsForTraitorKillingTraitor();
-
-			} else if (PlayerRole.DETECTIVE.equals(playerRole)) {
-				value = config.get().getKaramPointsForTraitorKillingDetective();
-			}
-
-		} else if (PlayerRole.INNOCENT.equals(attackerPlayerRole)) {
-			if (PlayerRole.TRAITOR.equals(playerRole)) {
-				value = config.get().getKarmaPointsForInnocentKillingTraitor();
-
-			} else if (PlayerRole.INNOCENT.equals(playerRole)) {
-				value = config.get().getKarmaPointsForInnocentKillingInnocent();
-
-			} else {
-				value = config.get().getKarmaPointsForInnocentKillingDetective();
-
-			}
-
-		} else if (PlayerRole.DETECTIVE.equals(attackerPlayerRole)) {
-			if (PlayerRole.TRAITOR.equals(playerRole)) {
-				value = config.get().getKarmaPointsForDetectiveKillingTraitor();
-
-			} else if (PlayerRole.INNOCENT.equals(playerRole)) {
-				value = config.get().getKarmaPointsForDetectiveKillingInnocent();
-
-			} else {
-				value = config.get().getKarmaPointsForDetectiveKillingDetective();
-			}
-
+		if (attackerRole.getRoleGroup().equals(attackedRole.getRoleGroup())) {
+			value = config.get().getKaramPointsForKillingSameRoleGroup();
+		} else {
+			value = config.get().getKaramPointsForKillingOppositeRoleGroup();
 		}
+
+		if (!attackedRole.isSecretRole()) {
+			value = 2 * value;
+		}
+
 		return value;
 	}
 
@@ -110,8 +88,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			if (attacker == null) return;
 
 			if (attacker.refComponent() != null && attacker.info() != null) {
-				PlayerRole attackerPlayerRole = attacker.info().getRole();
-				int value = calculateKarmaForAttacker(attackerPlayerRole, player.info().getRole());
+				int value = calculateKarmaForAttacker(attacker.info().getCurrentRoundRole(), player.info().getCurrentRoundRole());
 				gameModeState.karmaUpdates.merge(attacker.refComponent().getUuid(), value, Integer::sum);
 			}
 		}
@@ -121,7 +98,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 		GraveStoneWithNameplate graveStone = GraveStoneWithNameplate.builder()
 				.timeOfDeath(gameModeState.getRoundRemainingTime().format(timeFormatter))
 				.deadPlayerReference(reference)
-				.deadPlayerRole(player.info().getRole())
+				.deadPlayerRole(player.info().getCurrentRoundRole())
 				.deadPlayerName(player.component().getDisplayName())
 				.build();
 
@@ -162,8 +139,8 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 		world.execute(() -> {
 			player.reference().getStore().ensureComponent(player.reference(), LostInCombat.componentType);
 			player.component().getInventory().clear();
-			SpectatorMode.setGameModeToSpectator(player.refComponent(), player.reference());
-			updatePlayerRole(player, PlayerRole.SPECTATOR, player.refComponent().getUuid(), gameModeState);
+			SpectatorMode.setGameModeToSpectator(player);
+			updatePlayerCountsOnPlayerDeath(player.refComponent(), player.info().getCurrentRoundRole(), gameModeState);
 			player.info().getHud().update();
 
 			updateAttackerKarma(deathComponent, player, gameModeState);

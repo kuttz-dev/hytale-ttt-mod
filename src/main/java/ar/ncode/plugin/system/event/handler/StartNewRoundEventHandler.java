@@ -1,9 +1,7 @@
 package ar.ncode.plugin.system.event.handler;
 
 import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.MessageId;
 import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.PlayerRole;
 import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.system.GameModeSystem;
 import ar.ncode.plugin.system.event.StartNewRoundEvent;
@@ -11,9 +9,9 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
+import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.universe.Universe;
@@ -21,6 +19,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
+import com.hypixel.hytale.server.spawning.local.LocalSpawnController;
 
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -29,9 +28,9 @@ import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.model.MessageId.*;
-import static ar.ncode.plugin.model.enums.PlayerRole.DETECTIVE;
-import static ar.ncode.plugin.model.enums.PlayerRole.TRAITOR;
+import static ar.ncode.plugin.model.TranslationKey.PLAYER_ASSIGNED_ROLE_NOTIFICATION;
+import static ar.ncode.plugin.model.TranslationKey.ROUND_ABOUT_TO_START_MSG;
+import static ar.ncode.plugin.model.enums.RoleGroup.TRAITOR;
 import static ar.ncode.plugin.model.enums.RoundState.PREPARING;
 
 public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
@@ -52,7 +51,8 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 
 			// Inventory
 			player.component().getInventory().setActiveHotbarSlot((byte) 0);
-			addConfiguredStartingItemsToPlayer(player.component());
+			var itemGroups = config.get().getItems(player.info().getCurrentRoundRole().getStartingItems());
+			addItemsToPlayer(itemGroups, player.component().getInventory().getCombinedHotbarFirst());
 
 			// GUI
 			player.component().getPageManager().setPage(reference, reference.getStore(), Page.None);
@@ -61,52 +61,39 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 			// Remove effects
 			stats.maximizeStatValue(DefaultEntityStatTypes.getHealth());
 
-			NotificationStyle notificationStyle;
-			if (TRAITOR.equals(player.info().getRole())) {
-				notificationStyle = NotificationStyle.Danger;
-				player.info().setCredits(STARTING_CREDITS);
+			// Froce respawn on player
+			DeathComponent deathComponent = reference.getStore().getComponent(reference, DeathComponent.getComponentType());
+			if (deathComponent != null) {
+				LocalSpawnController spawnController = reference.getStore()
+						.ensureAndGetComponent(reference, LocalSpawnController.getComponentType());
 
-			} else if (DETECTIVE.equals(player.info().getRole())) {
-				notificationStyle = NotificationStyle.Default;
-				player.info().setCredits(STARTING_CREDITS);
+				spawnController.setTimeToNextRunSeconds(0);
+			}
+
+			NotificationStyle notificationStyle;
+			if (TRAITOR.equals(player.info().getCurrentRoundRole().getRoleGroup())) {
+				notificationStyle = NotificationStyle.Danger;
 
 			} else {
 				notificationStyle = NotificationStyle.Success;
 			}
 
+			player.info().setCredits(player.info().getCurrentRoundRole().getStartingCredits());
+
+
 			NotificationUtil.sendNotification(
 					player.refComponent().getPacketHandler(),
 					Message.translation(PLAYER_ASSIGNED_ROLE_NOTIFICATION.get())
-							.param("role", getTranslatedRole(player.info().getRole())),
+							.param("role", Message.translation(player.info().getCurrentRoundRole().getTranslationKey())),
 					notificationStyle
 			);
 		}
-	}
-
-	private static void addConfiguredStartingItemsToPlayer(Player player) {
-		var itemGroups = config.get().getItems(config.get().getStartingItemsInHotbar());
-		addItemsToPlayer(itemGroups, player.getInventory().getHotbar());
-
-		itemGroups = config.get().getItems(config.get().getStartingItemsInInventory());
-		addItemsToPlayer(itemGroups, player.getInventory().getStorage());
 	}
 
 	private static void addItemsToPlayer(List<ItemStack> items, ItemContainer container) {
 		for (ItemStack itemStack : items) {
 			container.addItemStack(itemStack);
 		}
-	}
-
-	private static Message getTranslatedRole(PlayerRole role) {
-		MessageId messageId = switch (role) {
-			case INNOCENT -> MessageId.HUD_CURRENT_ROLE_INNOCENT;
-			case TRAITOR -> HUD_CURRENT_ROLE_TRAITOR;
-			case DETECTIVE -> MessageId.HUD_CURRENT_ROLE_DETECTIVE;
-			case SPECTATOR -> MessageId.HUD_CURRENT_ROLE_SPECTATOR;
-			default -> MessageId.HUD_CURRENT_ROLE_PREPARING;
-		};
-
-		return Message.translation(messageId.get());
 	}
 
 	@Override

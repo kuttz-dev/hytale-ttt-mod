@@ -1,7 +1,7 @@
 package ar.ncode.plugin.system.scheduled;
 
-import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.system.tick.TickingSystem;
@@ -15,7 +15,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import java.time.LocalTime;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.model.MessageId.ROUND_TIME_FINISHED;
+import static ar.ncode.plugin.model.TranslationKey.ROUND_TIME_FINISHED;
 
 public class WorldRoundTimeSystem extends TickingSystem<EntityStore> {
 

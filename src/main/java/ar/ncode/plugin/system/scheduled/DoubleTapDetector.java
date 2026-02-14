@@ -1,6 +1,7 @@
 package ar.ncode.plugin.system.scheduled;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
+import ar.ncode.plugin.model.PlayerComponents;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.MovementStates;
@@ -169,7 +170,7 @@ public class DoubleTapDetector {
 			// Double tap detected
 			state.firstTapCompleteTime = 0L;
 			state.lastTriggerTime = now;
-			openShopIfUserHasRole(ref, playerRef, player, playerInfo);
+			openShopIfUserHasRole(ref, new PlayerComponents(player, playerRef, playerInfo, ref));
 
 		} else {
 			// First tap completed

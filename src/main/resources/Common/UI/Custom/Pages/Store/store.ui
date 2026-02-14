@@ -29,6 +29,11 @@ Group {
                   Text: "Credits: ";
                 }
 
+                Label #CreditsSpacing {
+                  Style: (TextColor: #ffffff);
+                  Text: " ";
+                }
+
                 Label #CreditAmount {
                   Style: (TextColor: #ffffff);
                   Text: "1";

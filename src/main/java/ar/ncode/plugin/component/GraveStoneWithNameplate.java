@@ -1,7 +1,7 @@
 package ar.ncode.plugin.component;
 
+import ar.ncode.plugin.config.CustomRole;
 import ar.ncode.plugin.model.DamageCause;
-import ar.ncode.plugin.model.enums.PlayerRole;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -43,9 +43,10 @@ public class GraveStoneWithNameplate implements Component<ChunkStore> {
 							(c, v) -> c.causeOfDeath = "".equals(v) ? null : DamageCause.valueOf(v.toUpperCase()),
 							c -> c.causeOfDeath == null ? "" : c.causeOfDeath.name())
 					.add()
-					.append(new KeyedCodec<>("DeadPlayerRole", Codec.STRING),
-							(c, v) -> c.deadPlayerRole = "".equals(v) ? null : PlayerRole.valueOf(v),
-							c -> c.deadPlayerName == null ? "" : c.deadPlayerRole.name())
+					.append(new KeyedCodec<>("DeadPlayerRole", CustomRole.CODEC),
+							(c, v) -> c.deadPlayerRole = v,
+							c -> c.deadPlayerRole
+					)
 					.add()
 					.append(new KeyedCodec<>("DeadPlayerName", Codec.STRING),
 							(c, v) -> c.deadPlayerName = v,
@@ -64,7 +65,7 @@ public class GraveStoneWithNameplate implements Component<ChunkStore> {
 	private Ref<EntityStore> namePlateReference;
 	private Ref<EntityStore> deadPlayerReference;
 	private DamageCause causeOfDeath;
-	private PlayerRole deadPlayerRole;
+	private CustomRole deadPlayerRole;
 	private String deadPlayerName;
 	private String timeOfDeath;
 

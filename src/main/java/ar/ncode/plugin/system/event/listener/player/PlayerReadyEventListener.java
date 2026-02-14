@@ -1,12 +1,13 @@
 package ar.ncode.plugin.system.event.listener.player;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.commands.ChangeWorldCommand;
 import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.enums.PlayerRole;
+import ar.ncode.plugin.model.PlayerComponents;
 import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.system.event.StartNewRoundEvent;
 import ar.ncode.plugin.ui.hud.PlayerCurrentRoleHud;
@@ -30,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.model.CustomPermissions.ADMIN_PERMISSIONS;
+import static ar.ncode.plugin.model.CustomPermissions.TTT_ADMIN_GROUP;
 import static ar.ncode.plugin.model.CustomPermissions.TTT_USER_GROUP;
 import static ar.ncode.plugin.model.CustomPermissions.USER_PERMISSIONS;
 import static ar.ncode.plugin.system.event.handler.FinishCurrentMapEventHandler.getNextMap;
@@ -37,15 +40,6 @@ import static ar.ncode.plugin.system.event.handler.StartNewRoundEventHandler.can
 import static ar.ncode.plugin.system.player.PlayerRespawnSystem.teleportPlayerToRandomSpawnPoint;
 
 public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
-
-	private static PlayerRole getPlayerRoleBasedOnGameState(GameModeState gameModeState) {
-		PlayerRole role = null;
-		if (gameModeState.roundState.equals(RoundState.IN_GAME)) {
-			role = PlayerRole.SPECTATOR;
-		}
-
-		return role;
-	}
 
 	private static PlayerCurrentRoleHud loadHudForPlayer(Player player, PlayerRef playerRef, PlayerGameModeInfo playerInfo) {
 		PlayerCurrentRoleHud hud = new PlayerCurrentRoleHud(playerRef, playerInfo);
@@ -92,24 +86,23 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 				// Reset flag after additional delay for the actual fade to complete
 				HytaleServer.SCHEDULED_EXECUTOR.schedule(
 						() -> TroubleInTrorkTownPlugin.isWorldTransitionInProgress = false,
-						1500,
-						TimeUnit.MILLISECONDS
+						2,
+						TimeUnit.SECONDS
 				);
 			}
-		}), 1500, TimeUnit.MILLISECONDS);
+		}), 2, TimeUnit.SECONDS);
 	}
 
 	private static void configurePlayerPermissions(PlayerRef playerRef) {
 		PermissionsModule permissions = PermissionsModule.get();
-		permissions.addGroupPermission(TTT_USER_GROUP, USER_PERMISSIONS);
 		permissions.addUserToGroup(playerRef.getUuid(), TTT_USER_GROUP);
 	}
 
 	@Override
 	public void accept(PlayerReadyEvent event) {
-		Player player = event.getPlayer();
+		Player playerComponent = event.getPlayer();
 		Ref<EntityStore> reference = event.getPlayerRef();
-		World world = player.getWorld();
+		World world = playerComponent.getWorld();
 		if (world == null) {
 			return;
 		}
@@ -125,7 +118,15 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 			configurePlayerPermissions(playerRef);
 
 			PlayerGameModeInfo playerInfo = reference.getStore().ensureAndGetComponent(reference, PlayerGameModeInfo.componentType);
-			GameModeState gameModeState = gameModeStateForWorld.getOrDefault(world.getWorldConfig().getUuid(), new GameModeState());
+			GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+
+			if (gameModeState == null) {
+				gameModeState = new GameModeState();
+				gameModeStateForWorld.put(world.getWorldConfig().getUuid(), gameModeState);
+			}
+
+
+			var player = new PlayerComponents(playerComponent, playerRef, playerInfo, reference);
 
 			// Handle world instance transitions
 			// We need to delay teleports to prevent "Cannot start a fade out while a fade completion callback is pending"
@@ -156,8 +157,7 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 			}
 
 			if (world.getWorldConfig().getDisplayName() != null) {
-				String worldName = world.getWorldConfig().getDisplayName().replace(" ", "_").toLowerCase();
-				InstanceConfig instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName).get();
+				var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
 
 				if (instanceConfig != null) {
 					teleportPlayerToRandomSpawnPoint(reference, reference.getStore(), instanceConfig, world);
@@ -165,7 +165,7 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 			}
 
 			// TTT: Hide ALL players from compass and worldmap (always on)
-			WorldMapTracker worldMapTracker = player.getWorldMapTracker();
+			WorldMapTracker worldMapTracker = playerComponent.getWorldMapTracker();
 			worldMapTracker.setPlayerMapFilter(otherPlayer -> true);  // true = hide everyone
 
 			EffectControllerComponent effectController = reference.getStore().getComponent(reference, EffectControllerComponent.getComponentType());
@@ -175,20 +175,14 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 			}
 
 			effectController.clearEffects(reference, reference.getStore());
-			SpectatorMode.disableSpectatorModeForPlayer(playerRef, reference);
-			player.getInventory().clear();
+			SpectatorMode.disableSpectatorModeForPlayer(player);
+			playerComponent.getInventory().clear();
 
-			PlayerRole role = getPlayerRoleBasedOnGameState(gameModeState);
-			playerInfo.setRole(role);
-			playerInfo.setCurrentRoundRole(role);
-			// Track spectator status for chat filtering
-			if (PlayerRole.SPECTATOR.equals(role)) {
-				TroubleInTrorkTownPlugin.spectatorPlayers.add(playerRef.getUuid());
-			} else {
-				TroubleInTrorkTownPlugin.spectatorPlayers.remove(playerRef.getUuid());
+			if (gameModeState.roundState.equals(RoundState.IN_GAME)) {
+				playerInfo.setSpectator(true);
 			}
 
-			var hud = loadHudForPlayer(player, playerRef, playerInfo);
+			var hud = loadHudForPlayer(playerComponent, playerRef, playerInfo);
 			playerInfo.setHud(hud);
 
 			if (canStartNewRound(gameModeState, world)) {
@@ -197,7 +191,7 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 						.dispatch(new StartNewRoundEvent(world.getWorldConfig().getUuid()));
 
 			} else if (playerCanNotSpawn(gameModeState)) {
-				SpectatorMode.setGameModeToSpectator(playerRef, reference);
+				SpectatorMode.setGameModeToSpectator(player);
 			}
 
 			gameModeStateForWorld.put(world.getWorldConfig().getUuid(), gameModeState);

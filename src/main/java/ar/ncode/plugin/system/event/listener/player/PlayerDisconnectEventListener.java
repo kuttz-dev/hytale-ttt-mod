@@ -7,6 +7,7 @@ import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
 import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.model.PlayerComponents;
 import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.system.GraveSystem;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
@@ -27,7 +28,7 @@ import java.util.function.Consumer;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.model.GameModeState.timeFormatter;
-import static ar.ncode.plugin.model.MessageId.THERE_ARE_NOT_ENOUGH_PLAYERS;
+import static ar.ncode.plugin.model.TranslationKey.THERE_ARE_NOT_ENOUGH_PLAYERS;
 
 public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectEvent> {
 
@@ -39,8 +40,8 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 
 		PlayerGameModeInfo playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
 		if (playerInfo != null) {
-			PlayerDeathSystem.updatePlayerCounts(playerInfo.getRole(), gameModeState);
-			graveStone.setDeadPlayerRole(playerInfo.getRole());
+			PlayerDeathSystem.updatePlayerCountsOnPlayerDeath(playerRef, playerInfo.getCurrentRoundRole(), gameModeState);
+			graveStone.setDeadPlayerRole(playerInfo.getCurrentRoundRole());
 			graveStone.setTimeOfDeath(gameModeState.getRoundRemainingTime().format(timeFormatter));
 		}
 
@@ -74,9 +75,6 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 
 		// Remove component from DoubleTapDetector to prevent memory leak
 		DoubleTapDetector.getInstance().removePlayer(playerRef.getUuid());
-		// Remove from spectator tracking
-		TroubleInTrorkTownPlugin.spectatorPlayers.remove(playerRef.getUuid());
-		TroubleInTrorkTownPlugin.traitorPlayers.remove(playerRef.getUuid());
 
 		Store<EntityStore> store = reference.getStore();
 		World world = store.getExternalData().getWorld();
@@ -91,10 +89,16 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 			return;
 		}
 
+		// Remove from spectator tracking
+		gameModeState.spectators.remove(playerRef.getUuid());
+		gameModeState.traitorsAlive.remove(playerRef.getUuid());
+		gameModeState.innocentsAlice.remove(playerRef.getUuid());
+
 		world.execute(() -> {
 			if (!reference.isValid()) return;
+			var playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
 
-			SpectatorMode.disableSpectatorModeForPlayer(playerRef, reference);
+			SpectatorMode.disableSpectatorModeForPlayer(new PlayerComponents(null, playerRef, playerInfo, reference));
 			store.removeComponentIfExists(reference, LostInCombat.componentType);
 			store.removeComponentIfExists(reference, ConfirmedDeath.componentType);
 

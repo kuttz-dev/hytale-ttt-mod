@@ -26,7 +26,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import java.util.List;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
-import static ar.ncode.plugin.model.MessageId.*;
+import static ar.ncode.plugin.model.TranslationKey.*;
 
 public class ShopPage extends InteractiveCustomUIPage<ShopPage.ShopInteractionEvent> {
 

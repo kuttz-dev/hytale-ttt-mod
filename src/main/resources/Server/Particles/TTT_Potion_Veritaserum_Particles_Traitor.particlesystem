@@ -1,0 +1,15 @@
+{
+  "LifeSpan": 2.0,
+  "Spawners": [
+    {
+      "SpawnerId": "TTT_Potion_Veritaserum_Particles_Traitor_Implosion",
+      "Scale": 1.25
+    },
+    {
+      "SpawnerId": "TTT_Potion_Veritaserum_Particles_Traitor_Sparks",
+      "PositionOffset": {
+        "Y": 0.25
+      }
+    }
+  ]
+}

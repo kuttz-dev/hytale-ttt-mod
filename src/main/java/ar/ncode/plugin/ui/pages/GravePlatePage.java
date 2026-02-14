@@ -2,7 +2,7 @@ package ar.ncode.plugin.ui.pages;
 
 import ar.ncode.plugin.component.GraveStoneWithNameplate;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
-import ar.ncode.plugin.model.MessageId;
+import ar.ncode.plugin.model.TranslationKey;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -19,8 +19,6 @@ import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
-
-import static ar.ncode.plugin.ui.pages.ScoreBoardPage.getRoleTranslation;
 
 public class GravePlatePage extends InteractiveCustomUIPage<GravePlatePage.InteractionEvent> {
 
@@ -39,9 +37,9 @@ public class GravePlatePage extends InteractiveCustomUIPage<GravePlatePage.Inter
 	                  @NonNullDecl UIEventBuilder eventBuilder, @NonNullDecl Store<EntityStore> store
 	) {
 		builder.append("Pages/Grave/grave-plate.ui");
-		builder.set("#TitleText.Text", Message.translation(MessageId.GRAVESTONE_PLATE_TITLE.get()));
-		builder.set("#ReportDeath.Text", Message.translation(MessageId.GRAVESTONE_PLATE_REPORT_DEATH.get()));
-		builder.set("#CloseBtn.Text", Message.translation(MessageId.GRAVESTONE_PLATE_CLOSE.get()));
+		builder.set("#TitleText.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_TITLE.get()));
+		builder.set("#ReportDeath.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_REPORT_DEATH.get()));
+		builder.set("#CloseBtn.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_CLOSE.get()));
 
 		eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ReportDeath", EventData.of("Action",
 				"reportDeath"));
@@ -51,21 +49,21 @@ public class GravePlatePage extends InteractiveCustomUIPage<GravePlatePage.Inter
 			return;
 		}
 
-		builder.set("#Player.Text", Message.translation(MessageId.GRAVESTONE_PLATE_PLAYER.get()));
+		builder.set("#Player.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_PLAYER.get()));
 		builder.set("#PlayerValue.Text", graveStoneWithNameplate.getDeadPlayerName());
 
 		if (graveStoneWithNameplate.getDeadPlayerRole() != null) {
-			builder.set("#Role.Text", Message.translation(MessageId.GRAVESTONE_PLATE_ROLE.get()));
-			builder.set("#RoleValue.Text", getRoleTranslation(graveStoneWithNameplate.getDeadPlayerRole()));
+			builder.set("#Role.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_ROLE.get()));
+			builder.set("#RoleValue.Text", graveStoneWithNameplate.getDeadPlayerRole().getTranslationKey());
 		}
 
 		if (graveStoneWithNameplate.getTimeOfDeath() != null) {
-			builder.set("#DeathTime.Text", Message.translation(MessageId.GRAVESTONE_PLATE_DEATH_TIME.get()));
+			builder.set("#DeathTime.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_DEATH_TIME.get()));
 			builder.set("#DeathTimeValue.Text", graveStoneWithNameplate.getTimeOfDeath());
 		}
 
 		if (graveStoneWithNameplate.getCauseOfDeath() != null) {
-			builder.set("#DeathCause.Text", Message.translation(MessageId.GRAVESTONE_PLATE_DEATH_CAUSE.get()));
+			builder.set("#DeathCause.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_DEATH_CAUSE.get()));
 			String translationKey = graveStoneWithNameplate.getCauseOfDeath().getTranslationKey();
 			builder.set("#DeathCauseValue.Text", Message.translation(translationKey));
 		}

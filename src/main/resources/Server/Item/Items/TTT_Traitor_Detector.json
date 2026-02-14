@@ -1,0 +1,123 @@
+{
+  "TranslationProperties": {
+    "Name": "server.items.Furniture_Village_Chest_Small.name"
+  },
+  "PlayerAnimationsId": "Block",
+  "Categories": [
+    "Blocks.Deco"
+  ],
+  "Set": "TTT",
+  "Icon": "Icons/ItemsGenerated/TTT_Traitor_Detector.png",
+  "Interactions": {
+    "Use": {
+      "Interactions": [
+        {
+          "Type": "test_player_role"
+        },
+        {
+          "Type": "UseBlock"
+        }
+      ]
+    }
+  },
+  "BlockType": {
+    "BlockSoundSetId": "Metal",
+    "CustomModel": "Blocks/TTT/TraitorDetector/TraitorDetector.blockymodel",
+    "DrawType": "Model",
+    "Flags": {
+      "IsUsable": true
+    },
+    "Material": "Solid",
+    "Opacity": "Solid",
+    "Supporting": {
+      "Up": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "Support": {
+      "Down": [
+        {
+          "FaceType": "Full"
+        }
+      ]
+    },
+    "VariantRotation": "Wall",
+    "Interactions": {
+      "Use": {
+        "Interactions": [
+          {
+            "Type": "test_player_role"
+          }
+        ],
+        "RequireNewClick": false
+      }
+    },
+    "ParticleColor": "#33cc76",
+    "CubeShadingMode": "Standard",
+    "CustomModelTexture": [
+      {
+        "Texture": "Blocks/TTT/TraitorDetector/MetalDetector_Texture.png"
+      }
+    ],
+    "RequiresAlphaBlending": false,
+    "PlacementSettings": {
+      "AllowRotationKey": true,
+      "PlaceInEmptyBlocks": true
+    },
+    "HitboxType": "TTT_Traitor_Detector_Hitbox",
+    "InteractionHint": "asdasdasdasd",
+    "IsDoor": false,
+    "Particles": [
+      {
+        "SystemId": "TTT_Innocent_Particle",
+        "TargetNodeName": "Led",
+        "Scale": 1,
+        "PositionOffset": {
+          "X": 1,
+          "Y": 1,
+          "Z": 1
+        },
+        "TargetEntityPart": "Self",
+        "DetachedFromModel": false
+      },
+      {
+        "TargetNodeName": "Led",
+        "SystemId": "Dance_Lights3",
+        "Scale": 1,
+        "PositionOffset": {
+          "X": -1,
+          "Y": 1,
+          "Z": 1
+        },
+        "DetachedFromModel": false
+      }
+    ]
+  },
+  "Tags": {
+    "Type": [
+      "Furniture"
+    ]
+  },
+  "IconProperties": {
+    "Scale": 0.2,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      -7,
+      -44
+    ]
+  },
+  "ItemSoundSetId": "ISS_Items_Metal",
+  "ItemLevel": 5,
+  "MaxStack": 1,
+  "Model": "Blocks/TTT/TraitorDetector/TraitorDetector.blockymodel",
+  "Scale": 2.5,
+  "Texture": "Blocks/TTT/TraitorDetector/MetalDetector_Texture.png",
+  "UsePlayerAnimations": true,
+  "Consumable": false
+}

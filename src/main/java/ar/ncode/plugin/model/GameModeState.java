@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 
@@ -18,15 +19,14 @@ public class GameModeState {
 
 	public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("mm:ss");
 	public RoundState roundState = RoundState.PREPARING;
-	public int traitorsAlive = 0;
-	public int innocentsAlive = 0;
+	public Set<UUID> traitorsAlive = ConcurrentHashMap.newKeySet();
+	public Set<UUID> innocentsAlice = ConcurrentHashMap.newKeySet();
+	public Set<UUID> spectators = ConcurrentHashMap.newKeySet();
 	public Map<UUID, Integer> karmaUpdates = new HashMap<>();
 	public LocalDateTime roundStateUpdatedAt;
 	public List<GraveStoneWithNameplate> graveStones = new ArrayList<>();
 	public int playedRounds = 0;
 	public Map<String, Integer> mapVotes = new HashMap<>();
-	public List<UUID> spectatorPlayers = new ArrayList<>();
-	public List<UUID> traitorPlayers = new ArrayList<>();
 
 	public void addGraveStone(GraveStoneWithNameplate graveStone) {
 		this.graveStones.add(graveStone);

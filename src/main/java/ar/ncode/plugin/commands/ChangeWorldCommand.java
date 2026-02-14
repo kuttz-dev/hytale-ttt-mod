@@ -110,7 +110,7 @@ public class ChangeWorldCommand extends CommandBase {
 				} catch (Exception e) {
 					LOGGER.atWarning().withCause(e).log("Failed to remove old world: " + oldWorldName);
 				}
-			}, 2, TimeUnit.SECONDS);
+			}, 3, TimeUnit.SECONDS);
 		});
 	}
 

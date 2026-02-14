@@ -3,8 +3,8 @@ package ar.ncode.plugin.ui.pages;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
+import ar.ncode.plugin.config.CustomRole;
 import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.PlayerRole;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.util.MathUtil;
@@ -25,10 +25,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
-import static ar.ncode.plugin.model.MessageId.*;
-import static ar.ncode.plugin.model.enums.PlayerRole.*;
+import static ar.ncode.plugin.model.TranslationKey.*;
+import static ar.ncode.plugin.model.enums.RoleGroup.TRAITOR;
 
 public class ScoreBoardPage extends BasicCustomUIPage {
 
@@ -37,16 +36,6 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 
 	public ScoreBoardPage(@NonNullDecl PlayerRef playerRef, @NonNullDecl CustomPageLifetime lifetime) {
 		super(playerRef, lifetime);
-	}
-
-	@NonNullDecl
-	public static Message getRoleTranslation(PlayerRole role) {
-		return switch (role) {
-			case INNOCENT -> Message.translation(HUD_CURRENT_ROLE_INNOCENT.get());
-			case DETECTIVE -> Message.translation(HUD_CURRENT_ROLE_DETECTIVE.get());
-			case TRAITOR -> Message.translation(HUD_CURRENT_ROLE_TRAITOR.get());
-			case SPECTATOR -> Message.translation(HUD_CURRENT_ROLE_SPECTATOR.get());
-		};
 	}
 
 	private static int getAvgPing(PlayerRef playerRef) {
@@ -102,15 +91,13 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 			builder.append("#Content", "Pages/Scoreboard/scoreboard-row.ui");
 			String rowPrefix = "#Content[" + rowNumber + "]";
 
-			PlayerRole targetPlayerRole = player.info().getCurrentRoundRole() == null ?
-					player.info().getRole() : player.info().getCurrentRoundRole();
+			CustomRole targetRoleGroup = player.info().getCurrentRoundRole();
 
-			if (showTraitors && TRAITOR.equals(targetPlayerRole)) {
-				String backgroundColor = config.get().getTraitorColor();
-				builder.set(rowPrefix + ".Background", backgroundColor);
+			if (targetRoleGroup != null && showTraitors && TRAITOR.equals(targetRoleGroup.getRoleGroup())) {
+				builder.set(rowPrefix + ".Background", TRAITOR.guiColor);
 
-			} else if (DETECTIVE.equals(targetPlayerRole)) {
-				builder.set(rowPrefix + ".Background", "#1F5CC4");
+			} else if (targetRoleGroup != null && !targetRoleGroup.isSecretRole()) {
+				builder.set(rowPrefix + ".Background", targetRoleGroup.getCustomGuiColor());
 			}
 
 			builder.set(rowPrefix + " #rowPlayerName.Text", player.component().getDisplayName());
@@ -150,8 +137,8 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 			return;
 		}
 
-		boolean showTraitors = TRAITOR.equals(playerInfo.getCurrentRoundRole());
-		boolean showLostInCombat = SPECTATOR.equals(playerInfo.getRole());
+		boolean showTraitors = TRAITOR.equals(playerInfo.getCurrentRoundRole().getRoleGroup());
+		boolean showLostInCombat = playerInfo.isSpectator();
 		ScoreBoardTable table = getTableRows(players, showLostInCombat);
 
 		buildTableRecords(builder, table.alivePlayers, showTraitors);

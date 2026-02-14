@@ -1,12 +1,15 @@
 package ar.ncode.plugin.model;
 
-public enum MessageId {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-	HUD_CURRENT_ROLE_PREPARING,
-	HUD_CURRENT_ROLE_SPECTATOR,
-	HUD_CURRENT_ROLE_INNOCENT,
-	HUD_CURRENT_ROLE_TRAITOR,
-	HUD_CURRENT_ROLE_DETECTIVE,
+@NoArgsConstructor
+@AllArgsConstructor
+public enum TranslationKey {
+
+	HUD_CURRENT_STATUS_PREPARING("#838D9C"),
+	HUD_CURRENT_STATUS_SPECTATOR("#838D9C"),
 
 	SCOREBOARD_TITLE,
 	SCOREBOARD_TITLES_PLAYER,
@@ -59,8 +62,16 @@ public enum MessageId {
 	;
 
 	public static final String LANG_FILE_NAME = "ncodeTTT";
+	@Getter
+	private String messageColor;
+
+	public static String getWithPrefix(String key) {
+		return LANG_FILE_NAME + "." + key.toLowerCase();
+	}
 
 	public String get() {
 		return LANG_FILE_NAME + "." + this.name().toLowerCase();
 	}
+
+
 }

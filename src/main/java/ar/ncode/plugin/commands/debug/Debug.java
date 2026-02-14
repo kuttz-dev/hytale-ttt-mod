@@ -1,10 +1,8 @@
 package ar.ncode.plugin.commands.debug;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
-import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.config.DebugConfig;
-import ar.ncode.plugin.model.enums.PlayerRole;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.vector.Vector3d;
@@ -16,7 +14,6 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncC
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -33,7 +30,7 @@ public class Debug extends AbstractCommandCollection {
 		this.addSubCommand(new DebugToggleCommand());
 		this.addSubCommand(new GetCurrentPositonCommand());
 		this.addSubCommand(new MemoryDebugCommand());
-		this.addSubCommand(new SetCurrentRole());
+//		this.addSubCommand(new SetCurrentRole());
 		this.addSubCommand(new Info());
 	}
 
@@ -123,57 +120,57 @@ public class Debug extends AbstractCommandCollection {
 		}
 	}
 
-	public static class SetCurrentRole extends AbstractAsyncCommand {
-
-		RequiredArg<String> roleArg = withRequiredArg(
-				"role", "The role to be set.",
-				ArgTypes.STRING
-		);
-
-		public SetCurrentRole() {
-			super("role", "Sets the current role");
-		}
-
-		@NonNullDecl
-		@Override
-		protected CompletableFuture<Void> executeAsync(@NonNullDecl CommandContext ctx) {
-			return CompletableFuture.runAsync(() -> {
-				String role = roleArg.get(ctx);
-				PlayerRole desiredRole;
-				try {
-					desiredRole = PlayerRole.valueOf(role.toUpperCase());
-				} catch (Exception e) {
-					ctx.sendMessage(Message.translation("Desired role doest not exist"));
-					return;
-				}
-
-				if (!ctx.isPlayer() || ctx.senderAsPlayerRef() == null) {
-					ctx.sendMessage(Message.raw("Command can only be used by players."));
-					return;
-				}
-
-				Player player = ctx.senderAs(Player.class);
-				World world = player.getWorld();
-				world.execute(() -> {
-					Ref<EntityStore> ref = ctx.senderAsPlayerRef();
-					var playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
-					var playerRef = ref.getStore().getComponent(ref, PlayerRef.getComponentType());
-
-					if (playerInfo == null) {
-						ctx.sendMessage(Message.raw("Error"));
-						return;
-					}
-
-					playerInfo.setRole(desiredRole);
-
-					if (PlayerRole.SPECTATOR.equals(desiredRole)) {
-						SpectatorMode.setGameModeToSpectator(playerRef, ref);
-					}
-
-				});
-			});
-		}
-	}
+//	public static class SetCurrentRole extends AbstractAsyncCommand {
+//
+//		RequiredArg<String> roleArg = withRequiredArg(
+//				"role", "The role to be set.",
+//				ArgTypes.STRING
+//		);
+//
+//		public SetCurrentRole() {
+//			super("role", "Sets the current role");
+//		}
+//
+//		@NonNullDecl
+//		@Override
+//		protected CompletableFuture<Void> executeAsync(@NonNullDecl CommandContext ctx) {
+//			return CompletableFuture.runAsync(() -> {
+//				String role = roleArg.get(ctx);
+//				RoleGroup desiredRole;
+//				try {
+//					desiredRole = RoleGroup.valueOf(role.toUpperCase());
+//				} catch (Exception e) {
+//					ctx.sendMessage(Message.translation("Desired role doest not exist"));
+//					return;
+//				}
+//
+//				if (!ctx.isPlayer() || ctx.senderAsPlayerRef() == null) {
+//					ctx.sendMessage(Message.raw("Command can only be used by players."));
+//					return;
+//				}
+//
+//				Player player = ctx.senderAs(Player.class);
+//				World world = player.getWorld();
+//				world.execute(() -> {
+//					Ref<EntityStore> ref = ctx.senderAsPlayerRef();
+//					var playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
+//					var playerRef = ref.getStore().getComponent(ref, PlayerRef.getComponentType());
+//
+//					if (playerInfo == null) {
+//						ctx.sendMessage(Message.raw("Error"));
+//						return;
+//					}
+//
+//
+//					if ("spectator".equalsIgnoreCase(desiredRole)) {
+//						playerInfo.setSpectator(true);
+//						SpectatorMode.setGameModeToSpectator(playerRef, ref);
+//					}
+//
+//				});
+//			});
+//		}
+//	}
 
 	public static class Info extends AbstractAsyncCommand {
 

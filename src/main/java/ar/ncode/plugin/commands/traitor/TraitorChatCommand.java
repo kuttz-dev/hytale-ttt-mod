@@ -1,9 +1,9 @@
 package ar.ncode.plugin.commands.traitor;
 
-import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.model.enums.PlayerRole;
-import ar.ncode.plugin.model.MessageId;
+import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.model.TranslationKey;
+import ar.ncode.plugin.model.enums.RoleGroup;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
@@ -20,12 +20,12 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static ar.ncode.plugin.ui.hud.PlayerCurrentRoleHud.TRAITOR_COLOR;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 
 public class TraitorChatCommand extends AbstractAsyncCommand {
 
 	RequiredArg<String> message = this.withRequiredArg(
-			"message", MessageId.TRAITORS_CHAT_COMMAND_DESCRIPTION.get(),
+			"message", TranslationKey.TRAITORS_CHAT_COMMAND_DESCRIPTION.get(),
 			ArgTypes.STRING
 	);
 
@@ -52,23 +52,24 @@ public class TraitorChatCommand extends AbstractAsyncCommand {
 		world.execute(() -> {
 			PlayerGameModeInfo playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
 
-			if (player == null || playerInfo == null) {
+			if (playerInfo == null) {
 				return;
 			}
 
-			if (!PlayerRole.TRAITOR.equals(playerInfo.getRole())) {
-				ctx.sendMessage(Message.translation(MessageId.TRAITORS_CHAT_ONLY_FOR_TRAITORS.get()));
+			if (!RoleGroup.TRAITOR.equals(playerInfo.getCurrentRoundRole().getRoleGroup())) {
+				ctx.sendMessage(Message.translation(TranslationKey.TRAITORS_CHAT_ONLY_FOR_TRAITORS.get()));
 				return;
 			}
 
 			String chatMessage = ctx.get(this.message);
 
 			if (player.getWorld() == null) {
-				ctx.sendMessage(Message.translation(MessageId.TRAITORS_CHAT_ONLY_FOR_TRAITORS.get()));
+				ctx.sendMessage(Message.translation(TranslationKey.TRAITORS_CHAT_ONLY_FOR_TRAITORS.get()));
 				return;
 			}
 
-			for (UUID playerUUID : TroubleInTrorkTownPlugin.traitorPlayers) {
+			GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+			for (UUID playerUUID : gameModeState.traitorsAlive) {
 				PlayerRef playerRef = Universe.get().getPlayer(playerUUID);
 				if (playerRef == null) {
 					continue;
@@ -76,8 +77,8 @@ public class TraitorChatCommand extends AbstractAsyncCommand {
 
 				playerRef.sendMessage(
 						Message.join(
-								Message.translation(MessageId.TRAITORS_CHAT_PREFIX.get())
-										.color(TRAITOR_COLOR),
+								Message.translation(TranslationKey.TRAITORS_CHAT_PREFIX.get())
+										.color(RoleGroup.TRAITOR.guiColor),
 								Message.raw(" - " + player.getDisplayName() + ": " + chatMessage)
 						)
 				);

@@ -1,212 +1,143 @@
 package ar.ncode.plugin.config;
 
+import ar.ncode.plugin.model.TranslationKey;
+import ar.ncode.plugin.model.enums.RoleGroup;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
+import com.hypixel.hytale.common.util.StringUtil;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 public class CustomConfig {
 
 	public static final BuilderCodec<CustomConfig> CODEC =
 			BuilderCodec.builder(CustomConfig.class, CustomConfig::new)
-					.append(new KeyedCodec<>("InnocentColor", Codec.STRING),
-							(config, value, extraInfo) -> config.innocentColor = value,  // Setter
-							(config, extraInfo) -> config.innocentColor)                     // Getter
-					.add()
-					.append(new KeyedCodec<>("TraitorColor", Codec.STRING),
-							(config, value, extraInfo) -> config.traitorColor = value,
-							(config, extraInfo) -> config.traitorColor)
-					.add()
 					.append(new KeyedCodec<>("RequiredPlayersToStartRound", Codec.INTEGER),
-							(config, value, extraInfo) -> config.requiredPlayersToStartRound = value,
-							(config, extraInfo) -> config.requiredPlayersToStartRound)
-					.add()
-					.append(new KeyedCodec<>("MinAmountOfTraitors", Codec.INTEGER),
-							(config, value, extraInfo) -> config.minAmountOfTraitors = value,
-							(config, extraInfo) -> config.minAmountOfTraitors)
-					.add()
-					.documentation("There will be 1 traitor for every N players, here you define N")
-					.append(new KeyedCodec<>("TraitorsRatio", Codec.INTEGER),
-							(config, value, extraInfo) -> config.traitorsRatio = value,
-							(config, extraInfo) -> config.traitorsRatio)
-					.add()
-					.append(new KeyedCodec<>("MinAmountOfDetectives", Codec.INTEGER),
-							(config, value, extraInfo) -> config.minAmountOfDetectives = value,
-							(config, extraInfo) -> config.minAmountOfDetectives)
-					.add()
-					.documentation("There will be 1 detective for every N players, here you define N")
-					.append(new KeyedCodec<>("DetectivesRatio", Codec.INTEGER),
-							(config, value, extraInfo) -> config.detectivesRatio = value,
-							(config, extraInfo) -> config.detectivesRatio)
-					.add()
-					.documentation("Lets you disable the detectives ratio after some point")
-					.append(new KeyedCodec<>("MaxDetectives", Codec.INTEGER),
-							(config, value, extraInfo) -> config.maxDetectives = value,
-							(config, extraInfo) -> config.maxDetectives)
+							(config, v, _) -> config.requiredPlayersToStartRound = v,
+							(config, _) -> config.requiredPlayersToStartRound)
 					.add()
 					.append(new KeyedCodec<>("TimeBeforeRoundInSeconds", Codec.INTEGER),
-							(config, value, extraInfo) -> config.timeBeforeRoundInSeconds = value,
-							(config, extraInfo) -> config.timeBeforeRoundInSeconds)
+							(config, v, _) -> config.timeBeforeRoundInSeconds = v,
+							(config, _) -> config.timeBeforeRoundInSeconds)
 					.add()
 					.append(new KeyedCodec<>("RoundDurationInSeconds", Codec.INTEGER),
-							(config, value, extraInfo) -> config.roundDurationInSeconds = value,
-							(config, extraInfo) -> config.roundDurationInSeconds)
+							(config, v, _) -> config.roundDurationInSeconds = v,
+							(config, _) -> config.roundDurationInSeconds)
 					.add()
 					.append(new KeyedCodec<>("TimeAfterRoundInSeconds", Codec.INTEGER),
-							(config, value, extraInfo) -> config.timeAfterRoundInSeconds = value,
-							(config, extraInfo) -> config.timeAfterRoundInSeconds)
+							(config, v, _) -> config.timeAfterRoundInSeconds = v,
+							(config, _) -> config.timeAfterRoundInSeconds)
 					.add()
 					.append(new KeyedCodec<>("TimeToVoteMapInSeconds", Codec.INTEGER),
-							(config, value, extraInfo) -> config.timeToVoteMapInSeconds = value,
-							(config, extraInfo) -> config.timeToVoteMapInSeconds)
+							(config, v, _) -> config.timeToVoteMapInSeconds = v,
+							(config, _) -> config.timeToVoteMapInSeconds)
 					.add()
 					.append(new KeyedCodec<>("TimeBeforeChangingMapInSeconds", Codec.INTEGER),
-							(config, value, extraInfo) -> config.timeBeforeChangingMapInSeconds = value,
-							(config, extraInfo) -> config.timeBeforeChangingMapInSeconds)
+							(config, v, _) -> config.timeBeforeChangingMapInSeconds = v,
+							(config, _) -> config.timeBeforeChangingMapInSeconds)
 					.add()
 					.append(new KeyedCodec<>("KarmaStartingValue", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karmaStartingValue = value,
-							(config, extraInfo) -> config.karmaStartingValue)
+							(config, v, _) -> config.karmaStartingValue = v,
+							(config, _) -> config.karmaStartingValue)
 					.add()
 					.append(new KeyedCodec<>("KarmaForDisconnectingMiddleRound", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karmaForDisconnectingMiddleRound = value,
-							(config, extraInfo) -> config.karmaForDisconnectingMiddleRound)
+							(config, v, _) -> config.karmaForDisconnectingMiddleRound = v,
+							(config, _) -> config.karmaForDisconnectingMiddleRound)
 					.add()
-					.append(new KeyedCodec<>("KaramPointsForTraitorKillingInnocent", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karamPointsForTraitorKillingInnocent = value,
-							(config, extraInfo) -> config.karamPointsForTraitorKillingInnocent)
+					.append(new KeyedCodec<>("KaramPointsForKillingSameRoleGroup", Codec.INTEGER),
+							(config, v, _) -> config.karamPointsForKillingSameRoleGroup = v,
+							(config, _) -> config.karamPointsForKillingSameRoleGroup)
 					.add()
-					.append(new KeyedCodec<>("KaramPointsForTraitorKillingDetective", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karamPointsForTraitorKillingDetective = value,
-							(config, extraInfo) -> config.karamPointsForTraitorKillingDetective)
-					.add()
-					.append(new KeyedCodec<>("KaramPointsForTraitorKillingTraitor", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karamPointsForTraitorKillingTraitor = value,
-							(config, extraInfo) -> config.karamPointsForTraitorKillingTraitor)
-					.add()
-					.append(new KeyedCodec<>("KarmaPointsForInnocentKillingTraitor", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karmaPointsForInnocentKillingTraitor = value,
-							(config, extraInfo) -> config.karmaPointsForInnocentKillingTraitor)
-					.add()
-					.append(new KeyedCodec<>("KarmaPointsForInnocentKillingDetective", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karmaPointsForInnocentKillingDetective = value,
-							(config, extraInfo) -> config.karmaPointsForInnocentKillingDetective)
-					.add()
-					.append(new KeyedCodec<>("KarmaPointsForInnocentKillingInnocent", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karmaPointsForInnocentKillingInnocent = value,
-							(config, extraInfo) -> config.karmaPointsForInnocentKillingInnocent)
-					.add()
-					.append(new KeyedCodec<>("KarmaPointsForDetectiveKillingTraitor", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karmaPointsForDetectiveKillingTraitor = value,
-							(config, extraInfo) -> config.karmaPointsForDetectiveKillingTraitor)
-					.add()
-					.append(new KeyedCodec<>("KarmaPointsForDetectiveKillingInnocent", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karmaPointsForDetectiveKillingInnocent = value,
-							(config, extraInfo) -> config.karmaPointsForDetectiveKillingInnocent)
-					.add()
-					.append(new KeyedCodec<>("KarmaPointsForDetectiveKillingDetective", Codec.INTEGER),
-							(config, value, extraInfo) -> config.karmaPointsForDetectiveKillingDetective = value,
-							(config, extraInfo) -> config.karmaPointsForDetectiveKillingDetective)
-					.add()
-					.append(new KeyedCodec<>("StartingItemsInHotbar", Codec.STRING_ARRAY),
-							(config, value, extraInfo) -> config.startingItemsInHotbar = value,
-							(config, extraInfo) -> config.startingItemsInHotbar)
-					.add()
-					.append(new KeyedCodec<>("StartingItemsInInventory", Codec.STRING_ARRAY),
-							(config, value, extraInfo) -> config.startingItemsInInventory = value,
-							(config, extraInfo) -> config.startingItemsInInventory)
-					.add()
-					.append(new KeyedCodec<>("TraitorStoreItems", Codec.STRING_ARRAY),
-							(config, value, extraInfo) -> config.traitorStoreItems = value,
-							(config, extraInfo) -> config.traitorStoreItems)
-					.add()
-					.append(new KeyedCodec<>("DetectiveStoreItems", Codec.STRING_ARRAY),
-							(config, value, extraInfo) -> config.detectiveStoreItems = value,
-							(config, extraInfo) -> config.detectiveStoreItems)
+					.append(new KeyedCodec<>("KaramPointsForKillingOppositeRoleGroup", Codec.INTEGER),
+							(config, v, _) -> config.karamPointsForKillingOppositeRoleGroup = v,
+							(config, _) -> config.karamPointsForKillingOppositeRoleGroup)
 					.add()
 					.append(new KeyedCodec<>("PlayerGraveId", Codec.STRING),
-							(config, value, extraInfo) -> config.playerGraveId = value,
-							(config, extraInfo) -> config.playerGraveId)
+							(config, v, _) -> config.playerGraveId = v,
+							(config, _) -> config.playerGraveId)
 					.add()
 					.append(new KeyedCodec<>("LootBoxBlockId", Codec.STRING),
-							(config, value, extraInfo) -> config.lootBoxBlockId = value,
-							(config, extraInfo) -> config.lootBoxBlockId)
+							(config, v, _) -> config.lootBoxBlockId = v,
+							(config, _) -> config.lootBoxBlockId)
 					.add()
 					.append(new KeyedCodec<>("RoundsPerMap", Codec.INTEGER),
-							(config, value, extraInfo) -> config.roundsPerMap = value,
-							(config, extraInfo) -> config.roundsPerMap)
+							(config, v, _) -> config.roundsPerMap = v,
+							(config, _) -> config.roundsPerMap)
 					.add()
 					.append(new KeyedCodec<>("MapsInARowForVoting", Codec.INTEGER),
-							(config, value, extraInfo) -> config.mapsInARowForVoting = value,
-							(config, extraInfo) -> config.mapsInARowForVoting)
+							(config, v, _) -> config.mapsInARowForVoting = v,
+							(config, _) -> config.mapsInARowForVoting)
 					.add()
 					.append(new KeyedCodec<>("WorldTemplatesFolder", Codec.STRING),
-							(config, value, extraInfo) -> config.worldTemplatesFolder = value,
-							(config, extraInfo) -> config.worldTemplatesFolder)
+							(config, v, _) -> config.worldTemplatesFolder = v,
+							(config, _) -> config.worldTemplatesFolder)
+					.add()
+					.append(new KeyedCodec<>("Roles", ArrayCodec.ofBuilderCodec(CustomRole.CODEC, CustomRole[]::new)),
+							(config, v, _) -> config.roles = v,
+							(config, _) -> config.roles)
 					.add()
 					.build();
 
-	// Sets Player's hud background color for current role
-	private String innocentColor = "#33CC76";
-	// Sets Player's hud background color for current role and scoreboard row background color
-	private String traitorColor = "#B01515";
-
+	private final int itemsInARowForTheShop = 5;
 	// Sets required amount of players to start a round
 	private int requiredPlayersToStartRound = 3;
-	private int minAmountOfTraitors = 1;
-	private int traitorsRatio = 4;
-	private int minAmountOfDetectives = 0;
-	private int detectivesRatio = 11;
-	private int maxDetectives = 10;
 	// Time in seconds before the round starts
 	private int timeBeforeRoundInSeconds = 10;
 	private int roundDurationInSeconds = 10 * 60;
 	private int timeAfterRoundInSeconds = 5;
 	private int timeToVoteMapInSeconds = 30;
 	private int timeBeforeChangingMapInSeconds = 5;
-
 	// Sets the starting value for each component's karma
 	private int karmaStartingValue = 1000;
-
 	private int karmaForDisconnectingMiddleRound = -100;
+	private int karamPointsForKillingOppositeRoleGroup = 10;
+	private int karamPointsForKillingSameRoleGroup = -10;
 
-	private int karamPointsForTraitorKillingInnocent = 10;
-	private int karamPointsForTraitorKillingDetective = karamPointsForTraitorKillingInnocent + 10;
-	private int karamPointsForTraitorKillingTraitor = -100;
+	private CustomRole[] roles = new CustomRole[]{
+			CustomRole.builder()
+					.id("detective")
+					.translationKey(TranslationKey.getWithPrefix("hud_current_role_detective"))
+					.customGuiColor("#1F5CC4")
+					.minimumAssignedPlayersWithRole(0)
+					.ratio(11)
+					.startingCredits(1)
+					.secretRole(false)
+					.roleGroup(RoleGroup.INNOCENT)
+					.storeItems(new String[]{
+							"TTT_Potion_Veritaserum:30",
+							"Weapon_Deployable_Healing_Totem:1"
+					})
+					.build(),
+			CustomRole.builder()
+					.id("innocent")
+					.translationKey(TranslationKey.getWithPrefix("hud_current_role_innocent"))
+					.minimumAssignedPlayersWithRole(1)
+					.ratio(1)
+					.secretRole(true)
+					.roleGroup(RoleGroup.INNOCENT)
+					.build(),
+			CustomRole.builder()
+					.id("traitor")
+					.translationKey(TranslationKey.getWithPrefix("hud_current_role_traitor"))
+					.minimumAssignedPlayersWithRole(1)
+					.ratio(4)
+					.startingCredits(1)
+					.secretRole(true)
+					.roleGroup(RoleGroup.TRAITOR)
+					.storeItems(new String[]{
+							"Weapon_Daggers_Doomed:1"
+					})
+					.build()
 
-	private int karmaPointsForInnocentKillingTraitor = 10;
-	private int karmaPointsForInnocentKillingDetective = -100;
-	private int karmaPointsForInnocentKillingInnocent = -50;
-
-	private int karmaPointsForDetectiveKillingTraitor = 10;
-	private int karmaPointsForDetectiveKillingInnocent = -50;
-	private int karmaPointsForDetectiveKillingDetective = -100;
-
-
-	private int itemsInARowForTheShop = 5;
-
-	private String[] startingItemsInHotbar = new String[]{
-			"Weapon_Shortbow_Combat:1",
 	};
-
-	private String[] startingItemsInInventory = new String[]{
-			"Weapon_Arrow_Crude:200"
-	};
-
-	private String[] traitorStoreItems = new String[]{
-			"Weapon_Daggers_Doomed:1"
-	};
-
-	private String[] detectiveStoreItems = new String[]{
-			"Weapon_Staff_Frost:1",
-			"Weapon_Deployable_Healing_Totem:1"
-	};
-
 	private String playerGraveId = "Player_Grave";
 	private String lootBoxBlockId = "Furniture_Human_Ruins_Chest_Small";
 	private int roundsPerMap = 8;
@@ -250,8 +181,13 @@ public class CustomConfig {
 
 	public List<List<ItemStack>> getItemsGroups(String[] configuredValues) {
 		List<List<ItemStack>> stacks = new ArrayList<>();
-		for (int i = 0; i < configuredValues.length; i++) {
-			stacks.add(parseItemEntry(configuredValues[i]));
+
+		if (configuredValues == null) {
+			return stacks;
+		}
+
+		for (String configuredValue : configuredValues) {
+			stacks.add(parseItemEntry(configuredValue));
 		}
 
 		return stacks;
@@ -260,11 +196,24 @@ public class CustomConfig {
 
 	public List<ItemStack> getItems(String[] configuredValues) {
 		List<ItemStack> stacks = new ArrayList<>();
-		for (int i = 0; i < configuredValues.length; i++) {
-			stacks.addAll(parseItemEntry(configuredValues[i]));
+
+		if (configuredValues == null) {
+			return stacks;
+		}
+
+		for (String configuredValue : configuredValues) {
+			stacks.addAll(parseItemEntry(configuredValue));
 		}
 
 		return stacks;
+	}
+
+	public Optional<CustomRole> getRoleByName(String name) {
+		if (name == null || "".equalsIgnoreCase(name.trim())) {
+			return Optional.empty();
+		}
+
+		return Arrays.stream(this.roles).filter(r -> name.equalsIgnoreCase(r.getId())).findFirst();
 	}
 
 }

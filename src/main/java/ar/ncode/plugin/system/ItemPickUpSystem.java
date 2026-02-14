@@ -2,7 +2,6 @@ package ar.ncode.plugin.system;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.config.WeaponTypeConfig;
-import ar.ncode.plugin.model.enums.PlayerRole;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
@@ -37,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.weaponTypesConfig;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.weaponsConfig;
 import static com.hypixel.hytale.common.util.ArrayUtil.contains;
 
 @Getter
@@ -102,11 +101,11 @@ public class ItemPickUpSystem extends EntityTickingSystem<EntityStore> {
 			var isCurrentlyPreventingPickup = commandBuffer.getComponent(closest, PreventPickup.getComponentType()) != null;
 
 			try {
-				if (PlayerRole.SPECTATOR.equals(playerInfo.getRole()) && !isCurrentlyPreventingPickup) {
+				if (playerInfo.isSpectator() && !isCurrentlyPreventingPickup) {
 					commandBuffer.ensureComponent(itemRef, PreventPickup.getComponentType());
 					return;
 
-				} else if (PlayerRole.SPECTATOR.equals(playerInfo.getRole())) {
+				} else if (playerInfo.isSpectator()) {
 					return;
 				}
 
@@ -115,7 +114,7 @@ public class ItemPickUpSystem extends EntityTickingSystem<EntityStore> {
 			}
 
 
-			Optional<WeaponTypeConfig> config = weaponTypesConfig.get().getByItemId(itemComponent.getItemStack().getItemId());
+			Optional<WeaponTypeConfig> config = weaponsConfig.get().getByItemId(itemComponent.getItemStack().getItemId());
 			if (config.isEmpty()) {
 				// By default, all items should be blocked from picking up
 				commandBuffer.ensureComponent(itemRef, PreventPickup.getComponentType());

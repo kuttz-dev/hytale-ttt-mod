@@ -1,5 +1,5 @@
-hud_current_role_preparing = Preparando
-hud_current_role_spectator = Espectador
+hud_current_status_preparing = Preparando
+hud_current_status_spectator = Espectador
 hud_current_role_innocent = Inocente
 hud_current_role_traitor = Traidor
 hud_current_role_detective = Detective
@@ -61,3 +61,6 @@ traitors_chat_only_for_traitors = Solo los traidores pueden usar este comando!
 traitors_chat_command_description = Envia un mensaje a los demás traidores (solo para traidores con vida).
 traitors_chat_command_world_error = El jugador debe estar en un mundo para usar este comando!
 traitors_chat_prefix = [TRAIDOR]
+
+veritaserum_potion_name = Poción Veritaserum
+veritaserum_potion_description = Obliga a quien la consuma a revelar la <color is="#33CC76">verdad</color>

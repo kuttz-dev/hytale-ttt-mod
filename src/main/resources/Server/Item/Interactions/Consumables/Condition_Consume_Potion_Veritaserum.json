@@ -1,0 +1,7 @@
+{
+  "Type": "Condition",
+  "RequiredGameMode": "Adventure",
+  "Crouching": false,
+  "Failed": "Block_Secondary",
+  "Next": "Consume_Charge_Potion_Fast"
+}

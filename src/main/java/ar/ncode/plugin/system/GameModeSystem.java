@@ -10,7 +10,6 @@ import ar.ncode.plugin.config.DebugConfig;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.PlayerRole;
 import ar.ncode.plugin.model.enums.RoundState;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.RemoveReason;
@@ -20,7 +19,6 @@ import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.modules.entity.component.Interactable;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
-import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
 import com.hypixel.hytale.server.core.modules.entity.item.PickupItemComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -28,24 +26,22 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
-import com.hypixel.hytale.server.spawning.local.LocalSpawnController;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
 import static ar.ncode.plugin.accessors.WorldAccessors.getWorldNameForInstance;
-import static ar.ncode.plugin.model.MessageId.*;
-import static ar.ncode.plugin.model.enums.PlayerRole.*;
+import static ar.ncode.plugin.model.TranslationKey.*;
+import static ar.ncode.plugin.model.enums.RoleGroup.INNOCENT;
+import static ar.ncode.plugin.model.enums.RoleGroup.TRAITOR;
 import static ar.ncode.plugin.system.event.handler.StartNewRoundEventHandler.updateEachPlayer;
 import static ar.ncode.plugin.system.player.PlayerRespawnSystem.teleportPlayerToRandomSpawnPoint;
 
 public class GameModeSystem {
 
-	public final static GameModeSystem INSTANCE = new GameModeSystem();
+	public static final GameModeSystem INSTANCE = new GameModeSystem();
 
 	private static void updatePlayersKarma(GameModeState gameModeState) {
 		gameModeState.karmaUpdates.forEach((playerUUID, karmaUpdate) -> {
@@ -121,7 +117,7 @@ public class GameModeSystem {
 	}
 
 	private static void showRoundResultInEventTitle(GameModeState gameModeState, World world) {
-		if (gameModeState.innocentsAlive > 0) {
+		if (!gameModeState.innocentsAlice.isEmpty()) {
 			EventTitleUtil.showEventTitleToWorld(
 					Message.translation(ROUND_INNOCENTS_WIN_MSG.get()),
 					Message.raw(""),
@@ -129,6 +125,7 @@ public class GameModeSystem {
 					4.0f, 1.5f, 1.5f,
 					world.getEntityStore().getStore()
 			);
+
 		} else {
 			EventTitleUtil.showEventTitleToWorld(
 					Message.translation(ROUND_TRAITORS_WIN_MSG.get()),
@@ -141,58 +138,43 @@ public class GameModeSystem {
 	}
 
 	private static void setPlayersRoles(GameModeState state, List<PlayerComponents> players, int playerCount) {
-		// Calcular cantidad de traidores y detectives (mínimo 1 de cada)
-		int configuredTraitors = playerCount / config.get().getTraitorsRatio();
-		int numTraitors = Math.max(config.get().getMinAmountOfTraitors(), configuredTraitors);
+		Collections.shuffle(players); // Shuffle for random role assignment
+		var roles = config.get().getRoles();
 
-		int configuredDetectives = playerCount / config.get().getDetectivesRatio();
-		int numDetectives = Math.max(config.get().getMinAmountOfDetectives(), configuredDetectives);
-		numDetectives = Math.min(numDetectives, config.get().getMaxDetectives());
+		// Track which players already got a special role
+		Set<UUID> assigned = new HashSet<>();
 
-		int assignedTraitors = 0;
-		int assignedDetectives = 0;
-
-		for (var player : players) {
-			Ref<EntityStore> reference = player.reference();
-			DeathComponent deathComponent = reference.getStore().getComponent(reference, DeathComponent.getComponentType());
-
-			if (deathComponent != null) {
-				LocalSpawnController spawnController = reference.getStore()
-						.ensureAndGetComponent(reference, LocalSpawnController.getComponentType());
-
-				spawnController.setTimeToNextRunSeconds(0);
+		for (var role : roles) {
+			if (INNOCENT.equals(role.getRoleGroup())) {
+				continue;
 			}
 
-			if (assignedTraitors < numTraitors) {
-				player.info().setRole(TRAITOR);
-				player.info().setCurrentRoundRole(TRAITOR);
-				assignedTraitors++;
-				TroubleInTrorkTownPlugin.traitorPlayers.add(player.refComponent().getUuid()); // Track for chat filtering
+			int expectedAssignedPlayers = playerCount / role.getRatio();
+			expectedAssignedPlayers = Math.max(role.getMinimumAssignedPlayersWithRole(), expectedAssignedPlayers);
 
-			} else if (assignedDetectives < numDetectives) {
-				player.info().setRole(DETECTIVE);
-				player.info().setCurrentRoundRole(DETECTIVE);
-				assignedDetectives++;
+			int assignedPlayers = 0;
 
-			} else {
-				player.info().setRole(INNOCENT);
-				player.info().setCurrentRoundRole(INNOCENT);
+			for (var player : players) {
+				UUID uuid = player.refComponent().getUuid();
+				if (assigned.contains(uuid)) {
+					continue;
+				}
+
+				if (assignedPlayers >= expectedAssignedPlayers) {
+					break;
+				}
+				player.info().setCurrentRoundRole(role);
+				assignedPlayers++;
+				assigned.add(uuid);
+
+				if (TRAITOR.equals(role.getRoleGroup())) {
+					state.traitorsAlive.add(player.refComponent().getUuid());
+
+				} else {
+					state.innocentsAlice.add(player.refComponent().getUuid());
+				}
 			}
 		}
-
-		state.innocentsAlive = playerCount + assignedDetectives - assignedTraitors;
-		state.traitorsAlive = assignedTraitors;
-	}
-
-	public static void updatePlayerRole(PlayerComponents player, PlayerRole role, UUID uuid, GameModeState gameModeState) {
-		if (PlayerRole.SPECTATOR.equals(role)) {
-			gameModeState.spectatorPlayers.add(uuid);
-
-		} else if (PlayerRole.TRAITOR.equals(role)) {
-			gameModeState.traitorPlayers.add(uuid);
-		}
-
-		player.info().setRole(role);
 	}
 
 	public void doAfterRound(World world, GameModeState state) {
@@ -236,12 +218,11 @@ public class GameModeSystem {
 				reference.getStore().tryRemoveComponent(reference, ConfirmedDeath.componentType);
 				reference.getStore().tryRemoveComponent(reference, LostInCombat.componentType);
 
-				if (PlayerRole.SPECTATOR.equals(player.info().getRole())) {
-					SpectatorMode.disableSpectatorModeForPlayer(player.refComponent(), reference);
+				if (player.info().isSpectator()) {
+					SpectatorMode.disableSpectatorModeForPlayer(player);
 				}
 
 				player.info().setCurrentRoundRole(null);
-				player.info().setRole(null);
 				player.info().getHud().update();
 			}
 		});
@@ -250,12 +231,10 @@ public class GameModeSystem {
 	public void doAtRoundStart(World world, GameModeState state) {
 		world.execute(() -> {
 			// Clear spectators and traitors
-			TroubleInTrorkTownPlugin.spectatorPlayers.clear();
-			TroubleInTrorkTownPlugin.traitorPlayers.clear();
+			state.spectators.clear();
+			state.traitorsAlive.clear();
 
 			var players = getPlayersAt(world);
-			Collections.shuffle(players); // Shuffle for random role assignment
-
 			setPlayersRoles(state, players, world.getPlayerCount());
 			updateEachPlayer(players);
 

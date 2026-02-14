@@ -21,8 +21,8 @@ import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.*;
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
-import static ar.ncode.plugin.model.MessageId.MAP_VOTE_NOTIFICATION;
-import static ar.ncode.plugin.model.MessageId.MAP_VOTE_NOTIFICATION_NEXT_MAP;
+import static ar.ncode.plugin.model.TranslationKey.MAP_VOTE_NOTIFICATION;
+import static ar.ncode.plugin.model.TranslationKey.MAP_VOTE_NOTIFICATION_NEXT_MAP;
 
 public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEvent> {
 
