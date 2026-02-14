@@ -1,13 +1,11 @@
 package ar.ncode.plugin.config;
 
+import ar.ncode.plugin.model.TranslationKey;
 import ar.ncode.plugin.model.enums.RoleGroup;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @Builder
@@ -17,23 +15,23 @@ public class CustomRole {
 
 	public static final BuilderCodec<CustomRole> CODEC = BuilderCodec.builder(CustomRole.class, CustomRole::new)
 			.append(new KeyedCodec<>("Id", Codec.STRING),
-					(c, value, extraInfo) -> c.id = value,
+					(c, v, extraInfo) -> c.id = v,
 					(c, extraInfo) -> c.id)
 			.add()
 			.append(new KeyedCodec<>("TranslationKey", Codec.STRING),
-					(c, value, extraInfo) -> c.translationKey = value,
+					(c, v, extraInfo) -> c.translationKey = v,
 					(c, extraInfo) -> c.translationKey)
 			.add()
 			.append(new KeyedCodec<>("CustomBackgroundColor", Codec.STRING),
-					(c, value, extraInfo) -> c.customGuiColor = value,
+					(c, v, extraInfo) -> c.customGuiColor = v,
 					(c, extraInfo) -> c.customGuiColor)
 			.add()
 			.append(new KeyedCodec<>("MinimumAssignedPlayersWithRole", Codec.INTEGER),
-					(c, value, extraInfo) -> c.minimumAssignedPlayersWithRole = value,
+					(c, v, extraInfo) -> c.minimumAssignedPlayersWithRole = v,
 					(c, extraInfo) -> c.minimumAssignedPlayersWithRole)
 			.add()
 			.append(new KeyedCodec<>("MaxAssignedPlayersWithRole", Codec.INTEGER),
-					(c, value, extraInfo) -> c.maxAssignedPlayersWithRole = value,
+					(c, v, extraInfo) -> c.maxAssignedPlayersWithRole = v,
 					(c, extraInfo) -> c.maxAssignedPlayersWithRole)
 			.add()
 			.append(new KeyedCodec<>("RoleGroup", Codec.STRING),
@@ -41,28 +39,29 @@ public class CustomRole {
 					(c, extraInfo) -> c.roleGroup == null ? "" : c.roleGroup.name())
 			.add()
 			.append(new KeyedCodec<>("SecretRole", Codec.BOOLEAN),
-					(c, value, extraInfo) -> c.secretRole = value,
+					(c, v, extraInfo) -> c.secretRole = v,
 					(c, extraInfo) -> c.secretRole)
 			.add()
 			.append(new KeyedCodec<>("Ratio", Codec.INTEGER),
-					(c, value, extraInfo) -> c.ratio = value,
+					(c, v, extraInfo) -> c.ratio = v,
 					(c, extraInfo) -> c.ratio)
 			.add()
 			.append(new KeyedCodec<>("StartingItems", Codec.STRING_ARRAY),
-					(c, value, extraInfo) -> c.startingItems = value,
+					(c, v, extraInfo) -> c.startingItems = v,
 					(c, extraInfo) -> c.startingItems)
 			.add()
 			.append(new KeyedCodec<>("StoreItems", Codec.STRING_ARRAY),
-					(c, value, extraInfo) -> c.storeItems = value,
+					(c, v, extraInfo) -> c.storeItems = v,
 					(c, extraInfo) -> c.storeItems)
 			.add()
 			.append(new KeyedCodec<>("StartingCredits", Codec.INTEGER),
-					(c, value, extraInfo) -> c.startingCredits = value,
+					(c, v, extraInfo) -> c.startingCredits = v,
 					(c, extraInfo) -> c.startingCredits)
 			.add()
 			.build();
 
 	private String id;
+	@Getter(AccessLevel.NONE)
 	private String translationKey;
 	private String customGuiColor;
 	@Builder.Default
@@ -79,6 +78,10 @@ public class CustomRole {
 
 	public boolean hasStore() {
 		return storeItems != null && storeItems.length > 0;
+	}
+
+	public String getTranslationKey() {
+		return TranslationKey.getWithPrefix(translationKey);
 	}
 
 }

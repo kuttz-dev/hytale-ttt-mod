@@ -55,7 +55,14 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 
 		} else {
 			this.messageId = playerInfo.getCurrentRoundRole().getTranslationKey();
-			this.backgroundColor = playerInfo.getCurrentRoundRole().getRoleGroup().guiColor;
+
+			if (playerInfo.getCurrentRoundRole().getCustomGuiColor() != null) {
+				this.backgroundColor = playerInfo.getCurrentRoundRole().getCustomGuiColor();
+
+			} else {
+				this.backgroundColor = playerInfo.getCurrentRoundRole().getRoleGroup().guiColor;
+
+			}
 		}
 
 		setHudRoleValues(builder);

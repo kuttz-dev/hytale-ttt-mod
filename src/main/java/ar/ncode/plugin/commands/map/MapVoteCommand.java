@@ -50,8 +50,8 @@ public class MapVoteCommand extends CommandBase {
 		}
 
 		player.getPageManager().openCustomPage(
-				reference, reference.getStore(), new MapVotePage(playerRef, CustomPageLifetime.CanDismiss, worldPreviews,
-						playerInfo)
+				reference, reference.getStore(),
+				new MapVotePage(playerRef, CustomPageLifetime.CanDismiss, worldPreviews, playerInfo)
 		);
 	}
 

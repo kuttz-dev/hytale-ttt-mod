@@ -1,6 +1,7 @@
 package ar.ncode.plugin.commands.loot;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.config.instance.SpawnPoint;
 import ar.ncode.plugin.config.loot.IncludedLootItem;
@@ -26,13 +27,13 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.util.Config;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.lootTables;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.*;
 import static ar.ncode.plugin.accessors.WorldAccessors.getWorldNameForInstance;
 import static ar.ncode.plugin.system.GraveSystem.findEmptyPlaceNearPosition;
 
@@ -54,7 +55,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 
 		private static void addLoot(World world, LootSpawnPoint lootSpawnPoint) {
 			for (String lootTableId : lootSpawnPoint.getLootTables()) {
-				LootTable lootTable = lootTables.get().getLootTableById(lootTableId);
+				LootTable lootTable = weaponsConfig.get().getLootTableById(lootTableId);
 
 				if (lootTable == null) {
 					continue;
@@ -199,8 +200,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 					lootSpawnPoint.setProbability(probabilityArg.get(ctx));
 				}
 
-				String worldName = world.getWorldConfig().getDisplayName().replace(" ", "_").toLowerCase();
-				InstanceConfig instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName).get();
+				var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
 				LootSpawnPoint[] lootSpawnPoints = instanceConfig.getLootSpawnPoints();
 				if (lootSpawnPoints == null) {
 					lootSpawnPoints = new LootSpawnPoint[0];
@@ -211,8 +211,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 				newLootSpawnPoints[lootSpawnPoints.length] = lootSpawnPoint;
 				instanceConfig.setLootSpawnPoints(newLootSpawnPoints);
 
-				TroubleInTrorkTownPlugin.instanceConfig.get(worldName).save();
-
+				WorldAccessors.getWorldInstanceConfigFile(world).ifPresent(Config::save);
 				ctx.sendMessage(Message.raw("Loot position added at your current location."));
 			});
 		}

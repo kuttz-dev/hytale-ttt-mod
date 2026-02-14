@@ -13,12 +13,14 @@
       "Interactions": [
         {
           "Type": "test_player_role"
+        },
+        {
+          "Type": "UseBlock"
         }
       ]
     }
   },
   "BlockType": {
-    "BlockParticleSetId": "Metal",
     "BlockSoundSetId": "Metal",
     "CustomModel": "Blocks/TTT/TraitorDetector/TraitorDetector.blockymodel",
     "DrawType": "Model",
@@ -26,7 +28,7 @@
       "IsUsable": true
     },
     "Material": "Solid",
-    "Opacity": "Transparent",
+    "Opacity": "Solid",
     "Supporting": {
       "Up": [
         {
@@ -41,18 +43,18 @@
         }
       ]
     },
-    "VariantRotation": "NESW",
+    "VariantRotation": "Wall",
     "Interactions": {
       "Use": {
         "Interactions": [
           {
             "Type": "test_player_role"
           }
-        ]
+        ],
+        "RequireNewClick": false
       }
     },
-    "ParticleColor": "#5b3222",
-    "TextureSideMask": "Blocks/TTT/TraitorDetector/MetalDetector_Texture.png",
+    "ParticleColor": "#33cc76",
     "CubeShadingMode": "Standard",
     "CustomModelTexture": [
       {
@@ -66,7 +68,32 @@
     },
     "HitboxType": "TTT_Traitor_Detector_Hitbox",
     "InteractionHint": "asdasdasdasd",
-    "IsDoor": false
+    "IsDoor": false,
+    "Particles": [
+      {
+        "SystemId": "TTT_Innocent_Particle",
+        "TargetNodeName": "Led",
+        "Scale": 1,
+        "PositionOffset": {
+          "X": 1,
+          "Y": 1,
+          "Z": 1
+        },
+        "TargetEntityPart": "Self",
+        "DetachedFromModel": false
+      },
+      {
+        "TargetNodeName": "Led",
+        "SystemId": "Dance_Lights3",
+        "Scale": 1,
+        "PositionOffset": {
+          "X": -1,
+          "Y": 1,
+          "Z": 1
+        },
+        "DetachedFromModel": false
+      }
+    ]
   },
   "Tags": {
     "Type": [
@@ -74,7 +101,7 @@
     ]
   },
   "IconProperties": {
-    "Scale": 0.3,
+    "Scale": 0.2,
     "Rotation": [
       22.5,
       45,
@@ -88,5 +115,9 @@
   "ItemSoundSetId": "ISS_Items_Metal",
   "ItemLevel": 5,
   "MaxStack": 1,
-  "Model": "Blocks/TTT/TraitorDetector/TraitorDetector.blockymodel"
+  "Model": "Blocks/TTT/TraitorDetector/TraitorDetector.blockymodel",
+  "Scale": 2.5,
+  "Texture": "Blocks/TTT/TraitorDetector/MetalDetector_Texture.png",
+  "UsePlayerAnimations": true,
+  "Consumable": false
 }

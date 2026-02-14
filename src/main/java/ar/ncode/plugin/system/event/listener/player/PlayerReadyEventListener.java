@@ -1,6 +1,7 @@
 package ar.ncode.plugin.system.event.listener.player;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.commands.ChangeWorldCommand;
 import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
@@ -30,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.model.CustomPermissions.ADMIN_PERMISSIONS;
+import static ar.ncode.plugin.model.CustomPermissions.TTT_ADMIN_GROUP;
 import static ar.ncode.plugin.model.CustomPermissions.TTT_USER_GROUP;
 import static ar.ncode.plugin.model.CustomPermissions.USER_PERMISSIONS;
 import static ar.ncode.plugin.system.event.handler.FinishCurrentMapEventHandler.getNextMap;
@@ -83,16 +86,15 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 				// Reset flag after additional delay for the actual fade to complete
 				HytaleServer.SCHEDULED_EXECUTOR.schedule(
 						() -> TroubleInTrorkTownPlugin.isWorldTransitionInProgress = false,
-						1500,
-						TimeUnit.MILLISECONDS
+						2,
+						TimeUnit.SECONDS
 				);
 			}
-		}), 1500, TimeUnit.MILLISECONDS);
+		}), 2, TimeUnit.SECONDS);
 	}
 
 	private static void configurePlayerPermissions(PlayerRef playerRef) {
 		PermissionsModule permissions = PermissionsModule.get();
-		permissions.addGroupPermission(TTT_USER_GROUP, USER_PERMISSIONS);
 		permissions.addUserToGroup(playerRef.getUuid(), TTT_USER_GROUP);
 	}
 
@@ -155,8 +157,7 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 			}
 
 			if (world.getWorldConfig().getDisplayName() != null) {
-				String worldName = world.getWorldConfig().getDisplayName().replace(" ", "_").toLowerCase();
-				InstanceConfig instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName).get();
+				var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
 
 				if (instanceConfig != null) {
 					teleportPlayerToRandomSpawnPoint(reference, reference.getStore(), instanceConfig, world);

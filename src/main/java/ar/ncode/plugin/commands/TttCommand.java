@@ -19,5 +19,7 @@ public class TttCommand extends AbstractCommandCollection {
 		this.addSubCommand(new SpawnCommand());
 		this.addSubCommand(new MapCommand());
 		this.addSubCommand(new Shop());
+		this.addSubCommand(new RoleCommand());
+		this.addSubCommand(new CreditsCommand());
 	}
 }

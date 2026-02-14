@@ -1,0 +1,82 @@
+{
+  "Parent": "Potion_Template",
+  "TranslationProperties": {
+    "Name": "veritaserum_potion_name",
+    "Description": "veritaserum_potion_description"
+  },
+  "Icon": "Icons/ItemsGenerated/TTT_Potion_Veritaserum_II.png",
+  "Interactions": {
+    "Primary": "Block_Primary",
+    "Secondary": "Root_Secondary_Consume_Potion_Veritaserum"
+  },
+  "InteractionVars": {
+    "RemoveEffect": {
+      "Interactions": [
+        {
+          "Type": "Simple"
+        }
+      ]
+    },
+    "Effect": {
+      "Interactions": [
+        {
+          "Type": "test_player_role_potion"
+        }
+      ]
+    },
+    "Stat_Check": {
+      "Interactions": [
+        {
+          "Parent": "Stat_Check",
+          "Costs": {
+            "Health": 1
+          },
+          "ValueType": "Percent",
+          "LessThan": false
+        }
+      ]
+    },
+    "ConsumeSFX": {
+      "Interactions": [
+        {
+          "Parent": "Consume_SFX",
+          "Effects": {
+            "LocalSoundEventId": "SFX_Health_Potion_Low_Drink"
+          }
+        }
+      ]
+    },
+    "ConsumedSFX": {
+      "Interactions": [
+        {
+          "Type": "Simple"
+        }
+      ]
+    }
+  },
+  "BlockType": {
+    "CustomModel": "Items/Consumables/Potions/Potion_Small.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "Items/Consumables/Potions/Potion_Textures/Green.png",
+        "Weight": 1
+      }
+    ],
+    "ParticleColor": "#0000b9"
+  },
+  "MaxStack": 30,
+  "ItemLevel": 50,
+  "DropOnDeath": true,
+  "IconProperties": {
+    "Scale": 0.58823,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -13.5
+    ]
+  }
+}

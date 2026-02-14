@@ -21,8 +21,8 @@ public class WorldPreviewLoader {
 	private WorldPreviewLoader() {
 	}
 
-	public static List<WorldPreview> load(Path universePath, Path pluginDataPath) throws Exception {
-		if (!Files.exists(universePath)) {
+	public static List<WorldPreview> load(Path templatesPath, Path pluginDataPath) throws Exception {
+		if (!Files.exists(templatesPath)) {
 			return new ArrayList<>();
 		}
 
@@ -36,7 +36,7 @@ public class WorldPreviewLoader {
 
 		List<WorldPreview> result = new ArrayList<>();
 
-		try (Stream<Path> worlds = Files.list(universePath)) {
+		try (Stream<Path> worlds = Files.list(templatesPath)) {
 			for (Path world : (Iterable<Path>) worlds::iterator) {
 				if (!Files.isDirectory(world)) {
 					continue;
@@ -74,7 +74,11 @@ public class WorldPreviewLoader {
 			AssetModule.get().registerPack("worlds_assets", assetsRoot, manifest);
 
 		} catch (Exception ignored) {
-			LOGGER.atSevere().log("Failed to load worlds assets - {}", ignored);
+			LOGGER.atSevere().log("Failed to load worlds assets -8 {}", ignored);
+		}
+
+		if (result.isEmpty()) {
+			throw new RuntimeException("There are no maps configured, gamemode can not start.");
 		}
 
 		return result;

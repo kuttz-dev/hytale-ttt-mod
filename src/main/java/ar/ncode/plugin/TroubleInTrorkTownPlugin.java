@@ -10,12 +10,12 @@ import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
 import ar.ncode.plugin.config.CustomConfig;
-import ar.ncode.plugin.config.WeaponTypeConfigs;
+import ar.ncode.plugin.config.WeaponsConfig;
 import ar.ncode.plugin.config.instance.InstanceConfig;
-import ar.ncode.plugin.config.loot.LootTables;
 import ar.ncode.plugin.interaction.PickUpWeaponInteraction;
 import ar.ncode.plugin.interaction.ShowDeadPlayerInteraction;
 import ar.ncode.plugin.interaction.TestPlayerRole;
+import ar.ncode.plugin.interaction.TestPlayerRolePotion;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.WorldPreview;
 import ar.ncode.plugin.packet.filter.GuiPacketsFilter;
@@ -50,6 +50,7 @@ import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
 import com.hypixel.hytale.server.core.io.adapter.PacketFilter;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
+import com.hypixel.hytale.server.core.permissions.PermissionsModule;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.Universe;
@@ -67,13 +68,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static ar.ncode.plugin.model.CustomPermissions.ADMIN_PERMISSIONS;
+import static ar.ncode.plugin.model.CustomPermissions.TTT_ADMIN_GROUP;
+import static ar.ncode.plugin.model.CustomPermissions.TTT_USER_GROUP;
+import static ar.ncode.plugin.model.CustomPermissions.USER_PERMISSIONS;
+
 /**
  * This class serves as the entrypoint for your plugin. Use the setup method to register into game registries or add
  * event listeners.
  */
 public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
-	public static final Path UNIVERSE_TEMPLATES_PATH = Paths.get("universe/templates");
+	public final Path templatesPath = getDataDirectory().resolve("maps");
 	public static final Set<UUID> spectatorPlayers = ConcurrentHashMap.newKeySet();
 	/**
 	 * Thread-safe set of component UUIDs who are spectators (dead).
@@ -83,11 +89,10 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 	public static TroubleInTrorkTownPlugin instance;
 	public static Map<UUID, GameModeState> gameModeStateForWorld = new HashMap<>();
 	public static Config<CustomConfig> config;
-	public static Config<WeaponTypeConfigs> weaponTypesConfig;
+	public static Config<WeaponsConfig> weaponsConfig;
 	public static List<WorldPreview> worldPreviews;
 	public static UUID currentInstance;
 	public static Map<String, Config<InstanceConfig>> instanceConfig = new HashMap<>();
-	public static Config<LootTables> lootTables;
 	/**
 	 * Flag to track if a world transition (fade) is currently in progress.
 	 * This prevents the "Cannot start a fade out while a fade completion callback is pending" error
@@ -103,12 +108,9 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		super(init);
 		instance = this;
 		config = this.withConfig("config", CustomConfig.CODEC);
-		lootTables = this.withConfig("loot_tables", LootTables.CODEC);
-		weaponTypesConfig = this.withConfig("weapon_types", WeaponTypeConfigs.CODEC);
+		weaponsConfig = this.withConfig("weapons_config", WeaponsConfig.CODEC);
 
-		Path templates = Paths.get("universe/templates");
-
-		try (Stream<Path> worlds = Files.list(templates)) {
+		try (Stream<Path> worlds = Files.list(templatesPath)) {
 			for (Path world : (Iterable<Path>) worlds::iterator) {
 				instanceConfig.put(
 						world.getFileName().toString(),
@@ -126,7 +128,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 	protected void setup() {
 		prepareConfigs();
 
-		worldPreviews = WorldPreviewLoader.load(UNIVERSE_TEMPLATES_PATH, getDataDirectory());
+		worldPreviews = WorldPreviewLoader.load(templatesPath, getDataDirectory());
 
 		PlayerGameModeInfo.componentType = getEntityStoreRegistry().registerComponent(PlayerGameModeInfo.class, "PlayerGameModeInfo", PlayerGameModeInfo.CODEC);
 		GraveStoneWithNameplate.componentType = getChunkStoreRegistry().registerComponent(GraveStoneWithNameplate.class,
@@ -151,6 +153,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 		getCodecRegistry(Interaction.CODEC)
 				.register("test_player_role", TestPlayerRole.class, TestPlayerRole.CODEC)
+				.register("test_player_role_potion", TestPlayerRolePotion.class, TestPlayerRolePotion.CODEC)
 				.register("show_dead_player_info", ShowDeadPlayerInteraction.class, ShowDeadPlayerInteraction.CODEC)
 				.register("pickup_weapon_interaction", PickUpWeaponInteraction.class, PickUpWeaponInteraction.CODEC);
 
@@ -168,22 +171,16 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 	}
 
 	private void prepareConfigs() {
-		Path configFilePath = Paths.get(getDataDirectory().toString(), "/config.json");
-		if (!Files.exists(getDataDirectory()) || !Files.exists(configFilePath)) {
+		if (!Files.exists(getDataDirectory()) || !Files.exists(getConfigFilePath())) {
 			config.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
 		}
 		config.load().thenRun(() -> LOGGER.atInfo().log("Gamemode config loaded."));
-
-		if (!Files.exists(Paths.get(getDataDirectory().toString(), "/loot_tables.json"))) {
-			lootTables.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
-		}
-		lootTables.load().thenRun(() -> LOGGER.atInfo().log("Loot tables config loaded."));
 
 		instanceConfig.forEach((world, instanceCfg) -> {
 			String instanceConfigFile = "/" + world + "_config.json";
 			Path worldConfigPath = Paths.get(getDataDirectory().toString(), instanceConfigFile);
 
-			Path instanceConfigPath = UNIVERSE_TEMPLATES_PATH.resolve(world);
+			Path instanceConfigPath = templatesPath.resolve(world);
 			instanceConfigPath = instanceConfigPath.resolve("config.json");
 
 			if (Files.exists(instanceConfigPath)) {
@@ -203,11 +200,18 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 			instanceCfg.load().thenRun(() -> LOGGER.atInfo().log("Instance config loaded for {}", world));
 		});
 
-		configFilePath = Paths.get(getDataDirectory().toString(), "/weapon_types.json");
-		if (!Files.exists(configFilePath)) {
-			weaponTypesConfig.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
+		if (!Files.exists(getWeaponsConfigFilePath())) {
+			weaponsConfig.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
 		}
-		weaponTypesConfig.load().thenRun(() -> LOGGER.atInfo().log("Config loaded."));
+		weaponsConfig.load().thenRun(() -> LOGGER.atInfo().log("Config loaded."));
+	}
+
+	private Path getConfigFilePath() {
+		return getDataDirectory().resolve("config.json");
+	}
+
+	private Path getWeaponsConfigFilePath() {
+		return getDataDirectory().resolve("weapons_config.json");
 	}
 
 	@Override
@@ -234,6 +238,10 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 			});
 //			world.getDeathConfig().getRespawnController().respawnPlayer()
 		});
+
+		PermissionsModule permissions = PermissionsModule.get();
+		permissions.addGroupPermission(TTT_USER_GROUP, USER_PERMISSIONS);
+		permissions.addGroupPermission(TTT_ADMIN_GROUP, ADMIN_PERMISSIONS);
 
 		LOGGER.atInfo().log("Plugin started!");
 	}
