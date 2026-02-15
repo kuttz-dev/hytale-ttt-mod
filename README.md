@@ -78,7 +78,7 @@ Rounds are event-driven and divided into clear phases:
     2. Deaths affect win conditions and karma.
     3. Dead players become spectators.
 
-3. **Aftermath**
+3. **Aftermatch**
     1. Cooldown before the next round.
     2. Ideal for map voting or short downtime.
 
