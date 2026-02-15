@@ -12,7 +12,7 @@ making it easy for the community to build on top of it.
 
 To set up this mod on a server please follow the guide at: [CONFIG.md](CONFIG.md#configuration)
 
-***
+---
 
 ## Current Features
 
@@ -26,7 +26,7 @@ To set up this mod on a server please follow the guide at: [CONFIG.md](CONFIG.md
 - Always-visible role UI for alive players.
 - Role ratios are fully configurable.
 
-***
+---
 
 ### 🔫 Weapons & Equipment
 
@@ -40,7 +40,7 @@ To set up this mod on a server please follow the guide at: [CONFIG.md](CONFIG.md
 
 ![weapon_spawns.png](docs/images/weapon_spawns.png)
 
-***
+---
 
 ### 🗺️ Custom Map System
 
@@ -54,7 +54,7 @@ To set up this mod on a server please follow the guide at: [CONFIG.md](CONFIG.md
 
 ![img.png](docs/images/templates.png)
 
-***
+---
 
 #### Weapon Spawning on Maps
 
@@ -84,7 +84,7 @@ Rounds are event-driven and divided into clear phases:
 
 Win conditions are evaluated dynamically as players die.
 
-***
+---
 
 ### ⚖️ Karma System
 
@@ -94,7 +94,7 @@ A configurable karma system that encourages fair play:
 - Correct kills increase karma.
 - All karma values are configurable.
 
-***
+---
 
 ### 🪦 Graves & Body Confirmation
 
@@ -108,7 +108,7 @@ A configurable karma system that encourages fair play:
   - Reveal information about the victim
 - Prevents instant role revelation and preserves deduction gameplay.
 
-***
+---
 
 ### 📊 Scoreboard
 
@@ -119,7 +119,7 @@ A configurable karma system that encourages fair play:
   - Karma
 - Traitor roles are hidden from alive players.
 
-***
+---
 
 ### 🌍 Localization
 
@@ -127,7 +127,7 @@ A configurable karma system that encourages fair play:
 - All text is externalized via language files.
 - English and Spanish included by default.
 
-***
+---
 
 ## 🗺️ Backlog & Planned Features
 
@@ -143,7 +143,7 @@ richer gameplay and community-made content.
 - Improved UI/UX polish
 - Better modding hooks for third-party extensions
 
-***
+---
 
 ## Open-Source Philosophy
 
@@ -154,4 +154,14 @@ This mod is **fully open-source** and built with extensibility in mind.
 
 The goal is not just to recreate TTT, but to provide a **community-driven foundation** for gamemodes in Hytale.
 
-***
+---
+
+## AI Ussage
+
+There is ussage of AI in this project as a tool to enhance creativity and productivity, always with human review and testing, and limited to:
+
+- Code snippets.
+- Text content, descriptions, and documentation.
+- Provisional concept art used for mandatory logos, banners, and also for prototyping with temporary models.
+
+---
