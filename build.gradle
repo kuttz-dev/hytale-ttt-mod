@@ -1,9 +1,11 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
 plugins {
     id 'java'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.3'
-    id("app.ultradev.hytalegradle") version "1.5.0"
+    //id("app.ultradev.hytalegradle") version "1.5.0"
 }
 
 
@@ -36,11 +38,11 @@ if (!hytaleHome) {
     if (project.ext.has('linuxHytaleCandidates')) {
         extra = " Tried: " + project.ext.linuxHytaleCandidates.join(", ")
     }
-    throw new GradleException("Your Hytale install could not be detected automatically. Use -Phytale_home=... or set XDG_DATA_HOME.${extra}")
-}
 
-if (!file(hytaleHome).exists()) {
-    throw new GradleException("Failed to find Hytale at the expected location. Please make sure you have installed the game. The expected location can be changed using the hytale_home property. Currently looking in ${project.findProperty('hytaleHome')}")
+    logger.warn("Your Hytale install could not be detected automatically. Use -Phytale_home=... or set XDG_DATA_HOME.${extra}")
+
+} else if (!file(hytaleHome).exists()) {
+    logger.warn("Failed to find Hytale at the expected location. Please make sure you have installed the game. The expected location can be changed using the hytale_home property. Currently looking in ${project.findProperty('hytaleHome')}")
 }
 
 java {
@@ -52,10 +54,6 @@ java {
 // Quiet warnings about missing Javadocs.
 javadoc {
     options.addStringOption('Xdoclint:-missing', '-quiet')
-}
-
-jar {
-    destinationDirectory.set(file("$buildDir/out"))
 }
 
 repositories {
@@ -73,10 +71,14 @@ def isCI = System.getenv("CI") != null
 
 dependencies {
     if (isCI) {
-        compileOnly("com.hypixel.hytale:Server:2026.02.06-aa1b071c2")
+        compileOnly("com.hypixel.hytale:Server:${project.findProperty("hytaleServerVersion")}")
+        testImplementation("com.hypixel.hytale:Server:${project.findProperty("hytaleServerVersion")}")
         println "CI build detected -> using MAVEN dependency"
+
     } else {
-        implementation(files("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar"))
+        def serverJar = files("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar")
+        implementation(serverJar)
+        testImplementation(serverJar)
         println "Local build detected -> using LOCAL jar"
     }
 
@@ -106,10 +108,10 @@ tasks.register('updatePluginManifest') {
         if (!manifestFile.exists()) {
             throw new GradleException("Could not find manifest.json at ${manifestFile.path}!")
         }
-        def manifestJson = new groovy.json.JsonSlurper().parseText(manifestFile.text)
+        def manifestJson = new JsonSlurper().parseText(manifestFile.text)
         manifestJson.Version = version
         manifestJson.IncludesAssetPack = includes_pack.toBoolean()
-        manifestFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(manifestJson))
+        manifestFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(manifestJson))
     }
 }
 
@@ -166,10 +168,12 @@ tasks.register('generateVSCodeLaunch') {
                         ]
                 ]
         ]
-        launchFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(launchConfig))
+
+        launchFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(launchConfig))
     }
 }
 
+/*
 hytale {
     // Add `--allow-op` to server args (allows you to run `/op self` in-game)
     allowOp.set(true)
@@ -180,6 +184,7 @@ hytale {
     // Load mods from the local Hytale installation
     includeLocalMods.set(true)
 }
+ */
 
 test {
     useJUnitPlatform()
@@ -188,5 +193,5 @@ test {
     }
 
     // Configure HytaleLogManager before any test classes are loaded
-    jvmArgs = ["-Djava.util.logging.manager=com.hypixel.hytale.logger.backend.HytaleLogManager"]
+    jvmArgs "-Djava.util.logging.manager=com.hypixel.hytale.logger.backend.HytaleLogManager"
 }
