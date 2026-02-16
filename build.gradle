@@ -71,7 +71,8 @@ def isCI = System.getenv("CI") != null
 
 dependencies {
     if (isCI) {
-        compileOnly("com.hypixel.hytale:Server:2026.02.06-aa1b071c2")
+        compileOnly("com.hypixel.hytale:Server:${project.findProperty("hytaleServerVersion")}")
+        testCompileOnly("com.hypixel.hytale:Server:${project.findProperty("hytaleServerVersion")}")
         println "CI build detected -> using MAVEN dependency"
     } else {
         implementation(files("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar"))
