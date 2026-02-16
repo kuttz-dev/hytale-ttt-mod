@@ -20,52 +20,52 @@ import static ar.ncode.plugin.model.CustomPermissions.TTT_MAP_VOTE;
 
 public class MapVoteCommand extends CommandBase {
 
-	public MapVoteCommand() {
-		super("vote", "Command to open the map voting menu.");
-		super.addAliases("votemap");
-		requirePermission(TTT_MAP_VOTE);
-	}
+    public MapVoteCommand() {
+        super("vote", "Command to open the map voting menu.");
+        super.addAliases("votemap");
+        requirePermission(TTT_MAP_VOTE);
+    }
 
-	private static void openGuiForPlayer(@NonNullDecl CommandContext ctx, Ref<EntityStore> reference) {
-		var playerInfo = reference.getStore().getComponent(reference, PlayerGameModeInfo.componentType);
-		var player = reference.getStore().getComponent(reference, Player.getComponentType());
-		var playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
+    private static void openGuiForPlayer(@NonNullDecl CommandContext ctx, Ref<EntityStore> reference) {
+        var playerInfo = reference.getStore().getComponent(reference, PlayerGameModeInfo.componentType);
+        var player = reference.getStore().getComponent(reference, Player.getComponentType());
+        var playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
 
-		if (playerInfo == null || player == null || playerRef == null) {
-			ctx.sendMessage(Message.raw("An error occurred while trying to access your component information."));
-			return;
-		}
+        if (playerInfo == null || player == null || playerRef == null) {
+            ctx.sendMessage(Message.raw("An error occurred while trying to access your component information."));
+            return;
+        }
 
-		World world = player.getWorld();
-		if (world == null) {
-			ctx.sendMessage(Message.raw("An error occurred while trying to access your world information."));
-			return;
-		}
+        World world = player.getWorld();
+        if (world == null) {
+            ctx.sendMessage(Message.raw("An error occurred while trying to access your world information."));
+            return;
+        }
 
-		GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+        GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
 
-		if (!gameModeState.hasLastRoundFinished()) {
-			ctx.sendMessage(Message.raw("You can only use this command after the last round has finished."));
-			return;
-		}
+        if (!gameModeState.hasLastRoundFinished()) {
+            ctx.sendMessage(Message.raw("You can only use this command after the last round has finished."));
+            return;
+        }
 
-		player.getPageManager().openCustomPage(
-				reference, reference.getStore(),
-				new MapVotePage(playerRef, CustomPageLifetime.CanDismiss, worldPreviews, playerInfo)
-		);
-	}
+        player.getPageManager().openCustomPage(
+                reference, reference.getStore(),
+                new MapVotePage(playerRef, CustomPageLifetime.CanDismiss, worldPreviews, playerInfo)
+        );
+    }
 
-	@Override
-	protected void executeSync(@NonNullDecl CommandContext ctx) {
-		Ref<EntityStore> reference = ctx.senderAsPlayerRef();
+    @Override
+    protected void executeSync(@NonNullDecl CommandContext ctx) {
+        Ref<EntityStore> reference = ctx.senderAsPlayerRef();
 
-		if (reference == null || !reference.isValid()) {
-			ctx.sendMessage(Message.raw("You can't use this command from the console."));
-			return;
-		}
+        if (reference == null || !reference.isValid()) {
+            ctx.sendMessage(Message.raw("You can't use this command from the console."));
+            return;
+        }
 
-		var world = reference.getStore().getExternalData().getWorld();
+        var world = reference.getStore().getExternalData().getWorld();
 
-		world.execute(() -> openGuiForPlayer(ctx, reference));
-	}
+        world.execute(() -> openGuiForPlayer(ctx, reference));
+    }
 }

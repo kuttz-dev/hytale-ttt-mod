@@ -10,16 +10,15 @@ plugins {
 ext {
     if (project.hasProperty('hytale_home')) {
         hytaleHome = project.findProperty('hytale_home')
-    }
-    else {
+    } else {
         def os = DefaultNativePlatform.getCurrentOperatingSystem()
 
         if (os.isWindows()) {
             hytaleHome = "${System.getProperty("user.home")}/AppData/Roaming/Hytale"
-        
+
         } else if (os.isMacOsX()) {
             hytaleHome = "${System.getProperty("user.home")}/Library/Application Support/Hytale"
-        
+
         } else if (os.isLinux()) {
             hytaleHome = "${System.getProperty("user.home")}/.var/app/com.hypixel.HytaleLauncher/data/Hytale"
             if (!file(hytaleHome).exists()) {
@@ -61,14 +60,25 @@ jar {
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://maven.hytale.com/release")
+    }
 }
 
 
 // Adds the Hytale server as a build dependency, allowing you to reference and
 // compile against their code. This requires you to have Hytale installed using
 // the official launcher for now.
+def isCI = System.getenv("CI") != null
+
 dependencies {
-    implementation(files("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar"))
+    if (isCI) {
+        compileOnly("com.hypixel.hytale:Server:2026.02.06-aa1b071c2")
+        println "CI build detected -> using MAVEN dependency"
+    } else {
+        implementation(files("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar"))
+        println "Local build detected -> using LOCAL jar"
+    }
 
     compileOnly("org.projectlombok:lombok:1.18.42")
     annotationProcessor("org.projectlombok:lombok:1.18.42")
@@ -144,15 +154,15 @@ tasks.register('generateVSCodeLaunch') {
         }
         def programParams = createServerRunArguments("\${workspaceFolder}")
         def launchConfig = [
-                version: "0.2.0",
+                version       : "0.2.0",
                 configurations: [
                         [
-                                type: "java",
-                                name: "HytaleServer",
-                                request: "launch",
+                                type     : "java",
+                                name     : "HytaleServer",
+                                request  : "launch",
                                 mainClass: "com.hypixel.hytale.Main",
-                                args: programParams,
-                                cwd: "\${workspaceFolder}/run"
+                                args     : programParams,
+                                cwd      : "\${workspaceFolder}/run"
                         ]
                 ]
         ]
