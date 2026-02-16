@@ -6,7 +6,6 @@ import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
-import com.hypixel.hytale.common.util.StringUtil;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import lombok.Getter;
 
@@ -85,6 +84,40 @@ public class CustomConfig {
 							(config, _) -> config.roles)
 					.add()
 					.build();
+	public static final CustomRole DETECTIVE_ROLE = CustomRole.builder()
+			.id("detective")
+			.translationKey(TranslationKey.getWithPrefix("hud_current_role_detective"))
+			.customGuiColor("#1F5CC4")
+			.minimumAssignedPlayersWithRole(0)
+			.ratio(11)
+			.startingCredits(1)
+			.secretRole(false)
+			.roleGroup(RoleGroup.INNOCENT)
+			.storeItems(new String[]{
+					"TTT_Potion_Veritaserum:30",
+					"Weapon_Deployable_Healing_Totem:1"
+			})
+			.build();
+	public static final CustomRole INNOCENT_ROLE = CustomRole.builder()
+			.id("innocent")
+			.translationKey(TranslationKey.getWithPrefix("hud_current_role_innocent"))
+			.minimumAssignedPlayersWithRole(1)
+			.ratio(1)
+			.secretRole(true)
+			.roleGroup(RoleGroup.INNOCENT)
+			.build();
+	public static final CustomRole TRAITOR_ROLE = CustomRole.builder()
+			.id("traitor")
+			.translationKey(TranslationKey.getWithPrefix("hud_current_role_traitor"))
+			.minimumAssignedPlayersWithRole(1)
+			.ratio(4)
+			.startingCredits(1)
+			.secretRole(true)
+			.roleGroup(RoleGroup.TRAITOR)
+			.storeItems(new String[]{
+					"Weapon_Daggers_Doomed:1"
+			})
+			.build();
 
 	private final int itemsInARowForTheShop = 5;
 	// Sets required amount of players to start a round
@@ -102,42 +135,11 @@ public class CustomConfig {
 	private int karamPointsForKillingSameRoleGroup = -10;
 
 	private CustomRole[] roles = new CustomRole[]{
-			CustomRole.builder()
-					.id("detective")
-					.translationKey(TranslationKey.getWithPrefix("hud_current_role_detective"))
-					.customGuiColor("#1F5CC4")
-					.minimumAssignedPlayersWithRole(0)
-					.ratio(11)
-					.startingCredits(1)
-					.secretRole(false)
-					.roleGroup(RoleGroup.INNOCENT)
-					.storeItems(new String[]{
-							"TTT_Potion_Veritaserum:30",
-							"Weapon_Deployable_Healing_Totem:1"
-					})
-					.build(),
-			CustomRole.builder()
-					.id("innocent")
-					.translationKey(TranslationKey.getWithPrefix("hud_current_role_innocent"))
-					.minimumAssignedPlayersWithRole(1)
-					.ratio(1)
-					.secretRole(true)
-					.roleGroup(RoleGroup.INNOCENT)
-					.build(),
-			CustomRole.builder()
-					.id("traitor")
-					.translationKey(TranslationKey.getWithPrefix("hud_current_role_traitor"))
-					.minimumAssignedPlayersWithRole(1)
-					.ratio(4)
-					.startingCredits(1)
-					.secretRole(true)
-					.roleGroup(RoleGroup.TRAITOR)
-					.storeItems(new String[]{
-							"Weapon_Daggers_Doomed:1"
-					})
-					.build()
-
+			DETECTIVE_ROLE,
+			INNOCENT_ROLE,
+			TRAITOR_ROLE
 	};
+
 	private String playerGraveId = "Player_Grave";
 	private String lootBoxBlockId = "Furniture_Human_Ruins_Chest_Small";
 	private int roundsPerMap = 8;
