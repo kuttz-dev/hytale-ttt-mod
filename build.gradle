@@ -36,11 +36,11 @@ if (!hytaleHome) {
     if (project.ext.has('linuxHytaleCandidates')) {
         extra = " Tried: " + project.ext.linuxHytaleCandidates.join(", ")
     }
-    throw new GradleException("Your Hytale install could not be detected automatically. Use -Phytale_home=... or set XDG_DATA_HOME.${extra}")
-}
 
-if (!file(hytaleHome).exists()) {
-    throw new GradleException("Failed to find Hytale at the expected location. Please make sure you have installed the game. The expected location can be changed using the hytale_home property. Currently looking in ${project.findProperty('hytaleHome')}")
+    logger.warn("Your Hytale install could not be detected automatically. Use -Phytale_home=... or set XDG_DATA_HOME.${extra}")
+
+} else if (!file(hytaleHome).exists()) {
+    logger.warn("Failed to find Hytale at the expected location. Please make sure you have installed the game. The expected location can be changed using the hytale_home property. Currently looking in ${project.findProperty('hytaleHome')}")
 }
 
 java {
