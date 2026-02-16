@@ -247,7 +247,6 @@ class ScoreBoardPageTest {
 	void testScenarioC_LostInCombat_ShowDisabled() {
 		Collection<PlayerComponents> players = new ArrayList<>();
 		PlayerComponents combatPlayer = createPlayer(INNOCENT_ROLE, "player_lost_combat_hidden", false, true);
-		combatPlayer.info().setCurrentRoundRole(INNOCENT_ROLE);
 		players.add(combatPlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, false);
@@ -408,7 +407,6 @@ class ScoreBoardPageTest {
 
 		// Valid active player
 		PlayerComponents activePlayer = createPlayer(INNOCENT_ROLE, "active_player", false, false);
-		activePlayer.info().setCurrentRoundRole(INNOCENT_ROLE);
 		players.add(activePlayer);
 
 		// Player with null info

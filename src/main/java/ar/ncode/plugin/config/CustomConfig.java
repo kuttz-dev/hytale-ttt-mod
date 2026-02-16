@@ -139,7 +139,6 @@ public class CustomConfig {
 			INNOCENT_ROLE,
 			TRAITOR_ROLE
 	};
-
 	private String playerGraveId = "Player_Grave";
 	private String lootBoxBlockId = "Furniture_Human_Ruins_Chest_Small";
 	private int roundsPerMap = 8;

@@ -74,6 +74,7 @@ dependencies {
         compileOnly("com.hypixel.hytale:Server:${project.findProperty("hytaleServerVersion")}")
         testImplementation("com.hypixel.hytale:Server:${project.findProperty("hytaleServerVersion")}")
         println "CI build detected -> using MAVEN dependency"
+        
     } else {
         def serverJar = files("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar")
         implementation(serverJar)
@@ -167,6 +168,7 @@ tasks.register('generateVSCodeLaunch') {
                         ]
                 ]
         ]
+        
         launchFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(launchConfig))
     }
 }
