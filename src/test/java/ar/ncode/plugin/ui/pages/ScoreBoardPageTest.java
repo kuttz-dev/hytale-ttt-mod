@@ -5,8 +5,8 @@ import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
 import ar.ncode.plugin.config.CustomConfig;
+import ar.ncode.plugin.config.CustomRole;
 import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.RoleGroup;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -24,6 +24,10 @@ import org.mockito.Mockito;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import static ar.ncode.plugin.config.CustomConfig.DETECTIVE_ROLE;
+import static ar.ncode.plugin.config.CustomConfig.INNOCENT_ROLE;
+import static ar.ncode.plugin.config.CustomConfig.TRAITOR_ROLE;
 
 /**
  * Test suite for ScoreBoardPage.getTableRows() method.
@@ -71,9 +75,10 @@ class ScoreBoardPageTest {
 	}
 
 	@NonNullDecl
-	private static PlayerComponents createPlayer(RoleGroup role, String name, boolean confirmedDeath, boolean lostInCombat) {
+	private static PlayerComponents createPlayer(CustomRole role, String name, boolean confirmedDeath, boolean lostInCombat) {
 		PlayerGameModeInfo info = PlayerGameModeInfo.builder()
-				.role(role)
+				.currentRoundRole(role)
+				.spectator(confirmedDeath || lostInCombat)
 				.build();
 
 		Player player = Mockito.mock(Player.class);
@@ -112,7 +117,7 @@ class ScoreBoardPageTest {
 	@Test
 	void getTableRows() {
 		Collection<PlayerComponents> players = new ArrayList<>();
-		PlayerComponents playerComponents = createPlayer(RoleGroup.INNOCENT, "josephkm", true, true);
+		PlayerComponents playerComponents = createPlayer(INNOCENT_ROLE, "josephkm", true, true);
 
 		players.add(playerComponents);
 
@@ -128,8 +133,7 @@ class ScoreBoardPageTest {
 	@Test
 	void testScenarioA_ActivePlayer() {
 		Collection<PlayerComponents> players = new ArrayList<>();
-		PlayerComponents activePlayer = createPlayer(RoleGroup.INNOCENT, "player_innocent", false, false);
-		activePlayer.info().setCurrentRoundRole(RoleGroup.INNOCENT);
+		PlayerComponents activePlayer = createPlayer(INNOCENT_ROLE, "player_innocent", false, false);
 		players.add(activePlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -138,7 +142,7 @@ class ScoreBoardPageTest {
 		Assertions.assertEquals(0, result.confirmedDeaths.size(), "Should have 0 confirmed deaths");
 		Assertions.assertEquals(0, result.lostInCombat.size(), "Should have 0 lost in combat");
 		Assertions.assertEquals(0, result.spectators.size(), "Should have 0 spectators");
-		Assertions.assertEquals("player_innocent", result.alivePlayers.get(0).component().getDisplayName());
+		Assertions.assertEquals("player_innocent", result.alivePlayers.getFirst().component().getDisplayName());
 	}
 
 	/**
@@ -149,16 +153,13 @@ class ScoreBoardPageTest {
 	void testScenarioA_MultipleActivePlayers() {
 		Collection<PlayerComponents> players = new ArrayList<>();
 
-		PlayerComponents innocentPlayer = createPlayer(RoleGroup.INNOCENT, "player_innocent", false, false);
-		innocentPlayer.info().setCurrentRoundRole(RoleGroup.INNOCENT);
+		PlayerComponents innocentPlayer = createPlayer(INNOCENT_ROLE, "player_innocent", false, false);
 		players.add(innocentPlayer);
 
-		PlayerComponents traitorPlayer = createPlayer(RoleGroup.TRAITOR, "player_traitor", false, false);
-		traitorPlayer.info().setCurrentRoundRole(RoleGroup.TRAITOR);
+		PlayerComponents traitorPlayer = createPlayer(TRAITOR_ROLE, "player_traitor", false, false);
 		players.add(traitorPlayer);
 
-		PlayerComponents detectivePlayer = createPlayer(RoleGroup.DETECTIVE, "player_detective", false, false);
-		detectivePlayer.info().setCurrentRoundRole(RoleGroup.DETECTIVE);
+		PlayerComponents detectivePlayer = createPlayer(DETECTIVE_ROLE, "player_detective", false, false);
 		players.add(detectivePlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -177,8 +178,7 @@ class ScoreBoardPageTest {
 	@Test
 	void testScenarioB_ConfirmedDeath() {
 		Collection<PlayerComponents> players = new ArrayList<>();
-		PlayerComponents deadPlayer = createPlayer(RoleGroup.INNOCENT, "player_dead", true, false);
-		deadPlayer.info().setCurrentRoundRole(RoleGroup.INNOCENT);
+		PlayerComponents deadPlayer = createPlayer(INNOCENT_ROLE, "player_dead", true, false);
 		players.add(deadPlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -198,8 +198,7 @@ class ScoreBoardPageTest {
 	@Test
 	void testScenarioB_ConfirmedDeathPriority() {
 		Collection<PlayerComponents> players = new ArrayList<>();
-		PlayerComponents deadPlayer = createPlayer(RoleGroup.INNOCENT, "player_dead_both", true, true);
-		deadPlayer.info().setCurrentRoundRole(RoleGroup.INNOCENT);
+		PlayerComponents deadPlayer = createPlayer(INNOCENT_ROLE, "player_dead_both", true, true);
 		players.add(deadPlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -219,8 +218,7 @@ class ScoreBoardPageTest {
 	@Test
 	void testScenarioC_LostInCombat_ShowEnabled() {
 		Collection<PlayerComponents> players = new ArrayList<>();
-		PlayerComponents combatPlayer = createPlayer(RoleGroup.INNOCENT, "player_lost_combat", false, true);
-		combatPlayer.info().setCurrentRoundRole(RoleGroup.INNOCENT);
+		PlayerComponents combatPlayer = createPlayer(INNOCENT_ROLE, "player_lost_combat", false, true);
 		players.add(combatPlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -241,8 +239,7 @@ class ScoreBoardPageTest {
 	@Test
 	void testScenarioC_LostInCombat_ShowDisabled() {
 		Collection<PlayerComponents> players = new ArrayList<>();
-		PlayerComponents combatPlayer = createPlayer(RoleGroup.INNOCENT, "player_lost_combat_hidden", false, true);
-		combatPlayer.info().setCurrentRoundRole(RoleGroup.INNOCENT);
+		PlayerComponents combatPlayer = createPlayer(INNOCENT_ROLE, "player_lost_combat_hidden", false, true);
 		players.add(combatPlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, false);
@@ -262,7 +259,8 @@ class ScoreBoardPageTest {
 	@Test
 	void testScenarioD_LateJoiner_Spectator() {
 		Collection<PlayerComponents> players = new ArrayList<>();
-		PlayerComponents spectator = createPlayer(RoleGroup.SPECTATOR, "late_joiner", false, false);
+		PlayerComponents spectator = createPlayer(null, "late_joiner", false, false);
+		spectator.info().setSpectator(true);
 		// currentRoundRole is null by default in PlayerGameModeInfo
 		players.add(spectator);
 
@@ -283,8 +281,8 @@ class ScoreBoardPageTest {
 	@Test
 	void testScenarioD_SpectatorWithoutCurrentRole() {
 		Collection<PlayerComponents> players = new ArrayList<>();
-		PlayerComponents spectator = createPlayer(RoleGroup.SPECTATOR, "spectator_player", false, false);
-		spectator.info().setCurrentRoundRole(null); // Explicitly set to null
+		PlayerComponents spectator = createPlayer(null, "spectator_player", false, false);
+		spectator.info().setSpectator(true);
 		players.add(spectator);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -308,28 +306,24 @@ class ScoreBoardPageTest {
 		Collection<PlayerComponents> players = new ArrayList<>();
 
 		// Active player - innocent
-		PlayerComponents activeInnocent = createPlayer(RoleGroup.INNOCENT, "active_innocent", false, false);
-		activeInnocent.info().setCurrentRoundRole(RoleGroup.INNOCENT);
+		PlayerComponents activeInnocent = createPlayer(INNOCENT_ROLE, "active_innocent", false, false);
 		players.add(activeInnocent);
 
 		// Active player - traitor
-		PlayerComponents activeTraitor = createPlayer(RoleGroup.TRAITOR, "active_traitor", false, false);
-		activeTraitor.info().setCurrentRoundRole(RoleGroup.TRAITOR);
+		PlayerComponents activeTraitor = createPlayer(TRAITOR_ROLE, "active_traitor", false, false);
 		players.add(activeTraitor);
 
 		// Confirmed death
-		PlayerComponents confirmedDead = createPlayer(RoleGroup.DETECTIVE, "confirmed_dead", true, false);
-		confirmedDead.info().setCurrentRoundRole(RoleGroup.DETECTIVE);
+		PlayerComponents confirmedDead = createPlayer(DETECTIVE_ROLE, "confirmed_dead", true, false);
 		players.add(confirmedDead);
 
 		// Lost in combat
-		PlayerComponents lostInCombat = createPlayer(RoleGroup.INNOCENT, "lost_in_combat", false, true);
-		lostInCombat.info().setCurrentRoundRole(RoleGroup.INNOCENT);
+		PlayerComponents lostInCombat = createPlayer(INNOCENT_ROLE, "lost_in_combat", false, true);
 		players.add(lostInCombat);
 
 		// Spectator (late joiner)
-		PlayerComponents spectator = createPlayer(RoleGroup.SPECTATOR, "spectator", false, false);
-		spectator.info().setCurrentRoundRole(null);
+		PlayerComponents spectator = createPlayer(null, "spectator", false, false);
+		spectator.info().setSpectator(true);
 		players.add(spectator);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -350,9 +344,9 @@ class ScoreBoardPageTest {
 						.anyMatch(p -> "active_traitor".equals(p.component().getDisplayName())),
 				"Should contain active_traitor"
 		);
-		Assertions.assertEquals("confirmed_dead", result.confirmedDeaths.get(0).component().getDisplayName());
-		Assertions.assertEquals("lost_in_combat", result.lostInCombat.get(0).component().getDisplayName());
-		Assertions.assertEquals("spectator", result.spectators.get(0).component().getDisplayName());
+		Assertions.assertEquals("confirmed_dead", result.confirmedDeaths.getFirst().component().getDisplayName());
+		Assertions.assertEquals("lost_in_combat", result.lostInCombat.getFirst().component().getDisplayName());
+		Assertions.assertEquals("spectator", result.spectators.getFirst().component().getDisplayName());
 	}
 
 	/**
@@ -380,8 +374,7 @@ class ScoreBoardPageTest {
 		Collection<PlayerComponents> players = new ArrayList<>();
 
 		// Valid active player
-		PlayerComponents activePlayer = createPlayer(RoleGroup.INNOCENT, "active_player", false, false);
-		activePlayer.info().setCurrentRoundRole(RoleGroup.INNOCENT);
+		PlayerComponents activePlayer = createPlayer(INNOCENT_ROLE, "active_player", false, false);
 		players.add(activePlayer);
 
 		// Player with invalid reference
@@ -394,7 +387,7 @@ class ScoreBoardPageTest {
 		var result = ScoreBoardPage.getTableRows(players, true);
 
 		Assertions.assertEquals(1, result.alivePlayers.size(), "Should only count the valid player");
-		Assertions.assertEquals("active_player", result.alivePlayers.get(0).component().getDisplayName());
+		Assertions.assertEquals("active_player", result.alivePlayers.getFirst().component().getDisplayName());
 	}
 
 	/**
@@ -406,8 +399,7 @@ class ScoreBoardPageTest {
 		Collection<PlayerComponents> players = new ArrayList<>();
 
 		// Valid active player
-		PlayerComponents activePlayer = createPlayer(RoleGroup.INNOCENT, "active_player", false, false);
-		activePlayer.info().setCurrentRoundRole(RoleGroup.INNOCENT);
+		PlayerComponents activePlayer = createPlayer(INNOCENT_ROLE, "active_player", false, false);
 		players.add(activePlayer);
 
 		// Player with null info
@@ -421,6 +413,6 @@ class ScoreBoardPageTest {
 		var result = ScoreBoardPage.getTableRows(players, true);
 
 		Assertions.assertEquals(1, result.alivePlayers.size(), "Should only count the valid player with info");
-		Assertions.assertEquals("active_player", result.alivePlayers.get(0).component().getDisplayName());
+		Assertions.assertEquals("active_player", result.alivePlayers.getFirst().component().getDisplayName());
 	}
 }
