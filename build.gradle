@@ -75,7 +75,9 @@ dependencies {
         testImplementation("com.hypixel.hytale:Server:${project.findProperty("hytaleServerVersion")}")
         println "CI build detected -> using MAVEN dependency"
     } else {
-        implementation(files("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar"))
+        def serverJar = files("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar")
+        implementation(serverJar)
+        testImplementation(serverJar)
         println "Local build detected -> using LOCAL jar"
     }
 
@@ -189,5 +191,5 @@ test {
     }
 
     // Configure HytaleLogManager before any test classes are loaded
-    jvmArgs = ["-Djava.util.logging.manager=com.hypixel.hytale.logger.backend.HytaleLogManager"]
+    jvmArgs "-Djava.util.logging.manager=com.hypixel.hytale.logger.backend.HytaleLogManager"
 }
