@@ -2,35 +2,35 @@
 $C = "../../Common.ui";
 
 Group #Item {
-    LayoutMode: Top;
-    Anchor: (Width: 400);
-    Padding: (Full: 5);
-
-    Group {
         LayoutMode: Top;
+        Anchor: (Width: 375);
         Padding: (Full: 5);
 
-        AssetImage #EntryIcon {
-          Anchor: (Horizontal: 1, Height: 250, Bottom: 5);
-          Visible: true;
-          AssetPath: "Images/Worlds/default.png";
-        }
+        Group {
+            LayoutMode: Top;
+            Padding: (Full: 5);
 
-      Group #EntryInfo {
-        LayoutMode: Top;
-        Anchor: (Horizontal: 1);
+            AssetImage #EntryIcon {
+                Anchor: (Horizontal: 1, Height: 250, Bottom: 5);
+                Visible: true;
+                AssetPath: "Images/Worlds/default.png";
+            }
 
-        Label #EntryName {
-          Style: (TextColor: #ffffff);
-          Anchor: (Horizontal: 1, Left: 0, Bottom: 5);
-          Text: "Entry name";
-        }
+            Group #EntryInfo {
+                LayoutMode: Top;
+                Anchor: (Horizontal: 1);
 
-        $C.@TextButton #EntryButton {
-            @Text = "Comprar";
-            Anchor: (Horizontal: 1, Height: 30);
-            Padding: (Horizontal: 0);
+                Label #EntryName {
+                    Style: (TextColor: #ffffff);
+                    Anchor: (Horizontal: 1, Left: 0, Bottom: 5);
+                    Text: "Entry name";
+                }
+
+                $C.@TextButton #EntryButton {
+                        @Text = "Comprar";
+                        Anchor: (Horizontal: 1, Height: 30);
+                        Padding: (Horizontal: 0);
+                }
+            }
         }
-      }
-    }
 }

@@ -63,7 +63,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -79,179 +84,187 @@ import static ar.ncode.plugin.model.CustomPermissions.USER_PERMISSIONS;
  */
 public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
-	public final Path templatesPath = getDataDirectory().resolve("maps");
-	public static final Set<UUID> spectatorPlayers = ConcurrentHashMap.newKeySet();
-	/**
-	 * Thread-safe set of component UUIDs who are spectators (dead).
-	 * Used by DeadChatListener to filter chat without accessing world thread.
-	 */
-	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-	public static TroubleInTrorkTownPlugin instance;
-	public static Map<UUID, GameModeState> gameModeStateForWorld = new HashMap<>();
-	public static Config<CustomConfig> config;
-	public static Config<WeaponsConfig> weaponsConfig;
-	public static List<WorldPreview> worldPreviews;
-	public static UUID currentInstance;
-	public static Map<String, Config<InstanceConfig>> instanceConfig = new HashMap<>();
-	/**
-	 * Flag to track if a world transition (fade) is currently in progress.
-	 * This prevents the "Cannot start a fade out while a fade completion callback is pending" error
-	 * when multiple players trigger transitions simultaneously.
-	 */
-	public static volatile boolean isWorldTransitionInProgress = false;
-	@SuppressWarnings("rawtypes")
-	private List<EventRegistration> events = new ArrayList<>();
-	private List<CommandRegistration> commands = new ArrayList<>();
-	private List<PacketFilter> inboundPacketFilters = new ArrayList<>();
+    public final Path templatesPath = getDataDirectory().resolve("maps");
+    public static final Set<UUID> spectatorPlayers = ConcurrentHashMap.newKeySet();
+    /**
+     * Thread-safe set of component UUIDs who are spectators (dead).
+     * Used by DeadChatListener to filter chat without accessing world thread.
+     */
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    public static TroubleInTrorkTownPlugin instance;
+    public static Map<UUID, GameModeState> gameModeStateForWorld = new HashMap<>();
+    public static Config<CustomConfig> config;
+    public static Config<WeaponsConfig> weaponsConfig;
+    public static List<WorldPreview> worldPreviews;
+    public static UUID currentInstance;
+    public static Map<String, Config<InstanceConfig>> instanceConfig = new HashMap<>();
+    /**
+     * Flag to track if a world transition (fade) is currently in progress.
+     * This prevents the "Cannot start a fade out while a fade completion callback is pending" error
+     * when multiple players trigger transitions simultaneously.
+     */
+    public static volatile boolean isWorldTransitionInProgress = false;
+    @SuppressWarnings("rawtypes")
+    private List<EventRegistration> events = new ArrayList<>();
+    private List<CommandRegistration> commands = new ArrayList<>();
+    private List<PacketFilter> inboundPacketFilters = new ArrayList<>();
 
-	public TroubleInTrorkTownPlugin(@Nonnull JavaPluginInit init) throws Exception {
-		super(init);
-		instance = this;
-		config = this.withConfig("config", CustomConfig.CODEC);
-		weaponsConfig = this.withConfig("weapons_config", WeaponsConfig.CODEC);
+    public TroubleInTrorkTownPlugin(@Nonnull JavaPluginInit init) throws Exception {
+        super(init);
+        instance = this;
+        config = this.withConfig("config", CustomConfig.CODEC);
+        weaponsConfig = this.withConfig("weapons_config", WeaponsConfig.CODEC);
 
-		try (Stream<Path> worlds = Files.list(templatesPath)) {
-			for (Path world : (Iterable<Path>) worlds::iterator) {
-				instanceConfig.put(
-						world.getFileName().toString(),
-						this.withConfig(world.getFileName() + "_config", InstanceConfig.CODEC)
-				);
-			}
-		} catch (Exception ignored) {
-			LOGGER.atSevere().log("Failed to instances configs - {}", ignored);
-		}
-		LOGGER.atInfo().log("Starting plugin: " + this.getName() + " - version " + this.getManifest().getVersion().toString());
-	}
+        loadMapsEntries();
+        LOGGER.atInfo().log("Starting plugin: " + this.getName() + " - version " + this.getManifest().getVersion().toString());
+    }
 
-	@SneakyThrows
-	@Override
-	protected void setup() {
-		prepareConfigs();
+    public void loadMapsEntries() {
+        try (Stream<Path> worlds = Files.list(templatesPath)) {
+            for (Path world : (Iterable<Path>) worlds::iterator) {
+                instanceConfig.put(
+                        world.getFileName().toString(),
+                        this.withConfig(world.getFileName() + "_config", InstanceConfig.CODEC)
+                );
+            }
+        } catch (Exception ignored) {
+            LOGGER.atSevere().log("Failed to instances configs - {}", ignored);
+        }
+    }
 
-		worldPreviews = WorldPreviewLoader.load(templatesPath, getDataDirectory());
+    @SneakyThrows
+    @Override
+    protected void setup() {
+        prepareConfigs();
 
-		PlayerGameModeInfo.componentType = getEntityStoreRegistry().registerComponent(PlayerGameModeInfo.class, "PlayerGameModeInfo", PlayerGameModeInfo.CODEC);
-		GraveStoneWithNameplate.componentType = getChunkStoreRegistry().registerComponent(GraveStoneWithNameplate.class,
-				"GraveStoneWithNameplate", GraveStoneWithNameplate.CODEC);
-		ConfirmedDeath.componentType = getEntityStoreRegistry().registerComponent(ConfirmedDeath.class, "ConfirmedDeath",
-				ConfirmedDeath.CODEC);
-		LostInCombat.componentType = getEntityStoreRegistry().registerComponent(LostInCombat.class, "LostInCombat",
-				LostInCombat.CODEC);
+        worldPreviews = WorldPreviewLoader.load(templatesPath, getDataDirectory());
 
-		events.add(getEventRegistry().registerGlobal(PlayerReadyEvent.class, new PlayerReadyEventListener()));
-		events.add(getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, new PlayerDisconnectEventListener()));
-		events.add(getEventRegistry().registerGlobal(PlayerChatEvent.class, new ChatListener()));
-		events.add(getEventRegistry().registerGlobal(StartNewRoundEvent.class, new StartNewRoundEventHandler()));
-		events.add(getEventRegistry().registerGlobal(FinishCurrentRoundEvent.class, new FinishCurrentRoundEventHandler()));
-		events.add(getEventRegistry().registerGlobal(FinishCurrentMapEvent.class, new FinishCurrentMapEventHandler()));
+        PlayerGameModeInfo.componentType = getEntityStoreRegistry().registerComponent(PlayerGameModeInfo.class, "PlayerGameModeInfo", PlayerGameModeInfo.CODEC);
+        GraveStoneWithNameplate.componentType = getChunkStoreRegistry().registerComponent(GraveStoneWithNameplate.class,
+                "GraveStoneWithNameplate", GraveStoneWithNameplate.CODEC);
+        ConfirmedDeath.componentType = getEntityStoreRegistry().registerComponent(ConfirmedDeath.class, "ConfirmedDeath",
+                ConfirmedDeath.CODEC);
+        LostInCombat.componentType = getEntityStoreRegistry().registerComponent(LostInCombat.class, "LostInCombat",
+                LostInCombat.CODEC);
 
-		commands.add(getCommandRegistry().registerCommand(new ExampleCommand(this.getName(), this.getManifest().getVersion().toString())));
-		commands.add(getCommandRegistry().registerCommand(new SpectatorMode()));
-		commands.add(getCommandRegistry().registerCommand(new ChangeWorldCommand()));
-		commands.add(getCommandRegistry().registerCommand(new TttCommand()));
-		commands.add(getCommandRegistry().registerCommand(new TraitorChatCommand()));
+        events.add(getEventRegistry().registerGlobal(PlayerReadyEvent.class, new PlayerReadyEventListener()));
+        events.add(getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, new PlayerDisconnectEventListener()));
+        events.add(getEventRegistry().registerGlobal(PlayerChatEvent.class, new ChatListener()));
+        events.add(getEventRegistry().registerGlobal(StartNewRoundEvent.class, new StartNewRoundEventHandler()));
+        events.add(getEventRegistry().registerGlobal(FinishCurrentRoundEvent.class, new FinishCurrentRoundEventHandler()));
+        events.add(getEventRegistry().registerGlobal(FinishCurrentMapEvent.class, new FinishCurrentMapEventHandler()));
 
-		getCodecRegistry(Interaction.CODEC)
-				.register("test_player_role", TestPlayerRole.class, TestPlayerRole.CODEC)
-				.register("test_player_role_potion", TestPlayerRolePotion.class, TestPlayerRolePotion.CODEC)
-				.register("show_dead_player_info", ShowDeadPlayerInteraction.class, ShowDeadPlayerInteraction.CODEC)
-				.register("pickup_weapon_interaction", PickUpWeaponInteraction.class, PickUpWeaponInteraction.CODEC);
+        commands.add(getCommandRegistry().registerCommand(new ExampleCommand(this.getName(), this.getManifest().getVersion().toString())));
+        commands.add(getCommandRegistry().registerCommand(new SpectatorMode()));
+        commands.add(getCommandRegistry().registerCommand(new ChangeWorldCommand()));
+        commands.add(getCommandRegistry().registerCommand(new TttCommand()));
+        commands.add(getCommandRegistry().registerCommand(new TraitorChatCommand()));
 
-		HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
-			try {
-				DoubleTapDetector.getInstance().tick();
+        getCodecRegistry(Interaction.CODEC)
+                .register("test_player_role", TestPlayerRole.class, TestPlayerRole.CODEC)
+                .register("test_player_role_potion", TestPlayerRolePotion.class, TestPlayerRolePotion.CODEC)
+                .register("show_dead_player_info", ShowDeadPlayerInteraction.class, ShowDeadPlayerInteraction.CODEC)
+                .register("pickup_weapon_interaction", PickUpWeaponInteraction.class, PickUpWeaponInteraction.CODEC);
 
-			} catch (Exception e) {
-				LOGGER.atWarning().log("Error in double-tap detector: " + e.getMessage());
-			}
+        HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
+            try {
+                DoubleTapDetector.getInstance().tick();
 
-		}, 100L, 50L, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                LOGGER.atWarning().log("Error in double-tap detector: " + e.getMessage());
+            }
 
-		LOGGER.atInfo().log("Plugin " + this.getName() + " setup completed!");
-	}
+        }, 100L, 50L, TimeUnit.MILLISECONDS);
 
-	private void prepareConfigs() {
-		if (!Files.exists(getDataDirectory()) || !Files.exists(getConfigFilePath())) {
-			config.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
-		}
-		config.load().thenRun(() -> LOGGER.atInfo().log("Gamemode config loaded."));
+        LOGGER.atInfo().log("Plugin " + this.getName() + " setup completed!");
+    }
 
-		instanceConfig.forEach((world, instanceCfg) -> {
-			String instanceConfigFile = "/" + world + "_config.json";
-			Path worldConfigPath = Paths.get(getDataDirectory().toString(), instanceConfigFile);
+    private void prepareConfigs() {
+        if (!Files.exists(getDataDirectory()) || !Files.exists(getConfigFilePath())) {
+            config.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
+        }
+        config.load().thenRun(() -> LOGGER.atInfo().log("Gamemode config loaded."));
 
-			Path instanceConfigPath = templatesPath.resolve(world);
-			instanceConfigPath = instanceConfigPath.resolve("config.json");
+        loadMapsConfig();
 
-			if (Files.exists(instanceConfigPath)) {
-				try {
-					Files.copy(instanceConfigPath, worldConfigPath, StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+        if (!Files.exists(getWeaponsConfigFilePath())) {
+            weaponsConfig.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
+        }
+        weaponsConfig.load().thenRun(() -> LOGGER.atInfo().log("Config loaded."));
+    }
 
-				LOGGER.atInfo().log("Copied default instance config for {} from template.", world);
-			}
+    public void loadMapsConfig() {
+        instanceConfig.forEach((world, instanceCfg) -> {
+            String instanceConfigFile = "/" + world + "_config.json";
+            Path worldConfigPath = Paths.get(getDataDirectory().toString(), instanceConfigFile);
 
-			if (!Files.exists(worldConfigPath)) {
-				instanceCfg.save().thenRun(() -> LOGGER.atInfo().log("Saved instance config for {}", world));
-			}
+            Path instanceConfigPath = templatesPath.resolve(world);
+            instanceConfigPath = instanceConfigPath.resolve("config.json");
 
-			instanceCfg.load().thenRun(() -> LOGGER.atInfo().log("Instance config loaded for {}", world));
-		});
+            if (Files.exists(instanceConfigPath)) {
+                try {
+                    Files.copy(instanceConfigPath, worldConfigPath, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
 
-		if (!Files.exists(getWeaponsConfigFilePath())) {
-			weaponsConfig.save().thenRun(() -> LOGGER.atInfo().log("Saved default config"));
-		}
-		weaponsConfig.load().thenRun(() -> LOGGER.atInfo().log("Config loaded."));
-	}
+                LOGGER.atInfo().log("Copied default instance config for {} from template.", world);
+            }
 
-	private Path getConfigFilePath() {
-		return getDataDirectory().resolve("config.json");
-	}
+            if (!Files.exists(worldConfigPath)) {
+                instanceCfg.save().thenRun(() -> LOGGER.atInfo().log("Saved instance config for {}", world));
+            }
 
-	private Path getWeaponsConfigFilePath() {
-		return getDataDirectory().resolve("weapons_config.json");
-	}
+            instanceCfg.load().thenRun(() -> LOGGER.atInfo().log("Instance config loaded for {}", world));
+        });
+    }
 
-	@Override
-	protected void start() {
-		getEntityStoreRegistry().registerSystem(new SpectatorModeDamageListener());
-		getEntityStoreRegistry().registerSystem(new PlayerDeathSystem());
-		getEntityStoreRegistry().registerSystem(new PlayerRespawnSystem());
-		getEntityStoreRegistry().registerSystem(new PlayerHudUpdateSystem());
-		getEntityStoreRegistry().registerSystem(new WorldRoundTimeSystem());
-		getEntityStoreRegistry().registerSystem(new BreakBlockListener());
-		getEntityStoreRegistry().registerSystem(new DamageBlockListener());
-		getEntityStoreRegistry().registerSystem(new PlaceBlockListener());
-		getEntityStoreRegistry().registerSystem(new InteractiveItemPickUpListener());
-		getEntityStoreRegistry().registerSystem(new ItemPickUpSystem());
+    private Path getConfigFilePath() {
+        return getDataDirectory().resolve("config.json");
+    }
 
-		inboundPacketFilters.add(PacketAdapters.registerInbound(new GuiPacketsFilter()));
+    private Path getWeaponsConfigFilePath() {
+        return getDataDirectory().resolve("weapons_config.json");
+    }
 
-		Universe.get().getWorlds().forEach((s, world) -> {
-			gameModeStateForWorld.put(world.getWorldConfig().getUuid(), new GameModeState());
-			world.execute(() -> {
-				world.getWorldConfig().setCanSaveChunks(false);
-				world.getWorldConfig().setGameTimePaused(true);
-				world.getWorldConfig().setSpawningNPC(false);
-			});
+    @Override
+    protected void start() {
+        getEntityStoreRegistry().registerSystem(new SpectatorModeDamageListener());
+        getEntityStoreRegistry().registerSystem(new PlayerDeathSystem());
+        getEntityStoreRegistry().registerSystem(new PlayerRespawnSystem());
+        getEntityStoreRegistry().registerSystem(new PlayerHudUpdateSystem());
+        getEntityStoreRegistry().registerSystem(new WorldRoundTimeSystem());
+        getEntityStoreRegistry().registerSystem(new BreakBlockListener());
+        getEntityStoreRegistry().registerSystem(new DamageBlockListener());
+        getEntityStoreRegistry().registerSystem(new PlaceBlockListener());
+        getEntityStoreRegistry().registerSystem(new InteractiveItemPickUpListener());
+        getEntityStoreRegistry().registerSystem(new ItemPickUpSystem());
+
+        inboundPacketFilters.add(PacketAdapters.registerInbound(new GuiPacketsFilter()));
+
+        Universe.get().getWorlds().forEach((s, world) -> {
+            gameModeStateForWorld.put(world.getWorldConfig().getUuid(), new GameModeState());
+            world.execute(() -> {
+                world.getWorldConfig().setCanSaveChunks(false);
+                world.getWorldConfig().setGameTimePaused(true);
+                world.getWorldConfig().setSpawningNPC(false);
+            });
 //			world.getDeathConfig().getRespawnController().respawnPlayer()
-		});
+        });
 
-		PermissionsModule permissions = PermissionsModule.get();
-		permissions.addGroupPermission(TTT_USER_GROUP, USER_PERMISSIONS);
-		permissions.addGroupPermission(TTT_ADMIN_GROUP, ADMIN_PERMISSIONS);
+        PermissionsModule permissions = PermissionsModule.get();
+        permissions.addGroupPermission(TTT_USER_GROUP, USER_PERMISSIONS);
+        permissions.addGroupPermission(TTT_ADMIN_GROUP, ADMIN_PERMISSIONS);
 
-		LOGGER.atInfo().log("Plugin started!");
-	}
+        LOGGER.atInfo().log("Plugin started!");
+    }
 
-	@Override
-	protected void shutdown() {
-		inboundPacketFilters.forEach(PacketAdapters::deregisterInbound);
-		commands.forEach(Registration::unregister);
-		events.forEach(Registration::unregister);
-		LOGGER.atInfo().log("Plugin shutting down!");
-	}
+    @Override
+    protected void shutdown() {
+        inboundPacketFilters.forEach(PacketAdapters::deregisterInbound);
+        commands.forEach(Registration::unregister);
+        events.forEach(Registration::unregister);
+        LOGGER.atInfo().log("Plugin shutting down!");
+    }
 
 }

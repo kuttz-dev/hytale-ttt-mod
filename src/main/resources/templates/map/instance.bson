@@ -1,0 +1,37 @@
+{
+  "Version": 4,
+  "DisplayName": "WORLD_NAME",
+  "WorldGen": {
+    "Type": "HytaleGenerator",
+    "WorldStructure": "Void"
+  },
+  "SpawnProvider": {
+    "Type": "Global",
+    "SpawnPoint": {
+      "X": 0,
+      "Y": 80,
+      "Z": 0,
+      "Pitch": 0,
+      "Yaw": 180,
+      "Roll": 0.0
+    }
+  },
+  "IsPvpEnabled": true,
+  "IsTicking": true,
+  "IsBlockTicking": true,
+  "IsSavingPlayers": true,
+  "IsSavingChunks": false,
+  "IsUnloadingChunks": true,
+  "DeleteOnRemove": true,
+  "IsSpawningNPC": false,
+  "Plugin": {
+    "Instance": {
+      "RemovalConditions": [
+        {
+          "Type": "WorldEmpty"
+        }
+      ],
+      "PreventReconnection": true
+    }
+  }
+}

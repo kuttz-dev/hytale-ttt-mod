@@ -1,6 +1,6 @@
 package ar.ncode.plugin.system.player;
 
-import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.config.instance.SpawnPoint;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -20,8 +20,6 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.ThreadLocalRandom;
-
-import static ar.ncode.plugin.accessors.WorldAccessors.getWorldNameForInstance;
 
 public class PlayerRespawnSystem extends RespawnSystems.OnRespawnSystem {
 
@@ -70,9 +68,11 @@ public class PlayerRespawnSystem extends RespawnSystems.OnRespawnSystem {
 			return;
 		}
 
-		String worldName = getWorldNameForInstance(world);
-		InstanceConfig instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName).get();
+		var config = WorldAccessors.getWorldInstanceConfigFile(world);
+		if (config.isEmpty()) {
+			return;
+		}
 
-		world.execute(() -> teleportPlayerToRandomSpawnPoint(reference, store, instanceConfig, world));
+		world.execute(() -> teleportPlayerToRandomSpawnPoint(reference, store, config.get().get(), world));
 	}
 }

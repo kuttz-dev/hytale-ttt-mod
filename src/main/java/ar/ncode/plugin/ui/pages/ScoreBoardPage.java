@@ -26,7 +26,12 @@ import java.util.List;
 import java.util.logging.Level;
 
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
-import static ar.ncode.plugin.model.TranslationKey.*;
+import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLE;
+import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLES_DEATHS;
+import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLES_KARMA;
+import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLES_KILLS;
+import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLES_PING;
+import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLES_PLAYER;
 import static ar.ncode.plugin.model.enums.RoleGroup.TRAITOR;
 
 public class ScoreBoardPage extends BasicCustomUIPage {
@@ -137,7 +142,7 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 			return;
 		}
 
-		boolean showTraitors = TRAITOR.equals(playerInfo.getCurrentRoundRole().getRoleGroup());
+		boolean showTraitors = playerInfo.getCurrentRoundRole() != null && TRAITOR.equals(playerInfo.getCurrentRoundRole().getRoleGroup());
 		boolean showLostInCombat = playerInfo.isSpectator();
 		ScoreBoardTable table = getTableRows(players, showLostInCombat);
 
