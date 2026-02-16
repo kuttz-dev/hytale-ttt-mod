@@ -192,5 +192,4 @@ test {
 
     // Configure HytaleLogManager before any test classes are loaded
     jvmArgs "-Djava.util.logging.manager=com.hypixel.hytale.logger.backend.HytaleLogManager"
-
 }
