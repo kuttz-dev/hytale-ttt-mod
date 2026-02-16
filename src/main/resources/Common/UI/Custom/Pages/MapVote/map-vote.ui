@@ -2,30 +2,30 @@
 $C = "../../Common.ui";
 
 Group {
-  LayoutMode: Top;
-  Anchor: (Width: 1200, Height: 900, Top: 250);
-  Padding: (Full: 20);
+    LayoutMode: Top;
+    Anchor: (Width: 1200, Height: 800, Top: 250);
+    Padding: (Full: 20);
 
-  $C.@Container #Container1d8d01f2 {
-    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+    $C.@Container #Container1d8d01f2 {
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
 
-    #Title {
-      Group {
-        LayoutMode: Left;
-        $C.@Title #TitleLabel {
-          @Text = "Vote the next map";
+        #Title {
+            Group {
+                LayoutMode: Left;
+                $C.@Title #TitleLabel {
+                    @Text = "Vote the next map";
+                }
+            }
         }
-      }
-    }
 
-    #Content {
-      Group #Rows {
-          LayoutMode: TopScrolling;
-          ScrollbarStyle: $C.@DefaultScrollbarStyle;
-          Anchor: (Full: 1);
+        #Content {
+            Group #Rows {
+                    LayoutMode: TopScrolling;
+                    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+                    Anchor: (Full: 1);
 
-      }
+            }
+        }
     }
-  }
 
 }
