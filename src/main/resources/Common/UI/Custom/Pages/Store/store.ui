@@ -2,54 +2,55 @@
 $C = "../../Common.ui";
 
 Group {
-  LayoutMode: Top;
-  Anchor: (Width: 800, Height: 500);
-  Padding: (Full: 20);
+    LayoutMode: Top;
+    Anchor: (Width: 800, Height: 500);
+    Padding: (Full: 20);
 
-  $C.@Container #Container1d8d01f2 {
-    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+    $C.@Container #Container1d8d01f2 {
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
 
-    #Title {
-      Group {
-        LayoutMode: Left;
-        $C.@Title #TitleText {
-          @Text = "Store";
-        }
-      }
-    }
-
-    #Content {
-        Group {
-            LayoutMode: Right;
-
+        #Title {
             Group {
                 LayoutMode: Left;
-                Label #Credits {
-                  Style: (TextColor: #ffffff);
-                  Text: "Credits: ";
-                }
-
-                Label #CreditsSpacing {
-                  Style: (TextColor: #ffffff);
-                  Text: " ";
-                }
-
-                Label #CreditAmount {
-                  Style: (TextColor: #ffffff);
-                  Text: "1";
+                $C.@Title #TitleText {
+                    @Text = "Store";
                 }
             }
         }
-      Group #Rows {
-          LayoutMode: TopScrolling;
-          ScrollbarStyle: $C.@DefaultScrollbarStyle;
-          Anchor: (Full: 1);
 
-      }
-    }
-  }
+        #Content {
+                Group {
+                    LayoutMode: Right;
 
-    $C.@CancelTextButton #CancelTextButton {
-      @Text = "Close";
+                    Group {
+                        LayoutMode: Left;
+                        Label #Credits {
+                            Style: (TextColor: #ffffff);
+                            Text: "Credits: ";
+                        }
+
+                        Label #CreditsSpacing {
+                            Style: (TextColor: #ffffff);
+                            Text: " ";
+                        }
+
+                        Label #CreditAmount {
+                            Style: (TextColor: #ffffff);
+                            Text: "0";
+                        }
+                    }
+                }
+
+                Group #Rows {
+                    LayoutMode: TopScrolling;
+                    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+                    Anchor: (Full: 1);
+
+                }
+        }
     }
+
+        $C.@CancelTextButton #CancelTextButton {
+            @Text = "Close";
+        }
 }

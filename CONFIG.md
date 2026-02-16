@@ -59,7 +59,7 @@ gradlew.bat build
 ./gradlew build
 ```
 
-The JAR will be in `build/out/ttt-0.2.0.jar`
+The JAR will be in `build/libs/ttt-X.X.X.jar`
 
 ### 4. Install the JAR
 
@@ -90,59 +90,11 @@ This creates a `run/` directory with server files.
 
 ## Configuration
 
-TTT generates a config file on first run. Edit it at:
+TTT generates two config files on first run. Edit it at:
 
 ```
 <Server>/config/ncode/ttt/config.json
-```
-
-### Full Configuration Reference
-
-```json
-{
-  "InnocentColor": "#33CC76",
-  "TraitorColor": "#B01515",
-  "RequiredPlayersToStartRound": 3,
-  "MinAmountOfTraitors": 1,
-  "TraitorsRatio": 4,
-  "MinAmountOfDetectives": 0,
-  "DetectivesRatio": 11,
-  "MaxDetectives": 10,
-  "TimeBeforeRoundInSeconds": 10,
-  "RoundDurationInSeconds": 600,
-  "TimeAfterRoundInSeconds": 5,
-  "TimeToVoteMapInSeconds": 30,
-  "TimeBeforeChangingMapInSeconds": 5,
-  "KarmaStartingValue": 1000,
-  "KarmaForDisconnectingMiddleRound": -100,
-  "KaramPointsForTraitorKillingInnocent": 10,
-  "KaramPointsForTraitorKillingDetective": 20,
-  "KaramPointsForTraitorKillingTraitor": -100,
-  "KarmaPointsForInnocentKillingTraitor": 10,
-  "KarmaPointsForInnocentKillingDetective": -100,
-  "KarmaPointsForInnocentKillingInnocent": -50,
-  "KarmaPointsForDetectiveKillingTraitor": 10,
-  "KarmaPointsForDetectiveKillingInnocent": -50,
-  "KarmaPointsForDetectiveKillingDetective": -100,
-  "StartingItemsInHotbar": [
-    "Weapon_Shortbow_Combat:1"
-  ],
-  "StartingItemsInInventory": [
-    "Weapon_Arrow_Crude:200"
-  ],
-  "TraitorStoreItems": [
-    "Weapon_Daggers_Doomed:1"
-  ],
-  "DetectiveStoreItems": [
-    "Weapon_Staff_Frost:1",
-    "Weapon_Deployable_Healing_Totem:1"
-  ],
-  "PlayerGraveId": "Player_Grave",
-  "LootBoxBlockId": "Furniture_Human_Ruins_Chest_Small",
-  "RoundsPerMap": 8,
-  "MapsInARowForVoting": 3,
-  "WorldTemplatesFolder": "universe/templates"
-}
+<Server>/config/ncode/ttt/weapons_config.json
 ```
 
 ### Configuration Options Explained
@@ -162,8 +114,8 @@ Items use the format `ItemId:Amount` or `ItemId:Amount|ItemId:Amount` for bundle
 
 ```json
 "StartingItemsInHotbar": [
-"Weapon_Shortbow_Combat:1",
-"Consumable_Potion_Health:3"
+	"Weapon_Shortbow_Combat:1",
+	"Consumable_Potion_Health:3"
 ]
 ```
 
@@ -171,12 +123,12 @@ Items use the format `ItemId:Amount` or `ItemId:Amount|ItemId:Amount` for bundle
 
 ## Custom Maps
 
-TTT supports custom map templates for variety. Maps are loaded from the `WorldTemplatesFolder`.
+TTT supports custom map templates for variety. Maps are loaded from the folder `mods/ncode_ttt/maps`.
 
 ### Map Structure
 
 ```
-universe/templates/
+mods/ncode_ttt/maps
 ├── map_mansion/
 │   ├── chunks/
 │       ├── 0.0.region.bin
@@ -203,11 +155,6 @@ Each map can have its own spawn point and loot configuration:
     },
     {
       "x": 105,
-      "y": 64,
-      "z": 100
-    },
-    {
-      "x": 110,
       "y": 64,
       "z": 100
     }
