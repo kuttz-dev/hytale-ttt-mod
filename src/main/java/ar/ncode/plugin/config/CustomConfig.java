@@ -84,6 +84,7 @@ public class CustomConfig {
 							(config, _) -> config.roles)
 					.add()
 					.build();
+
 	public static final CustomRole DETECTIVE_ROLE = CustomRole.builder()
 			.id("detective")
 			.translationKey(TranslationKey.getWithPrefix("hud_current_role_detective"))

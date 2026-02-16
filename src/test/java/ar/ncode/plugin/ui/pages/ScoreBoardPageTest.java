@@ -134,7 +134,6 @@ class ScoreBoardPageTest {
 	void testScenarioA_ActivePlayer() {
 		Collection<PlayerComponents> players = new ArrayList<>();
 		PlayerComponents activePlayer = createPlayer(INNOCENT_ROLE, "player_innocent", false, false);
-		activePlayer.info().setCurrentRoundRole(INNOCENT_ROLE);
 		players.add(activePlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -155,15 +154,12 @@ class ScoreBoardPageTest {
 		Collection<PlayerComponents> players = new ArrayList<>();
 
 		PlayerComponents innocentPlayer = createPlayer(INNOCENT_ROLE, "player_innocent", false, false);
-		innocentPlayer.info().setCurrentRoundRole(INNOCENT_ROLE);
 		players.add(innocentPlayer);
 
 		PlayerComponents traitorPlayer = createPlayer(TRAITOR_ROLE, "player_traitor", false, false);
-		traitorPlayer.info().setCurrentRoundRole(TRAITOR_ROLE);
 		players.add(traitorPlayer);
 
 		PlayerComponents detectivePlayer = createPlayer(DETECTIVE_ROLE, "player_detective", false, false);
-		detectivePlayer.info().setCurrentRoundRole(DETECTIVE_ROLE);
 		players.add(detectivePlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -183,7 +179,6 @@ class ScoreBoardPageTest {
 	void testScenarioB_ConfirmedDeath() {
 		Collection<PlayerComponents> players = new ArrayList<>();
 		PlayerComponents deadPlayer = createPlayer(INNOCENT_ROLE, "player_dead", true, false);
-		deadPlayer.info().setCurrentRoundRole(INNOCENT_ROLE);
 		players.add(deadPlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -204,7 +199,6 @@ class ScoreBoardPageTest {
 	void testScenarioB_ConfirmedDeathPriority() {
 		Collection<PlayerComponents> players = new ArrayList<>();
 		PlayerComponents deadPlayer = createPlayer(INNOCENT_ROLE, "player_dead_both", true, true);
-		deadPlayer.info().setCurrentRoundRole(INNOCENT_ROLE);
 		players.add(deadPlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
@@ -225,7 +219,6 @@ class ScoreBoardPageTest {
 	void testScenarioC_LostInCombat_ShowEnabled() {
 		Collection<PlayerComponents> players = new ArrayList<>();
 		PlayerComponents combatPlayer = createPlayer(INNOCENT_ROLE, "player_lost_combat", false, true);
-		combatPlayer.info().setCurrentRoundRole(INNOCENT_ROLE);
 		players.add(combatPlayer);
 
 		var result = ScoreBoardPage.getTableRows(players, true);
