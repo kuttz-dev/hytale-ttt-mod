@@ -1,7 +1,7 @@
 package ar.ncode.plugin.interaction;
 
 import ar.ncode.plugin.accessors.WorldAccessors;
-import ar.ncode.plugin.component.GraveStoneWithNameplate;
+import ar.ncode.plugin.component.DeadPlayerGravestoneComponent;
 import ar.ncode.plugin.ui.pages.GravePlatePage;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -21,11 +21,11 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-public class ShowDeadPlayerInteraction extends SimpleInstantInteraction {
+public class ShowDeadPlayerInfoInteraction extends SimpleInstantInteraction {
 
-	public static final BuilderCodec<ShowDeadPlayerInteraction> CODEC = BuilderCodec.builder(
-			ShowDeadPlayerInteraction.class,
-			ShowDeadPlayerInteraction::new, SimpleInstantInteraction.CODEC
+	public static final BuilderCodec<ShowDeadPlayerInfoInteraction> CODEC = BuilderCodec.builder(
+			ShowDeadPlayerInfoInteraction.class,
+			ShowDeadPlayerInfoInteraction::new, SimpleInstantInteraction.CODEC
 	).build();
 
 	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
@@ -47,8 +47,7 @@ public class ShowDeadPlayerInteraction extends SimpleInstantInteraction {
 			return;
 		}
 		Vector3i blockPosition = new Vector3i(targetBlock.x, targetBlock.y, targetBlock.z);
-		GraveStoneWithNameplate graveStone = WorldAccessors.getBlockComponentAt(world, blockPosition,
-				GraveStoneWithNameplate.componentType);
+		DeadPlayerGravestoneComponent graveStone = WorldAccessors.getBlockComponentAt(world, blockPosition, DeadPlayerGravestoneComponent.componentType);
 
 		if (graveStone == null) {
 			return;
@@ -65,8 +64,10 @@ public class ShowDeadPlayerInteraction extends SimpleInstantInteraction {
 				return;
 			}
 
-			player.getPageManager().openCustomPage(reference, reference.getStore(), new GravePlatePage(playerRef,
-					CustomPageLifetime.CanDismiss, graveStone));
+			player.getPageManager().openCustomPage(
+					reference, reference.getStore(),
+					new GravePlatePage(playerRef, CustomPageLifetime.CanDismiss, graveStone.getDeadPlayerInfoComponent())
+			);
 		});
 	}
 

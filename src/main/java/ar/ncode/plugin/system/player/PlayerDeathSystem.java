@@ -1,7 +1,7 @@
 package ar.ncode.plugin.system.player;
 
 import ar.ncode.plugin.commands.SpectatorMode;
-import ar.ncode.plugin.component.GraveStoneWithNameplate;
+import ar.ncode.plugin.component.DeadPlayerInfoComponent;
 import ar.ncode.plugin.component.death.LostInCombat;
 import ar.ncode.plugin.config.CustomRole;
 import ar.ncode.plugin.model.DamageCause;
@@ -9,7 +9,7 @@ import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;
 import ar.ncode.plugin.model.enums.RoleGroup;
 import ar.ncode.plugin.model.enums.RoundState;
-import ar.ncode.plugin.system.GraveSystem;
+import ar.ncode.plugin.system.DeathSystem;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
 import com.hypixel.hytale.common.util.CompletableFutureUtil;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -22,6 +22,7 @@ import com.hypixel.hytale.component.dependency.SystemDependency;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.asset.type.gameplay.DeathConfig;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
@@ -47,7 +48,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
 	private final Set<Dependency<EntityStore>> dependencies = Set.of(new SystemDependency<>(Order.BEFORE,
-			DeathSystems.PlayerDeathScreen.class, OrderPriority.NORMAL));
+			DeathSystems.PlayerDeathScreen.class, OrderPriority.FURTHEST));
 
 	public static void updatePlayerCountsOnPlayerDeath(PlayerRef playerRef, CustomRole role, GameModeState gameModeState) {
 		if (RoleGroup.TRAITOR.equals(role.getRoleGroup())) {
@@ -94,10 +95,10 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 		}
 	}
 
-	private static void spawnGraveStone(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl DeathComponent deathComponent, GameModeState gameModeState, PlayerComponents player, World world) {
-		GraveStoneWithNameplate graveStone = GraveStoneWithNameplate.builder()
+	private static void spawnGraveStone(@NonNullDecl DeathComponent deathComponent, GameModeState gameModeState, PlayerComponents player, World world) {
+		DeadPlayerInfoComponent graveStone = DeadPlayerInfoComponent.builder()
 				.timeOfDeath(gameModeState.getRoundRemainingTime().format(timeFormatter))
-				.deadPlayerReference(reference)
+				.deadPlayerReference(player.reference())
 				.deadPlayerRole(player.info().getCurrentRoundRole())
 				.deadPlayerName(player.component().getDisplayName())
 				.build();
@@ -107,7 +108,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			graveStone.setCauseOfDeath(damageCause);
 		}
 
-		GraveSystem.spawnGraveAtPlayerDeath(world, graveStone, reference);
+		DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, player.reference());
 	}
 
 	@Nonnull
@@ -120,23 +121,26 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 	public void onComponentAdded(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl DeathComponent deathComponent,
 	                             @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer
 	) {
+
 		// Get reference to the damaged entity
 		var player = getPlayerFrom(reference).orElse(null);
 		if (player == null) return;
 
-		// Disable death screen
-		deathComponent.setShowDeathMenu(false);
-		CompletableFutureUtil._catch(DeathComponent.respawn(store, reference));
-
 		World world = player.component().getWorld();
 		if (world == null) return;
 
-		GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
-		if (gameModeState == null || !RoundState.IN_GAME.equals(gameModeState.roundState)) {
-			return;
-		}
-
 		world.execute(() -> {
+			// Disable death screen
+			deathComponent.setShowDeathMenu(false);
+			deathComponent.setItemsLossMode(DeathConfig.ItemsLossMode.ALL);
+			deathComponent.setItemsDurabilityLossPercentage(0.0F);
+			CompletableFutureUtil._catch(DeathComponent.respawn(store, reference));
+
+			GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+			if (gameModeState == null || !RoundState.IN_GAME.equals(gameModeState.roundState)) {
+				return;
+			}
+
 			player.reference().getStore().ensureComponent(player.reference(), LostInCombat.componentType);
 			player.component().getInventory().clear();
 			SpectatorMode.setGameModeToSpectator(player);
@@ -144,7 +148,8 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			player.info().getHud().update();
 
 			updateAttackerKarma(deathComponent, player, gameModeState);
-			spawnGraveStone(reference, deathComponent, gameModeState, player, world);
+
+			spawnGraveStone(deathComponent, gameModeState, player, world);
 
 			if (roundShouldEnd(gameModeState)) {
 				HytaleServer.get().getEventBus()

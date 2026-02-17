@@ -10,7 +10,15 @@ everything together—before it’s too late.
 The project was prototyped during Hytale’s first week and is designed to be **modular, configurable, and extensible**,
 making it easy for the community to build on top of it.
 
-To set up this mod on a server please follow the guide at: [CONFIG.md](CONFIG.md#configuration)
+## Quick Start
+
+- To set up this mod, please follow the guide at: [CONFIG.md](CONFIG.md#configuration)
+- Open the special shop by using double-tap on the Alt key (while alive and in the appropriate role, Traitor or
+  Detective).
+- Open the scoreboard: press the O key.
+- Minimum players: configurable in the server configuration (e.g. `config.json`). Default: 3 players.
+- Maps: at least one map template must be configured under `mods/ncode_ttt/maps` (the map system requires a configured
+  map to run).
 
 ---
 
@@ -19,9 +27,9 @@ To set up this mod on a server please follow the guide at: [CONFIG.md](CONFIG.md
 ### 🎭 Roles System
 
 - Configurable roles. Default ones are:
-  - **Innocents**: need to survive and work together to identify and eliminate traitors.
-  - **Traitors**: must eliminate everyone without getting caught.
-  - **Detectives**: have special tools to help expose the truth.
+    - **Innocents**: need to survive and work together to identify and eliminate traitors.
+    - **Traitors**: must eliminate everyone without getting caught.
+    - **Detectives**: have special tools to help expose the truth.
 - **Spectator** – Dead players can freely observe without interacting.
 - Always-visible role UI for alive players.
 - Role ratios are fully configurable.
@@ -31,7 +39,6 @@ To set up this mod on a server please follow the guide at: [CONFIG.md](CONFIG.md
 ### 🔫 Weapons & Equipment
 
 ![img.png](docs/images/traitor_shop.png)
-
 
 - **Configurable equipment store** for traitors and detectives.
 - Items can be purchased with credits or looted from dead players.
@@ -104,8 +111,8 @@ A configurable karma system that encourages fair play:
 
 - Dead players leave behind**graves**.
 - Graves can be inspected to:
-  - Confirm death
-  - Reveal information about the victim
+    - Confirm death
+    - Reveal information about the victim
 - Prevents instant role revelation and preserves deduction gameplay.
 
 ---
@@ -115,8 +122,8 @@ A configurable karma system that encourages fair play:
 ![scoreboard.png](docs/images/scoreboard.png)
 
 - Displays:
-  - Kills / deaths
-  - Karma
+    - Kills / deaths
+    - Karma
 - Traitor roles are hidden from alive players.
 
 ---
@@ -135,9 +142,9 @@ This project is under active development. The short-term roadmap focuses on **co
 richer gameplay and community-made content.
 
 - Expanded detective and traitor equipment:
-  - DNA Scanner
-  - Traitor Knife
-  - Detective skin
+    - DNA Scanner
+    - Traitor Knife
+    - Detective skin
 - Separate chat channels (alive / dead / spectator)
 - Karma-based punishments and reputation system
 - Improved UI/UX polish
@@ -158,7 +165,8 @@ The goal is not just to recreate TTT, but to provide a **community-driven founda
 
 ## AI Ussage
 
-There is ussage of AI in this project as a tool to enhance creativity and productivity, always with human review and testing, and limited to:
+There is ussage of AI in this project as a tool to enhance creativity and productivity, always with human review and
+testing, and limited to:
 
 - Code snippets.
 - Text content, descriptions, and documentation.

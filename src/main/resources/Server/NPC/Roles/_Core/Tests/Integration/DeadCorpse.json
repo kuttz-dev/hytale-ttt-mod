@@ -1,0 +1,84 @@
+{
+  "Type": "Generic",
+  "Parameters": {
+    "Invulnerable": {
+      "Value": true,
+      "Description": "Whether this NPC is invulnerable."
+    },
+    "NameTranslationKey": {
+      "Value": "server.npcRoles.Kweebec_Merchant.name",
+      "Description": "Translation key for NPC name display"
+    }
+  },
+  "DefaultNPCAttitude": "Ignore",
+  "DefaultPlayerAttitude": "Ignore",
+  "Appearance": "Player",
+  "MaxHealth": 100,
+  "IsMemory": false,
+  "Invulnerable": {
+    "Compute": "Invulnerable"
+  },
+  "MotionControllerList": [
+    {
+      "Type": "Walk",
+      "MaxWalkSpeed": 5,
+      "Gravity": 10,
+      "RunThreshold": 0.3,
+      "MaxFallSpeed": 15,
+      "MaxRotationSpeed": 360,
+      "Acceleration": 10
+    }
+  ],
+  "Instructions": [
+    {
+      "Sensor": {
+        "Type": "Any"
+      },
+      "Actions": [
+        {
+          "Type": "PlayAnimation",
+          "Slot": "Status",
+          "Animation": "Sleep"
+        }
+      ],
+      "Continue": true
+    }
+  ],
+  "InteractionInstruction": {
+    "Instructions": [
+      {
+        "Continue": true,
+        "Sensor": {
+          "Type": "Any"
+        },
+        "Actions": [
+          {
+            "Type": "SetInteractable",
+            "Interactable": true
+          }
+        ]
+      },
+      {
+        "Sensor": {
+          "Type": "HasInteracted"
+        },
+        "Instructions": [
+          {
+            "Sensor": {
+              "Type": "Any"
+            },
+            "Actions": [
+              {
+                "Type": "OpenDeadPlayerInfo",
+                "Shop": "Kweebec_Merchant"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "NameTranslationKey": {
+    "Compute": "NameTranslationKey"
+  }
+}

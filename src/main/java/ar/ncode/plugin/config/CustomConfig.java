@@ -8,6 +8,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,6 +84,21 @@ public class CustomConfig {
 							(config, v, _) -> config.roles = v,
 							(config, _) -> config.roles)
 					.add()
+					.append(new KeyedCodec<>("PlayersLeaveRemainsWhenDie", Codec.BOOLEAN),
+							(config, v, _) -> config.playersLeaveRemainsWhenDie = v,
+							(config, _) -> config.playersLeaveRemainsWhenDie)
+					.documentation("Defines if a corpse or a gravestone should spawn when a player dies")
+					.add()
+					.append(new KeyedCodec<>("PlayersLeaveGravestonesWhenDie", Codec.BOOLEAN),
+							(config, v, _) -> config.playersLeaveGravestonesWhenDie = v,
+							(config, _) -> config.playersLeaveGravestonesWhenDie)
+					.documentation("Defines if a gravestone should spawn when a player dies instead of a corpse")
+					.add()
+					.append(new KeyedCodec<>("GravestonesHaveNameplates", Codec.BOOLEAN),
+							(config, v, _) -> config.gravestonesHaveNameplates = v,
+							(config, _) -> config.gravestonesHaveNameplates)
+					.documentation("Defines if a gravestone should have a nameplate floating above")
+					.add()
 					.build();
 
 	public static final CustomRole DETECTIVE_ROLE = CustomRole.builder()
@@ -107,6 +123,7 @@ public class CustomConfig {
 			.secretRole(true)
 			.roleGroup(RoleGroup.INNOCENT)
 			.build();
+
 	public static final CustomRole TRAITOR_ROLE = CustomRole.builder()
 			.id("traitor")
 			.translationKey(TranslationKey.getWithPrefix("hud_current_role_traitor"))
@@ -145,6 +162,12 @@ public class CustomConfig {
 	private int roundsPerMap = 8;
 	private int mapsInARowForVoting = 3;
 	private String worldTemplatesFolder = "universe/templates";
+	@Accessors(fluent = true)
+	private boolean playersLeaveRemainsWhenDie = true;
+	@Accessors(fluent = true)
+	private boolean playersLeaveGravestonesWhenDie = false;
+	@Accessors(fluent = true)
+	private boolean gravestonesHaveNameplates = true;
 
 	public static List<ItemStack> parseItemEntry(String line) {
 		if (line == null || line.isBlank()) {

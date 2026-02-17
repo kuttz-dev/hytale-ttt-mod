@@ -9,7 +9,12 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.UUID;
@@ -64,6 +69,7 @@ public class PlayerGameModeInfo implements Component<EntityStore> {
 	private float elapsedTimeSinceLastUpdate = 0;
 	@Builder.Default
 	private boolean alreadyVotedMap = false;
+	@Builder.Default
 	private UUID worldInstance = null;
 
 	@NullableDecl

@@ -71,18 +71,6 @@
     "IsDoor": false,
     "Particles": [
       {
-        "SystemId": "TTT_Innocent_Particle",
-        "TargetNodeName": "Led",
-        "Scale": 1,
-        "PositionOffset": {
-          "X": 1,
-          "Y": 1,
-          "Z": 1
-        },
-        "TargetEntityPart": "Self",
-        "DetachedFromModel": false
-      },
-      {
         "TargetNodeName": "Led",
         "SystemId": "Dance_Lights3",
         "Scale": 1,

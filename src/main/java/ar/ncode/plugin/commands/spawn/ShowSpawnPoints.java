@@ -1,8 +1,6 @@
 package ar.ncode.plugin.commands.spawn;
 
-import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.accessors.WorldAccessors;
-import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.config.instance.SpawnPoint;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.math.vector.Vector3i;
@@ -19,7 +17,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import java.util.concurrent.CompletableFuture;
 
 import static ar.ncode.plugin.commands.loot.LootShowSpawnPointsCommand.addBlockToWorldOnSpawnPoint;
-import static ar.ncode.plugin.system.GraveSystem.setBlockWithRotation;
+import static ar.ncode.plugin.system.DeathSystem.setBlockWithRotation;
 
 public class ShowSpawnPoints extends AbstractAsyncCommand {
 

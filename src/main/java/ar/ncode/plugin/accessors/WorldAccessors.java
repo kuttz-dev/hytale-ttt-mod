@@ -47,11 +47,20 @@ public class WorldAccessors {
 	}
 
 	private static String getWorldName(World world) {
-		return getSafeWorldName(world.getWorldConfig().getDisplayName());
+		String worldName = getSafeWorldName(world.getWorldConfig().getDisplayName());
+		if (worldName == null) {
+			worldName = world.getName();
+		}
+
+		return worldName;
 	}
 
-	public static String getSafeWorldName(String worldDisplayName) {
-		return worldDisplayName.replace(" ", "_").toLowerCase();
+	public static String getSafeWorldName(String worldName) {
+		if (worldName != null) {
+			return worldName.replace(" ", "_").toLowerCase();
+		}
+
+		return null;
 	}
 
 	public static Ref<ChunkStore> getBlockEntityRefAt(World world, Vector3i position) {

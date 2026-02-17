@@ -33,9 +33,10 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.*;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.weaponsConfig;
 import static ar.ncode.plugin.accessors.WorldAccessors.getWorldNameForInstance;
-import static ar.ncode.plugin.system.GraveSystem.findEmptyPlaceNearPosition;
+import static ar.ncode.plugin.system.DeathSystem.findEmptyPlaceNearPosition;
 
 public class LootSpawnCommand extends AbstractCommandCollection {
 

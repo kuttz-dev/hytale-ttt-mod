@@ -27,13 +27,19 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
 import static ar.ncode.plugin.accessors.WorldAccessors.getWorldNameForInstance;
-import static ar.ncode.plugin.model.TranslationKey.*;
+import static ar.ncode.plugin.model.TranslationKey.ROUND_INNOCENTS_WIN_MSG;
+import static ar.ncode.plugin.model.TranslationKey.ROUND_START_MSG;
+import static ar.ncode.plugin.model.TranslationKey.ROUND_TRAITORS_WIN_MSG;
 import static ar.ncode.plugin.model.enums.RoleGroup.INNOCENT;
 import static ar.ncode.plugin.model.enums.RoleGroup.TRAITOR;
 import static ar.ncode.plugin.system.event.handler.StartNewRoundEventHandler.updateEachPlayer;
@@ -91,7 +97,7 @@ public class GameModeSystem {
 				// Get the reference to the specific entity in this chunk
 				Ref<EntityStore> entityRef = archetypeChunk.getReferenceTo(i);
 
-				if (entityRef.isValid()) {
+				if (entityRef.isValid() && DebugConfig.get().entitiesShouldDisappearAfterRound()) {
 					// Queue the entity for removal.
 					// CommandBuffer.removeEntity(Ref, RemoveReason) is verified in the source.
 					commandBuffer.removeEntity(entityRef, RemoveReason.REMOVE);
@@ -108,7 +114,7 @@ public class GameModeSystem {
 					namePlateReference.getStore().removeEntity(namePlateReference, RemoveReason.REMOVE);
 				}
 
-				Vector3i graveStonePosition = graveStone.getGraveStonePosition();
+				Vector3i graveStonePosition = graveStone.getPosition();
 				world.breakBlock(graveStonePosition.x, graveStonePosition.y, graveStonePosition.z, 0);
 			}
 		});
@@ -184,6 +190,7 @@ public class GameModeSystem {
 
 			// Clean world
 			removeGraveStones(state, world);
+			removeCorpses(state);
 			removeDroppedItems(world);
 
 			// Update round state
@@ -199,6 +206,16 @@ public class GameModeSystem {
 				player.info().getHud().update();
 			}
 		});
+	}
+
+	private void removeCorpses(GameModeState state) {
+		state.corpses.forEach(corpse -> {
+			if (DebugConfig.INSTANCE.entitiesShouldDisappearAfterRound() && corpse.isValid()) {
+				corpse.getStore().removeEntity(corpse, RemoveReason.REMOVE);
+			}
+		});
+
+		state.corpses.clear();
 	}
 
 	public void doBeforeRound(World world, GameModeState state) {
