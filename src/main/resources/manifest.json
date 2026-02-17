@@ -16,7 +16,7 @@
         "Hytale:NPC": "*"
     },
     "OptionalDependencies": {
-        
+
     },
     "DisabledByDefault": false,
     "IncludesAssetPack": true,
