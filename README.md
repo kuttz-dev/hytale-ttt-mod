@@ -103,17 +103,21 @@ A configurable karma system that encourages fair play:
 
 ---
 
-### 🪦 Graves & Body Confirmation
+### 🪦 Corpses / Graves & Body Confirmation
 
-![img.png](docs/images/grave.png)
+![corpse.png](docs/images/dead_corpse.png)
 
-![img.png](docs/images/grave_gui.png)
+![corpse_with_gui.png](docs/images/dead_corpse_with_gui.png)
 
-- Dead players leave behind**graves**.
-- Graves can be inspected to:
+- Dead players leave behind configurable corpses or **graves**.
+- Corpses / Graves can be inspected to:
     - Confirm death
     - Reveal information about the victim
 - Prevents instant role revelation and preserves deduction gameplay.
+
+![grave.png](docs/images/grave.png)
+
+![grave_with_gui.png](docs/images/grave_gui.png)
 
 ---
 
