@@ -2,14 +2,11 @@ package ar.ncode.plugin.commands.debug;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.config.DebugConfig;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
-import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -18,7 +15,6 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 
 public class Debug extends AbstractCommandCollection {
@@ -32,51 +28,6 @@ public class Debug extends AbstractCommandCollection {
 		this.addSubCommand(new MemoryDebugCommand());
 //		this.addSubCommand(new SetCurrentRole());
 		this.addSubCommand(new Info());
-	}
-
-	public static class DebugToggleCommand extends AbstractAsyncCommand {
-
-		RequiredArg<String> configArg = withRequiredArg(
-				"config", "The config to toggle debug mode for.",
-				ArgTypes.STRING
-		);
-
-		public DebugToggleCommand() {
-			super("toggle", "Toggles the debug mode.");
-		}
-
-		@Nonnull
-		@Override
-		protected CompletableFuture<Void> executeAsync(@NonNullDecl CommandContext ctx) {
-			return CompletableFuture.runAsync(() -> {
-				DebugConfig config = DebugConfig.INSTANCE;
-				boolean newValue;
-				String arg = configArg.get(ctx);
-				switch (arg) {
-					case "gamemode" -> {
-						newValue = !config.isEnableChangingGameMode();
-						config.setEnableChangingGameMode(newValue);
-					}
-					case "gravestones" -> {
-						newValue = !config.isPersistentGraveStones();
-						config.setPersistentGraveStones(newValue);
-					}
-					case "blocks" -> {
-						newValue = !config.isCanPlaceAndDestroyBlocks();
-						config.setCanPlaceAndDestroyBlocks(newValue);
-					}
-					default -> {
-						ctx.sendMessage(Message.raw("Invalid config specified."));
-						return;
-					}
-				}
-
-				ctx.sendMessage(
-						Message.raw(arg + " is now " + (newValue ? "enabled" : "disabled") + ".")
-				);
-			});
-		}
-
 	}
 
 	public static class GetCurrentPositonCommand extends AbstractAsyncCommand {

@@ -1,6 +1,9 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.gradle.internal.jvm.Jvm
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
+import java.nio.file.Files
 
 plugins {
     id 'java'
@@ -194,4 +197,98 @@ test {
 
     // Configure HytaleLogManager before any test classes are loaded
     jvmArgs "-Djava.util.logging.manager=com.hypixel.hytale.logger.backend.HytaleLogManager"
+}
+
+def fernflowerUrl = "https://github.com/Vineflower/vineflower/releases/download/1.11.2/vineflower-1.11.2-slim.jar"
+
+tasks.register("generateSources") {
+
+    group = "hytale"
+    description = "Decompiles Hytale to a source jar to provide better IDE indexing"
+
+    def cacheDir = layout.projectDirectory.dir("build/hytaleCache")
+
+    //inputs.dir(cacheDir)
+    outputs.dir(cacheDir)
+
+    doLast {
+
+        def cachePath = cacheDir.asFile.toPath()
+        Files.createDirectories(cachePath)
+
+        def serverJar = file("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar")
+        File inputJarFile = null
+
+        if (serverJar.exists()) {
+            logger.lifecycle("Using local HytaleServer.jar from install folder")
+            inputJarFile = serverJar
+
+        } else {
+            logger.lifecycle("Local HytaleServer.jar not found, resolving dependency instead...")
+
+            def version = project.findProperty("hytaleServerVersion")
+            if (!version) {
+                throw new GradleException("Missing property 'hytaleServerVersion'")
+            }
+
+            def depNotation = "com.hypixel.hytale:Server:${version}"
+            logger.lifecycle("Resolving dependency: ${depNotation}")
+
+            def resolvedFiles = configurations.detachedConfiguration(
+                    dependencies.create(depNotation)
+            ).resolve()
+
+            // should be a single jar
+            inputJarFile = resolvedFiles.find { it.name.endsWith(".jar") }
+
+            if (inputJarFile == null) {
+                throw new GradleException("Failed to resolve server jar from dependency: ${depNotation}")
+            }
+        }
+
+        logger.lifecycle("Using input jar: ${inputJarFile.absolutePath}")
+
+        def fernflowerPath = cachePath.resolve("vineflower.jar")
+
+        if (!Files.exists(fernflowerPath)) {
+            logger.lifecycle("Downloading Fernflower...")
+            Files.copy(
+                    new URI(fernflowerUrl).toURL().openStream(),
+                    fernflowerPath
+            )
+        }
+
+        def outputSourcesJar = cachePath.resolve("HytaleServer-sources.jar").toFile()
+
+        logger.lifecycle("Decompiling Hytale...")
+        logger.lifecycle("Output: ${outputSourcesJar.absolutePath}")
+
+        def javaExecutable = Jvm.current().javaExecutable
+        def cmd = [
+                javaExecutable.absolutePath,
+                "-jar",
+                fernflowerPath.toAbsolutePath().toString(),
+                "--only=com/hypixel",
+                inputJarFile.absolutePath,
+                outputSourcesJar.absolutePath
+        ]
+
+        def process = new ProcessBuilder(cmd)
+                .directory(cachePath.toFile())
+                .redirectErrorStream(true)
+                .start()
+
+
+        def outputThread = new Thread({
+            process.inputStream.eachLine { line ->
+                logger.lifecycle(line)
+            }
+        })
+
+        outputThread.daemon = true
+        outputThread.start()
+
+        process.waitFor()
+        outputThread.join(1000)
+    }
 }

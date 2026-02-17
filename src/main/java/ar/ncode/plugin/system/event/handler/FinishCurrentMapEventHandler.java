@@ -19,7 +19,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.*;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.worldPreviews;
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
 import static ar.ncode.plugin.model.TranslationKey.MAP_VOTE_NOTIFICATION;
 import static ar.ncode.plugin.model.TranslationKey.MAP_VOTE_NOTIFICATION_NEXT_MAP;
@@ -30,6 +32,10 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
 	public static String getNextMap(GameModeState gameState) {
+		if (worldPreviews.isEmpty()) {
+			throw new RuntimeException("There are no maps configured for the gamemode");
+		}
+
 		String newWorldName = null;
 		if (gameState.mapVotes.isEmpty()) {
 			// Choose a random map
@@ -64,7 +70,9 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 			var players = getPlayersAt(world);
 
 			for (var player : players) {
-				player.info().getHud().update();
+				if (player.info().getHud() != null) {
+					player.info().getHud().update();
+				}
 
 				HytaleServer.SCHEDULED_EXECUTOR.schedule(() ->
 						world.execute(() ->

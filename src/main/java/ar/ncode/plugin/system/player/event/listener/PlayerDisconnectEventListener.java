@@ -1,15 +1,16 @@
-package ar.ncode.plugin.system.event.listener.player;
+package ar.ncode.plugin.system.player.event.listener;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.commands.ChangeWorldCommand;
 import ar.ncode.plugin.commands.SpectatorMode;
-import ar.ncode.plugin.component.GraveStoneWithNameplate;
+import ar.ncode.plugin.component.DeadPlayerInfoComponent;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;
 import ar.ncode.plugin.model.enums.RoundState;
-import ar.ncode.plugin.system.GraveSystem;
+import ar.ncode.plugin.system.DeathSystem;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
 import ar.ncode.plugin.system.player.PlayerDeathSystem;
 import ar.ncode.plugin.system.scheduled.DoubleTapDetector;
@@ -36,7 +37,7 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 		int value = config.get().getKarmaForDisconnectingMiddleRound();
 		gameModeState.karmaUpdates.merge(playerRef.getUuid(), value, Integer::sum);
 
-		GraveStoneWithNameplate graveStone = new GraveStoneWithNameplate();
+		DeadPlayerInfoComponent graveStone = new DeadPlayerInfoComponent();
 
 		PlayerGameModeInfo playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
 		if (playerInfo != null) {
@@ -46,8 +47,7 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 		}
 
 		graveStone.setDeadPlayerName(playerRef.getUsername());
-
-		GraveSystem.spawnGraveAtPlayerDeath(world, graveStone, reference);
+		DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, reference);
 	}
 
 	private static void notEnoughPlayersLogic(Store<EntityStore> store, World world) {
@@ -81,6 +81,7 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 
 		if (world.getPlayerCount() == 0) {
 			TroubleInTrorkTownPlugin.currentInstance = null;
+			ChangeWorldCommand.cleanUpWorld(world.getWorldConfig().getUuid(), world.getWorldConfig().getDisplayName());
 		}
 
 		GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());

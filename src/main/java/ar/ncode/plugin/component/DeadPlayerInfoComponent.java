@@ -9,8 +9,8 @@ import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.math.vector.Vector3d;
+import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.math.vector.Vector3i;
-import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,20 +24,25 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GraveStoneWithNameplate implements Component<ChunkStore> {
+public class DeadPlayerInfoComponent implements Component<EntityStore> {
 
-	public static final BuilderCodec<GraveStoneWithNameplate> CODEC =
-			BuilderCodec.builder(GraveStoneWithNameplate.class, GraveStoneWithNameplate::new)
-					.append(new KeyedCodec<>("GraveStonePosition", Codec.INT_ARRAY),
-							(c, v) -> c.graveStonePosition = v != null && v.length == 3 ? new Vector3i(v[0], v[1],
+	public static final BuilderCodec<DeadPlayerInfoComponent> CODEC =
+			BuilderCodec.builder(DeadPlayerInfoComponent.class, DeadPlayerInfoComponent::new)
+					.append(new KeyedCodec<>("Position", Codec.INT_ARRAY),
+							(c, v) -> c.position = v != null && v.length == 3 ? new Vector3i(v[0], v[1],
 									v[2]) : null,
-							c -> c.graveStonePosition == null ? new int[]{} : new int[]{c.graveStonePosition.x,
-									c.graveStonePosition.y, c.graveStonePosition.z})
+							c -> c.position == null ? new int[]{} : new int[]{c.position.x,
+									c.position.y, c.position.z})
 					.add()
 					.append(new KeyedCodec<>("NamePlatePosition", Codec.DOUBLE_ARRAY),
 							(c, v) -> c.namePlatePosition = v != null && v.length == 3 ?
 									new Vector3d(v[0], v[1], v[2]) : null,
 							c -> c.namePlatePosition == null ? new double[]{} : new double[]{c.namePlatePosition.x, c.namePlatePosition.y, c.namePlatePosition.z})
+					.add()
+					.append(new KeyedCodec<>("Rotation", Codec.FLOAT_ARRAY),
+							(c, v) -> c.rotation = v != null && v.length == 3 ?
+									new Vector3f(v[0], v[1], v[2]) : null,
+							c -> c.rotation == null ? new float[]{} : new float[]{c.rotation.x, c.rotation.y, c.rotation.z})
 					.add()
 					.append(new KeyedCodec<>("CauseOfDeath", Codec.STRING),
 							(c, v) -> c.causeOfDeath = "".equals(v) ? null : DamageCause.valueOf(v.toUpperCase()),
@@ -58,10 +63,11 @@ public class GraveStoneWithNameplate implements Component<ChunkStore> {
 					.add()
 					.build();
 
-	public static ComponentType<ChunkStore, GraveStoneWithNameplate> componentType;
+	public static ComponentType<EntityStore, DeadPlayerInfoComponent> componentType;
 
-	private Vector3i graveStonePosition;
+	private Vector3i position;
 	private Vector3d namePlatePosition;
+	private Vector3f rotation;
 	private Ref<EntityStore> namePlateReference;
 	private Ref<EntityStore> deadPlayerReference;
 	private DamageCause causeOfDeath;
@@ -72,19 +78,19 @@ public class GraveStoneWithNameplate implements Component<ChunkStore> {
 
 	@NullableDecl
 	@Override
-	public Component<ChunkStore> clone() {
-		return new GraveStoneWithNameplate(graveStonePosition, namePlatePosition, namePlateReference,
+	public Component<EntityStore> clone() {
+		return new DeadPlayerInfoComponent(position, namePlatePosition, rotation, namePlateReference,
 				deadPlayerReference, causeOfDeath, deadPlayerRole, deadPlayerName, timeOfDeath);
 	}
 
 	@NullableDecl
 	@Override
-	public Component<ChunkStore> cloneSerializable() {
+	public Component<EntityStore> cloneSerializable() {
 		return Component.super.cloneSerializable();
 	}
 
 	public void setGraveAndNameplatePosition(Vector3i graveStonePosition) {
-		this.graveStonePosition = graveStonePosition;
+		this.position = graveStonePosition;
 		this.namePlatePosition = graveStonePosition.toVector3d()
 				.add(0.5F, 1.2, 0.5F);
 	}

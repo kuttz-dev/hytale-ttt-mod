@@ -47,16 +47,7 @@ public class ChangeWorldCommand extends CommandBase {
 			String oldWorldName = currentWorld.getName();
 			UUID oldWorldUuid = currentWorld.getWorldConfig().getUuid();
 
-			World targetWorld = null;
-			try {
-				targetWorld = InstancesPlugin.get()
-						.spawnInstance(newWorldName, currentWorld, new Transform())
-						.get();
-
-			} catch (Exception e) {
-				LOGGER.atSevere().withCause(e).log("Failed to spawn instance: " + newWorldName);
-				throw new RuntimeException(e);
-			}
+			World targetWorld = createNewInstance(currentWorld, newWorldName);
 
 			TroubleInTrorkTownPlugin.currentInstance = targetWorld.getWorldConfig().getUuid();
 
@@ -78,14 +69,7 @@ public class ChangeWorldCommand extends CommandBase {
 				);
 			}
 
-			// Clear all component states to prevent memory leak when changing instances
-			DoubleTapDetector.getInstance().clearAllPlayers();
-
-			// Clean up old GameModeState
-			TroubleInTrorkTownPlugin.gameModeStateForWorld.remove(oldWorldUuid);
-
-			// Clean up old GameModeState
-			TroubleInTrorkTownPlugin.instanceConfig.remove(oldWorldName);
+			cleanUpWorld(oldWorldUuid, oldWorldName);
 
 			// Schedule direct world removal after teleports complete (2 seconds delay)
 			// Using Universe.removeWorld() directly instead of safeRemoveInstance() because
@@ -112,6 +96,29 @@ public class ChangeWorldCommand extends CommandBase {
 				}
 			}, 3, TimeUnit.SECONDS);
 		});
+	}
+
+	public static void cleanUpWorld(UUID oldWorldUuid, String oldWorldName) {
+		// Clear all component states to prevent memory leak when changing instances
+		DoubleTapDetector.getInstance().clearAllPlayers();
+
+		// Clean up old GameModeState
+		TroubleInTrorkTownPlugin.gameModeStateForWorld.remove(oldWorldUuid);
+
+		// Clean up old GameModeState
+		TroubleInTrorkTownPlugin.instanceConfig.remove(oldWorldName);
+	}
+
+	public static World createNewInstance(World currentWorld, String newWorldName) {
+		try {
+			return InstancesPlugin.get()
+					.spawnInstance(newWorldName, currentWorld, new Transform())
+					.get();
+
+		} catch (Exception e) {
+			LOGGER.atSevere().withCause(e).log("Failed to spawn instance: " + newWorldName);
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

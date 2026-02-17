@@ -71,7 +71,7 @@ public class WorldPreviewLoader {
 			manifest.setName("ttt-worlds_assets");
 			manifest.setVersion(new Semver(1, 0, 0));
 
-			AssetModule.get().registerPack("worlds_assets", assetsRoot, manifest);
+			AssetModule.get().registerPack("worlds_assets", assetsRoot, manifest, false);
 
 		} catch (Exception ignored) {
 			LOGGER.atSevere().log("Failed to load worlds assets -8 {}", ignored);

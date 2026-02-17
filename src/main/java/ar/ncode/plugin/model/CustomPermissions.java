@@ -6,6 +6,8 @@ public class CustomPermissions {
 
 	public static final String TTT_PREFIX = "ttt";
 	public static final String TTT_MAP_VOTE = TTT_PREFIX + ".map.vote";
+	public static final String TTT_MAP_FINISH = TTT_PREFIX + ".map.finish";
+	public static final String TTT_MAP_CRUD = TTT_PREFIX + ".map.crud";
 	public static final String TTT_SHOP_OPEN = TTT_PREFIX + ".shop.open";
 	public static final String TTT_ROLE_SET = TTT_PREFIX + ".role.set";
 	public static final String TTT_CREDITS_SET = TTT_PREFIX + ".credits.set";
@@ -18,7 +20,9 @@ public class CustomPermissions {
 			TTT_MAP_VOTE,
 			TTT_SHOP_OPEN,
 			TTT_CREDITS_SET,
-			TTT_ROLE_SET
+			TTT_ROLE_SET,
+			TTT_MAP_FINISH,
+			TTT_MAP_CRUD
 	);
 	public static final String TTT_USER_GROUP = TTT_PREFIX + ".groups.user";
 	public static final String TTT_ADMIN_GROUP = TTT_PREFIX + ".groups.admin";

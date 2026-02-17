@@ -11,12 +11,14 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import java.util.concurrent.CompletableFuture;
 
 import static ar.ncode.plugin.commands.spawn.ShowSpawnPoints.getWorldFromCommandContext;
+import static ar.ncode.plugin.model.CustomPermissions.TTT_MAP_FINISH;
 
 public class FinishCurrentMapCommand extends AbstractAsyncCommand {
 
 	public FinishCurrentMapCommand() {
 		super("finish", "description");
 		addAliases("end");
+		requirePermission(TTT_MAP_FINISH);
 	}
 
 	@NonNullDecl

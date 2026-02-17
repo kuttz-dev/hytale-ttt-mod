@@ -1,19 +1,15 @@
-package ar.ncode.plugin.system.event.listener.player;
+package ar.ncode.plugin.system.player.event.listener;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.accessors.WorldAccessors;
-import ar.ncode.plugin.commands.ChangeWorldCommand;
 import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;
 import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.system.event.StartNewRoundEvent;
 import ar.ncode.plugin.ui.hud.PlayerCurrentRoleHud;
-import com.hypixel.hytale.builtin.instances.InstancesPlugin;
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.math.vector.Transform;
 import com.hypixel.hytale.protocol.packets.interface_.HudComponent;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent;
@@ -22,7 +18,6 @@ import com.hypixel.hytale.server.core.entity.entities.player.hud.HudManager;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.permissions.PermissionsModule;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.WorldMapTracker;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -31,11 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.model.CustomPermissions.ADMIN_PERMISSIONS;
-import static ar.ncode.plugin.model.CustomPermissions.TTT_ADMIN_GROUP;
 import static ar.ncode.plugin.model.CustomPermissions.TTT_USER_GROUP;
-import static ar.ncode.plugin.model.CustomPermissions.USER_PERMISSIONS;
-import static ar.ncode.plugin.system.event.handler.FinishCurrentMapEventHandler.getNextMap;
 import static ar.ncode.plugin.system.event.handler.StartNewRoundEventHandler.canStartNewRound;
 import static ar.ncode.plugin.system.player.PlayerRespawnSystem.teleportPlayerToRandomSpawnPoint;
 
@@ -107,7 +98,6 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 			return;
 		}
 
-
 		world.execute(() -> {
 			PlayerRef playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
 
@@ -127,46 +117,16 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 
 
 			var player = new PlayerComponents(playerComponent, playerRef, playerInfo, reference);
+			player.info().setWorldInstance(world.getWorldConfig().getUuid());
 
-			// Handle world instance transitions
-			// We need to delay teleports to prevent "Cannot start a fade out while a fade completion callback is pending"
-			// The client needs time to fully initialize after the initial world join before we can teleport them
-			if (TroubleInTrorkTownPlugin.currentInstance == null) {
-				// No current instance exists, load a new map with delay
-				String nextMap = getNextMap(gameModeState);
-				scheduleWorldTransition(world, () -> ChangeWorldCommand.loadInstance(world, nextMap));
-				return;
-
-			} else if (playerInfo.getWorldInstance() == null) {
-				// Instance exists, teleport component to it with delay
-				World targetWorld = Universe.get().getWorld(TroubleInTrorkTownPlugin.currentInstance);
-				if (targetWorld == null) {
-					TroubleInTrorkTownPlugin.currentInstance = null;
-					String nextMap = getNextMap(gameModeState);
-					scheduleWorldTransition(world, () -> ChangeWorldCommand.loadInstance(world, nextMap));
-					return;
-				}
-
-				scheduleWorldTransition(world, () -> {
-					// Re-check if component still needs teleport (they might have disconnected)
-					if (reference.isValid() && playerInfo.getWorldInstance() == null) {
-						playerInfo.setWorldInstance(TroubleInTrorkTownPlugin.currentInstance);
-						InstancesPlugin.teleportPlayerToInstance(reference, reference.getStore(), targetWorld, new Transform());
-					}
-				});
-			}
-
-			if (world.getWorldConfig().getDisplayName() != null) {
-				var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
-
-				if (instanceConfig != null) {
-					teleportPlayerToRandomSpawnPoint(reference, reference.getStore(), instanceConfig, world);
-				}
+			var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
+			if (instanceConfig != null) {
+				teleportPlayerToRandomSpawnPoint(reference, reference.getStore(), instanceConfig, world);
 			}
 
 			// TTT: Hide ALL players from compass and worldmap (always on)
 			WorldMapTracker worldMapTracker = playerComponent.getWorldMapTracker();
-			worldMapTracker.setPlayerMapFilter(otherPlayer -> true);  // true = hide everyone
+			worldMapTracker.setPlayerMapFilter(otherPlayer -> true);  // true = hide player
 
 			EffectControllerComponent effectController = reference.getStore().getComponent(reference, EffectControllerComponent.getComponentType());
 

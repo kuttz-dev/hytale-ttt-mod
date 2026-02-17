@@ -8,7 +8,7 @@ This guide covers everything you need to install, configure, and run the TTT mod
 
 - **Hytale** installed via the official launcher
 - **Java 25** (bundled with Hytale, or install separately)
-- **Gradle** (optional - wrapper included)
+- **Gradle** (optional—wrapper included)
 
 ---
 
@@ -40,7 +40,7 @@ Edit `gradle.properties` if needed:
 
 ```properties
 # Plugin version
-version=0.2.0
+version=0.5.0
 # Java version (Hytale uses 25)
 java_version=25
 # Release channel: "release" or "pre-release"
@@ -67,10 +67,10 @@ Copy the built JAR to your Mods folder:
 
 ```bash
 # Windows
-copy build\out\ttt-*.jar "%APPDATA%\Hytale\UserData\Mods\"
+copy build\libs\ttt-*.jar "%APPDATA%\Hytale\UserData\Mods\"
 
 # Linux
-cp build/out/ttt-*.jar ~/.local/share/Hytale/UserData/Mods/
+cp build/libs/ttt-*.jar ~/.local/share/Hytale/UserData/Mods/
 ```
 
 ---
@@ -90,7 +90,7 @@ This creates a `run/` directory with server files.
 
 ## Configuration
 
-TTT generates two config files on first run. Edit it at:
+TTT generates two config files on the first run. Edit it at:
 
 ```
 <Server>/config/ncode/ttt/config.json
@@ -113,10 +113,12 @@ TTT generates two config files on first run. Edit it at:
 Items use the format `ItemId:Amount` or `ItemId:Amount|ItemId:Amount` for bundles:
 
 ```json
-"StartingItemsInHotbar": [
-	"Weapon_Shortbow_Combat:1",
-	"Consumable_Potion_Health:3"
-]
+{
+  "StartingItemsInHotbar": [
+    "Weapon_Shortbow_Combat:1",
+    "Consumable_Potion_Health:3"
+  ]
+}
 ```
 
 ---
@@ -183,28 +185,64 @@ Use admin commands to define spawn points:
 
 ---
 
-## Commands
+## Commands and Permissions (auto-generated from source)
 
-### Player Commands
+Below is an updated list of commands and the permission nodes added in the codebase. If you change commands in code,
+re-run this extraction to keep docs in sync.
 
-| Command         | Description                            |
-|-----------------|----------------------------------------|
-| `/ttt shop`     | Open the role-specific equipment store |
-| `/ttt map vote` | Open the map vote GUI                  |
+### Player commands
 
-### Admin Commands
+| Command / Alias                         | Usage / Notes                                                    | Permission node          |
+|-----------------------------------------|------------------------------------------------------------------|--------------------------|
+| `/ttt shop` (aliases: `/store`, `/buy`) | Open role-specific equipment store (traitor/detective only)      | `ttt.shop.open`          |
+| `/ttt map vote` (alias: `votemap`)      | Open the map vote GUI (only available after last round finished) | `ttt.map.vote`           |
+| `/t`                                    | Traitors-only chat shortcut (sends message to alive traitors)    | none (role-checked)      |
+| `/spectator [target]`                   | Toggle spectator mode for a component (or for target)            | none (usable by players) |
+| `/change-world <template>`              | Debug: load a new world instance and teleport players            | none (debug command)     |
 
-| Command                | Description            |
-|------------------------|------------------------|
-| `/ttt`                 | Main TTT admin command |
-| `/ttt spawn add`       | Add player spawn point |
-| `/ttt spawn show`      | Visualize spawn points |
-| `/ttt loot spawn add`  | Add loot spawn point   |
-| `/ttt loot spawn show` | Visualize loot spawns  |
-| `/ttt loot force`      | Force spawn loot       |
-| `/ttt map finish`      | End current map        |
-| `/ttt debug`           | Debug information      |
-| `/ttt debug memory`    | Memory usage stats     |
+Notes: many `ttt` subcommands live under `/ttt` and inherit the `TTT_USER_GROUP` group by default; specific subcommands
+may require explicit permission nodes (see admin commands below).
+
+### Admin commands
+
+These commands require admin permission nodes (either via `requirePermission(...)` or by being in the
+`TTT_ADMIN_GROUP`):
+
+| Command                              | Description                                   | Permission node   |
+|--------------------------------------|-----------------------------------------------|-------------------|
+| `/ttt role set <role> [target]`      | Force-set a player's role                     | `ttt.role.set`    |
+| `/ttt credits set <amount> [target]` | Set a player's credits                        | `ttt.credits.set` |
+| `/ttt map finish` (alias: `end`)     | Force finish current map                      | `ttt.map.finish`  |
+| `/ttt map create <name>`             | Create a new map template (copies templates)  | `ttt.map.crud`    |
+| `/ttt map read/list`                 | List or show map details                      | `ttt.map.crud`    |
+| `/ttt map update <old> <new>`        | Rename a map and update config                | `ttt.map.crud`    |
+| `/ttt map delete <name> confirm`     | Delete a map (requires explicit confirmation) | `ttt.map.crud`    |
+
+Other admin/management commands (no explicit node but grouped under admin group):
+
+- `/ttt debug ...` — Debug commands (get-position, memory, info) — available to users (debug)
+- `/ttt spawn add` — Add player spawn point (writes to map config) — inherits `ttt.groups.user`
+- `/ttt spawn show` — Show spawn points — inherits `ttt.groups.user`
+- `/ttt loot spawn add` — Add loot spawn point — inherits `ttt.groups.user`
+- `/ttt loot spawn show` — Show loot spawn points — inherits `ttt.groups.user`
+- `/ttt loot force` — Force spawn loot in current world — inherits `ttt.groups.user`
+
+### Permission nodes (defined in source)
+
+- `ttt.map.vote`       — Open map vote GUI
+- `ttt.map.finish`     — Force finish current map
+- `ttt.map.crud`       — Create/read/update/delete maps
+- `ttt.shop.open`      — Open the traitor/detective shop
+- `ttt.role.set`       — Set a player's role (admin)
+- `ttt.credits.set`    — Set a player's credits (admin)
+
+Permission groups (used when registering permissions at plugin start):
+
+- `ttt.groups.user`   — TTT user group (default for `/ttt` collection)
+- `ttt.groups.admin`  — TTT admin group (admin-level commands)
+
+Reference: constants are declared at `src/main/java/ar/ncode/plugin/model/CustomPermissions.java` and assigned to groups
+at plugin startup in `TroubleInTrorkTownPlugin.java`.
 
 ---
 
@@ -247,7 +285,7 @@ src/main/resources/Server/Languages/
 ### Build fails
 
 1. Ensure Hytale is installed (needs HytaleServer.jar)
-2. Check Java version: `java -version` (needs 25)
+2. Check the Java version: `java -version` (needs 25)
 3. Try `./gradlew clean build`
 
 ---

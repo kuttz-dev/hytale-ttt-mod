@@ -1,7 +1,9 @@
 package ar.ncode.plugin.model;
 
-import ar.ncode.plugin.component.GraveStoneWithNameplate;
+import ar.ncode.plugin.component.DeadPlayerInfoComponent;
 import ar.ncode.plugin.model.enums.RoundState;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lombok.ToString;
 
 import java.time.Duration;
@@ -9,7 +11,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
@@ -24,11 +31,12 @@ public class GameModeState {
 	public Set<UUID> spectators = ConcurrentHashMap.newKeySet();
 	public Map<UUID, Integer> karmaUpdates = new HashMap<>();
 	public LocalDateTime roundStateUpdatedAt;
-	public List<GraveStoneWithNameplate> graveStones = new ArrayList<>();
+	public List<DeadPlayerInfoComponent> graveStones = new ArrayList<>();
+	public List<Ref<EntityStore>> corpses = new ArrayList<>();
 	public int playedRounds = 0;
 	public Map<String, Integer> mapVotes = new HashMap<>();
 
-	public void addGraveStone(GraveStoneWithNameplate graveStone) {
+	public void addGraveStone(DeadPlayerInfoComponent graveStone) {
 		this.graveStones.add(graveStone);
 	}
 
@@ -64,7 +72,7 @@ public class GameModeState {
 	}
 
 	public void addVoteForMap(String mapName) {
-		this.mapVotes.compute(mapName, (key, value) -> value == null ? 1 : value + 1);
+		this.mapVotes.compute(mapName, (key, v) -> v == null ? 1 : v + 1);
 	}
 
 	public void updateRoundState(RoundState state) {
