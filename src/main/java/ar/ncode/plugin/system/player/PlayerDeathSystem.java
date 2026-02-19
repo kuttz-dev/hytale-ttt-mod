@@ -83,7 +83,9 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 		return value;
 	}
 
-	private static void updateAttackerKarma(@NonNullDecl DeathComponent deathComponent, PlayerComponents player, GameModeState gameModeState, ComponentAccessor<EntityStore> store) {
+	private static void updateKdaAndKarma(@NonNullDecl DeathComponent deathComponent, PlayerComponents player, GameModeState gameModeState, ComponentAccessor<EntityStore> store) {
+		gameModeState.deathsUpdates.put(player.refComponent().getUuid(), 1);
+
 		if (deathComponent.getDeathInfo() == null) {
 			return;
 		}
@@ -97,11 +99,12 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			if (attacker.refComponent() != null && attacker.info() != null) {
 				int value = calculateKarmaForAttacker(attacker.info().getCurrentRoundRole(), player.info().getCurrentRoundRole());
 				gameModeState.karmaUpdates.merge(attacker.refComponent().getUuid(), value, Integer::sum);
+				gameModeState.killUpdates.merge(attacker.refComponent().getUuid(), 1, Integer::sum);
 			}
 		}
 	}
 
-	private static void spawnGraveStone(@NonNullDecl DeathComponent deathComponent, GameModeState gameModeState, PlayerComponents player, World world) {
+	private static void spawnGraveStone(@NonNullDecl DeathComponent deathComponent, GameModeState gameModeState, PlayerComponents player, World world, ComponentAccessor<EntityStore> store) {
 		DeadPlayerInfoComponent graveStone = DeadPlayerInfoComponent.builder()
 				.timeOfDeath(gameModeState.getRoundRemainingTime().format(timeFormatter))
 				.deadPlayerReference(player.reference())
@@ -114,7 +117,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			graveStone.setCauseOfDeath(damageCause);
 		}
 
-		DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, player.reference(), player.reference().getStore());
+		DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, player.reference(), store);
 	}
 
 	@Nonnull
@@ -154,9 +157,8 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			player.component().getInventory().clear();
 			player.info().getHud().update();
 
-			updateAttackerKarma(deathComponent, player, gameModeState, commandBuffer);
-
-			spawnGraveStone(deathComponent, gameModeState, player, world);
+			updateKdaAndKarma(deathComponent, player, gameModeState, commandBuffer);
+			spawnGraveStone(deathComponent, gameModeState, player, world, commandBuffer);
 
 			if (roundShouldEnd(gameModeState)) {
 				HytaleServer.get().getEventBus()

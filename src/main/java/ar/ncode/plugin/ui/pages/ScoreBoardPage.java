@@ -111,6 +111,9 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 			int ping = getAvgPing(player.refComponent());
 			builder.set(rowPrefix + " #rowPing.Text", String.valueOf(ping));
 
+			builder.set(rowPrefix + " #rowKills.Text", String.valueOf(player.info().getKills()));
+			builder.set(rowPrefix + " #rowDeaths.Text", String.valueOf(player.info().getDeaths()));
+
 			rowNumber++;
 		}
 	}

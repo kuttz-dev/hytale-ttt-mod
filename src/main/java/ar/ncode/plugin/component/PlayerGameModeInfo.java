@@ -82,5 +82,7 @@ public class PlayerGameModeInfo implements Component<EntityStore> {
 				worldInstance);
 	}
 
-
+	public void incrementDeaths() {
+		this.deaths++;
+	}
 }

@@ -30,6 +30,8 @@ public class GameModeState {
 	public Set<UUID> innocentsAlive = ConcurrentHashMap.newKeySet();
 	public Set<UUID> spectators = ConcurrentHashMap.newKeySet();
 	public Map<UUID, Integer> karmaUpdates = new HashMap<>();
+	public Map<UUID, Integer> killUpdates = new HashMap<>();
+	public Map<UUID, Integer> deathsUpdates = new HashMap<>();
 	public LocalDateTime roundStateUpdatedAt;
 	public List<DeadPlayerInfoComponent> graveStones = new ArrayList<>();
 	public List<Ref<EntityStore>> corpses = new ArrayList<>();

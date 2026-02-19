@@ -10,6 +10,8 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
+import com.hypixel.hytale.server.core.modules.entity.component.Intangible;
+import com.hypixel.hytale.server.core.modules.entity.component.Invulnerable;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -17,12 +19,15 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 
+import static ar.ncode.plugin.model.CustomPermissions.TTT_INFO_SEE;
+
 public class PlayerInfoCommand extends AbstractAsyncCommand {
 
 	RequiredArg<PlayerRef> playerArg = this.withRequiredArg("targetPlayer", "Target player to see its info", ArgTypes.PLAYER_REF);
 
 	public PlayerInfoCommand() {
 		super("info", "Shows the player info related to the game mode.");
+		requirePermission(TTT_INFO_SEE);
 	}
 
 	@Nonnull
@@ -53,6 +58,8 @@ public class PlayerInfoCommand extends AbstractAsyncCommand {
 
 				boolean isLostInCombat = reference.getStore().getComponent(reference, LostInCombat.componentType) != null;
 				boolean hasConfirmedDeath = reference.getStore().getComponent(reference, ConfirmedDeath.componentType) != null;
+				boolean isIntangible = reference.getStore().getComponent(reference, Intangible.getComponentType()) != null;
+				boolean isInvulnerable = reference.getStore().getComponent(reference, Invulnerable.getComponentType()) != null;
 
 				PlayerGameModeInfo info = player.get().info();
 				ctx.sendMessage(Message.raw("Player: " + player.get().component().getDisplayName()));
@@ -66,6 +73,7 @@ public class PlayerInfoCommand extends AbstractAsyncCommand {
 				}
 				ctx.sendMessage(Message.raw("- is lost in combat: " + isLostInCombat));
 				ctx.sendMessage(Message.raw("- has confirmed death: " + hasConfirmedDeath));
+				ctx.sendMessage(Message.raw("- is invulnerable: " + isInvulnerable));
 			});
 		});
 	}

@@ -1,9 +1,9 @@
 package ar.ncode.plugin.system;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.commands.loot.LootSpawnCommand;
-import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
 import ar.ncode.plugin.config.CustomRole;
@@ -22,7 +22,6 @@ import com.hypixel.hytale.server.core.modules.entity.component.Interactable;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
 import com.hypixel.hytale.server.core.modules.entity.item.PickupItemComponent;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -50,34 +49,47 @@ public class GameModeSystem {
 
 	public static final GameModeSystem INSTANCE = new GameModeSystem();
 
-	private static void updatePlayersKarma(GameModeState gameModeState) {
-		gameModeState.karmaUpdates.forEach((playerUUID, karmaUpdate) -> {
-			PlayerRef playerRef = Universe.get().getPlayer(playerUUID);
+	private static void updatePlayersKdaAndKarma(GameModeState gameModeState) {
+		var world = Universe.get().getWorld(TroubleInTrorkTownPlugin.currentInstance);
+		if (world == null) {
+			return;
+		}
 
-			if (playerRef == null || karmaUpdate == null) {
-				return;
-			}
+		var players = WorldAccessors.getPlayersAt(world);
 
-			Ref<EntityStore> reference = playerRef.getReference();
+		for (var player : players) {
+			UUID playerUUID = player.refComponent().getUuid();
 
-			if (reference == null) {
-				return;
-			}
+			updateKarma(gameModeState, player, playerUUID);
+			updateDeaths(gameModeState, player, playerUUID);
+			updateKills(gameModeState, player, playerUUID);
+		}
 
+		gameModeState.karmaUpdates.clear();
+		gameModeState.killUpdates.clear();
+		gameModeState.deathsUpdates.clear();
+	}
 
-			PlayerGameModeInfo playerInfo = reference.getStore().getComponent(reference,
-					PlayerGameModeInfo.componentType);
+	private static void updateKills(GameModeState gameModeState, PlayerComponents player, UUID playerUUID) {
+		var update = gameModeState.killUpdates.get(playerUUID);
+		if (update != null) {
+			player.info().setKills(player.info().getKills() + update);
+		}
+	}
 
-			if (playerInfo == null) {
-				return;
-			}
+	private static void updateDeaths(GameModeState gameModeState, PlayerComponents player, UUID playerUUID) {
+		var playerDied = gameModeState.deathsUpdates.get(playerUUID) != null;
+		if (playerDied) {
+			player.info().incrementDeaths();
+		}
+	}
 
-			int karma = playerInfo.getKarma() + karmaUpdate;
-			if (karma > 1000) {
-				karma = 1000;
-			}
-			playerInfo.setKarma(karma);
-		});
+	private static void updateKarma(GameModeState gameModeState, PlayerComponents player, UUID playerUUID) {
+		var update = gameModeState.karmaUpdates.get(playerUUID);
+		if (update != null) {
+			int karma = Math.clamp((long) player.info().getKarma() + update, 0, 1000);
+			player.info().setKarma(karma);
+		}
 	}
 
 	private static void removeDroppedItems(World world) {
@@ -209,7 +221,7 @@ public class GameModeSystem {
 			state.playedRounds++;
 
 			// Update players
-			updatePlayersKarma(state);
+			updatePlayersKdaAndKarma(state);
 
 			var players = getPlayersAt(world);
 			for (var player : players) {

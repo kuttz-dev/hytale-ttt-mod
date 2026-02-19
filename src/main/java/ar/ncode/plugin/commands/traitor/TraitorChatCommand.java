@@ -21,6 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
+import static ar.ncode.plugin.model.CustomPermissions.TTT_TRAITOR_CHAT;
 
 public class TraitorChatCommand extends AbstractAsyncCommand {
 
@@ -31,6 +32,7 @@ public class TraitorChatCommand extends AbstractAsyncCommand {
 
 	public TraitorChatCommand() {
 		super("t", "description");
+		requirePermission(TTT_TRAITOR_CHAT);
 	}
 
 	@NonNullDecl

@@ -1,6 +1,7 @@
 package ar.ncode.plugin.ui.pages;
 
 import ar.ncode.plugin.component.DeadPlayerInfoComponent;
+import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.model.TranslationKey;
 import com.hypixel.hytale.codec.Codec;
@@ -66,6 +67,11 @@ public class GravePlatePage extends InteractiveCustomUIPage<GravePlatePage.Inter
 			builder.set("#DeathCause.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_DEATH_CAUSE.get()));
 			String translationKey = deadPLayerInfoComponent.getCauseOfDeath().getTranslationKey();
 			builder.set("#DeathCauseValue.Text", Message.translation(translationKey));
+		}
+
+		var playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
+		if (playerInfo != null && playerInfo.isSpectator()) {
+			builder.set("#ReportDeath.Visible", false);
 		}
 	}
 
