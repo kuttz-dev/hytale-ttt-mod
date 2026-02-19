@@ -28,6 +28,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
+import com.hypixel.hytale.server.core.modules.entity.damage.DeferredCorpseRemoval;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -62,7 +63,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			gameModeState.traitorsAlive.remove(playerRef.getUuid());
 
 		} else if (RoleGroup.INNOCENT.equals(role.getRoleGroup())) {
-			gameModeState.innocentsAlice.remove(playerRef.getUuid());
+			gameModeState.innocentsAlive.remove(playerRef.getUuid());
 		}
 	}
 
@@ -139,6 +140,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			deathComponent.setShowDeathMenu(false);
 			deathComponent.setItemsLossMode(DeathConfig.ItemsLossMode.ALL);
 			deathComponent.setItemsDurabilityLossPercentage(0.0F);
+			commandBuffer.tryRemoveComponent(reference, DeferredCorpseRemoval.getComponentType());
 			CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference));
 
 			GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());

@@ -30,4 +30,21 @@ public class PlayerAccessors {
 				new PlayerComponents(player, playerRef, playerInfo, reference)
 		);
 	}
+
+	public static Optional<PlayerComponents> getPlayerFrom(@Nullable PlayerRef playerRef, ComponentAccessor<EntityStore> store) {
+		if (playerRef == null || !playerRef.isValid() || playerRef.getReference() == null) {
+			return Optional.empty();
+		}
+
+		Player player = store.getComponent(playerRef.getReference(), Player.getComponentType());
+		PlayerGameModeInfo playerInfo = store.getComponent(playerRef.getReference(), PlayerGameModeInfo.componentType);
+
+		if (player == null || playerInfo == null) {
+			return Optional.empty();
+		}
+
+		return Optional.of(
+				new PlayerComponents(player, playerRef, playerInfo, playerRef.getReference())
+		);
+	}
 }

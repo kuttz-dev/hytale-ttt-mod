@@ -84,7 +84,7 @@ public class RoleCommand extends AbstractCommandCollection {
 						gameModeState.traitorsAlive.remove(player.refComponent().getUuid());
 
 					} else if (RoleGroup.INNOCENT.equals(player.info().getCurrentRoundRole().getRoleGroup())) {
-						gameModeState.innocentsAlice.remove(player.refComponent().getUuid());
+						gameModeState.innocentsAlive.remove(player.refComponent().getUuid());
 					}
 
 				} else {
@@ -99,7 +99,7 @@ public class RoleCommand extends AbstractCommandCollection {
 					gameModeState.traitorsAlive.add(player.refComponent().getUuid());
 
 				} else if (RoleGroup.INNOCENT.equals(role.get().getRoleGroup())) {
-					gameModeState.innocentsAlice.add(player.refComponent().getUuid());
+					gameModeState.innocentsAlive.add(player.refComponent().getUuid());
 				}
 
 				player.info().getHud().update();

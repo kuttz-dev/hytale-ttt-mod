@@ -124,7 +124,7 @@ public class GameModeSystem {
 	}
 
 	private static void showRoundResultInEventTitle(GameModeState gameModeState, World world) {
-		if (!gameModeState.innocentsAlice.isEmpty()) {
+		if (!gameModeState.innocentsAlive.isEmpty()) {
 			EventTitleUtil.showEventTitleToWorld(
 					Message.translation(ROUND_INNOCENTS_WIN_MSG.get()),
 					Message.raw(""),
@@ -160,7 +160,7 @@ public class GameModeSystem {
 		}
 
 		for (var role : roles) {
-			if (!INNOCENT.equals(role.getRoleGroup())) {
+			if (INNOCENT.equals(role.getRoleGroup())) {
 				setPlayerRole(state, players, playerCount, role, assigned);
 			}
 		}
@@ -175,8 +175,7 @@ public class GameModeSystem {
 		for (var player : players) {
 			UUID uuid = player.refComponent().getUuid();
 			if (assigned.contains(uuid)) {
-				//TODO: Unccomment this:
-				// continue;
+				continue;
 			}
 
 			if (assignedPlayers >= expectedAssignedPlayers) {
@@ -190,7 +189,7 @@ public class GameModeSystem {
 				state.traitorsAlive.add(player.refComponent().getUuid());
 
 			} else {
-				state.innocentsAlice.add(player.refComponent().getUuid());
+				state.innocentsAlive.add(player.refComponent().getUuid());
 			}
 		}
 	}

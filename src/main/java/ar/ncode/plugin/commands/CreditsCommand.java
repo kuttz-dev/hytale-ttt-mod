@@ -77,7 +77,7 @@ public class CreditsCommand extends AbstractCommandCollection {
 						gameModeState.traitorsAlive.remove(player.refComponent().getUuid());
 
 					} else if (RoleGroup.INNOCENT.equals(player.info().getCurrentRoundRole().getRoleGroup())) {
-						gameModeState.innocentsAlice.remove(player.refComponent().getUuid());
+						gameModeState.innocentsAlive.remove(player.refComponent().getUuid());
 					}
 
 				} else {

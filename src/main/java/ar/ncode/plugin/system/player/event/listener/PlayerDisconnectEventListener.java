@@ -93,7 +93,7 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 		// Remove from spectator tracking
 		gameModeState.spectators.remove(playerRef.getUuid());
 		gameModeState.traitorsAlive.remove(playerRef.getUuid());
-		gameModeState.innocentsAlice.remove(playerRef.getUuid());
+		gameModeState.innocentsAlive.remove(playerRef.getUuid());
 
 		world.execute(() -> {
 			if (!reference.isValid()) return;

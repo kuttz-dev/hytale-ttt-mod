@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.UUID;
@@ -68,7 +69,8 @@ public class PlayerGameModeInfo implements Component<EntityStore> {
 	@Builder.Default
 	private float elapsedTimeSinceLastUpdate = 0;
 	@Builder.Default
-	private boolean alreadyVotedMap = false;
+	@Accessors(fluent = true)
+	private boolean hasAlreadyVotedMap = false;
 	@Builder.Default
 	private UUID worldInstance = null;
 
@@ -76,7 +78,7 @@ public class PlayerGameModeInfo implements Component<EntityStore> {
 	@Override
 	public Component<EntityStore> clone() {
 		return new PlayerGameModeInfo(this.karma, this.kills, this.deaths, this.credits, this.hud,
-				timeOfDeath, causeOfDeath, currentRoundRole, spectator, elapsedTimeSinceLastUpdate, alreadyVotedMap,
+				timeOfDeath, causeOfDeath, currentRoundRole, spectator, elapsedTimeSinceLastUpdate, hasAlreadyVotedMap,
 				worldInstance);
 	}
 

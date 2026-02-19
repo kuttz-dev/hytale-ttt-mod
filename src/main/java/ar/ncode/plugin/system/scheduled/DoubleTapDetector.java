@@ -25,7 +25,7 @@ public class DoubleTapDetector {
 	private static final long TAP_MAX_MS = 400L;
 	private static final long DOUBLE_TAP_WINDOW_MS = 400L;
 	private static DoubleTapDetector instance;
-	private final Map<UUID, PlayerWalkState> playerStates = new ConcurrentHashMap();
+	private final Map<UUID, PlayerWalkState> playerStates = new ConcurrentHashMap<>();
 
 	public static DoubleTapDetector getInstance() {
 		if (instance == null) {
@@ -51,64 +51,52 @@ public class DoubleTapDetector {
 				continue;
 			}
 
-			Store<EntityStore> store = ref.getStore();
-			if (store == null) {
-				continue;
-			}
-
-			EntityStore entityStore = store.getExternalData();
-			if (entityStore == null) {
-				continue;
-			}
-
-			World world = entityStore.getWorld();
-			if (world == null) {
-				continue;
-			}
-
-			world.execute(() -> processPlayerTick(playerRef, ref, store, world));
+			World world = ref.getStore().getExternalData().getWorld();
+			world.execute(() -> processPlayerTick(playerRef, ref, ref.getStore()));
 		}
 	}
 
 	private void processPlayerTick(
 			PlayerRef playerRef,
 			Ref<EntityStore> ref,
-			Store<EntityStore> store,
-			World world
+			Store<EntityStore> store
 	) {
-		if (ref == null || !ref.isValid()) {
-			return;
+		try {
+			if (ref == null || !ref.isValid()) {
+				return;
+			}
+
+			Player player = ref.getStore().getComponent(ref, Player.getComponentType());
+			PlayerGameModeInfo playerInfo = store.getComponent(ref, PlayerGameModeInfo.componentType);
+
+			if (player == null || playerInfo == null) {
+				return;
+			}
+
+			MovementStatesComponent movementComponent =
+					store.getComponent(ref, MovementStatesComponent.getComponentType());
+			if (movementComponent == null) {
+				return;
+			}
+
+			MovementStates states = movementComponent.getMovementStates();
+			if (states == null) {
+				return;
+			}
+
+			UUID playerId = playerRef.getUuid();
+			boolean currentlyWalking = states.walking;
+
+			checkWalkStateChange(
+					playerId,
+					currentlyWalking,
+					ref,
+					player,
+					playerRef,
+					playerInfo
+			);
+		} catch (Exception ignored) {
 		}
-
-		Player player = ref.getStore().getComponent(ref, Player.getComponentType());
-		PlayerGameModeInfo playerInfo = store.getComponent(ref, PlayerGameModeInfo.componentType);
-
-		if (player == null || playerInfo == null) {
-			return;
-		}
-
-		MovementStatesComponent movementComponent =
-				store.getComponent(ref, MovementStatesComponent.getComponentType());
-		if (movementComponent == null) {
-			return;
-		}
-
-		MovementStates states = movementComponent.getMovementStates();
-		if (states == null) {
-			return;
-		}
-
-		UUID playerId = playerRef.getUuid();
-		boolean currentlyWalking = states.walking;
-
-		checkWalkStateChange(
-				playerId,
-				currentlyWalking,
-				ref,
-				player,
-				playerRef,
-				playerInfo
-		);
 	}
 
 	private void checkWalkStateChange(
@@ -134,7 +122,7 @@ public class DoubleTapDetector {
 		boolean walkingChanged = state.previousWalking != currentlyWalking;
 
 		if (walkingChanged) {
-			if (!state.previousWalking && currentlyWalking) {
+			if (!state.previousWalking) {
 				// Walk started → tap begin
 				state.tapStartTime = now;
 			} else {

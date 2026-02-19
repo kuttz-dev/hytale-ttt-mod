@@ -27,7 +27,7 @@ public class GameModeState {
 	public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("mm:ss");
 	public RoundState roundState = RoundState.PREPARING;
 	public Set<UUID> traitorsAlive = ConcurrentHashMap.newKeySet();
-	public Set<UUID> innocentsAlice = ConcurrentHashMap.newKeySet();
+	public Set<UUID> innocentsAlive = ConcurrentHashMap.newKeySet();
 	public Set<UUID> spectators = ConcurrentHashMap.newKeySet();
 	public Map<UUID, Integer> karmaUpdates = new HashMap<>();
 	public LocalDateTime roundStateUpdatedAt;

@@ -18,7 +18,7 @@ import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 public class FinishCurrentRoundEventHandler implements Consumer<FinishCurrentRoundEvent> {
 
 	public static boolean roundShouldEnd(GameModeState gameModeState) {
-		return gameModeState.innocentsAlice.isEmpty() || gameModeState.traitorsAlive.isEmpty();
+		return gameModeState.innocentsAlive.isEmpty() || gameModeState.traitorsAlive.isEmpty();
 	}
 
 
