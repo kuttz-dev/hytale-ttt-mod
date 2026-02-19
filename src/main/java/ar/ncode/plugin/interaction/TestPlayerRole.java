@@ -74,7 +74,7 @@ public class TestPlayerRole extends SimpleInstantInteraction {
 				return;
 			}
 
-			var playerOpt = PlayerAccessors.getPlayerFrom(closest);
+			var playerOpt = PlayerAccessors.getPlayerFrom(closest, closest.getStore());
 			if (playerOpt.isEmpty()) {
 				return;
 			}
@@ -102,7 +102,7 @@ public class TestPlayerRole extends SimpleInstantInteraction {
 			// Apply visual effect to the scanned player
 			// applyEffectToPlayer(closest, effectId, store);
 			ParticleUtil.spawnParticleEffect("TTT_Innocent_Particle", targetPlayerTransform.getPosition(), world.getEntityStore().getStore());
-			
+
 			// Broadcast scan result to nearby players
 			String resultMessage = isTraitor
 					? "[SCANNER] TRAITOR DETECTED!"
@@ -111,7 +111,7 @@ public class TestPlayerRole extends SimpleInstantInteraction {
 			// Send result to operator (who clicked the scanner)
 			var operatorRef = ctx.getOwningEntity();
 			if (operatorRef.isValid()) {
-				var operatorOpt = PlayerAccessors.getPlayerFrom(operatorRef);
+				var operatorOpt = PlayerAccessors.getPlayerFrom(operatorRef, operatorRef.getStore());
 				operatorOpt.ifPresent(op ->
 						op.component().sendMessage(Message.raw(resultMessage))
 				);

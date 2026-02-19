@@ -38,7 +38,7 @@ public class SeeDeadPlayerInfoAction extends ActionBase {
 			return false;
 		}
 
-		var player = PlayerAccessors.getPlayerFrom(playerReference);
+		var player = PlayerAccessors.getPlayerFrom(playerReference, playerReference.getStore());
 		if (player.isEmpty()) {
 			return false;
 		}

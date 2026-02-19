@@ -47,7 +47,7 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 		}
 
 		graveStone.setDeadPlayerName(playerRef.getUsername());
-		DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, reference);
+		DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, reference, reference.getStore());
 	}
 
 	private static void notEnoughPlayersLogic(Store<EntityStore> store, World world) {
@@ -99,7 +99,7 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 			if (!reference.isValid()) return;
 			var playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
 
-			SpectatorMode.disableSpectatorModeForPlayer(new PlayerComponents(null, playerRef, playerInfo, reference));
+			SpectatorMode.disableSpectatorModeForPlayer(new PlayerComponents(null, playerRef, playerInfo, reference), reference.getStore());
 			store.removeComponentIfExists(reference, LostInCombat.componentType);
 			store.removeComponentIfExists(reference, ConfirmedDeath.componentType);
 

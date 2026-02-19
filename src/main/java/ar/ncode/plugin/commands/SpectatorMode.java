@@ -4,6 +4,7 @@ import ar.ncode.plugin.accessors.PlayerAccessors;
 import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.PlayerComponents;
+import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.MovementSettings;
@@ -37,24 +38,24 @@ public class SpectatorMode extends CommandBase {
 		super("spectator", "Command to toggle spectator mode for a component");
 	}
 
-	public static boolean toggleSpectatorMode(Ref<EntityStore> reference) {
-		var player = PlayerAccessors.getPlayerFrom(reference);
+	public static boolean toggleSpectatorMode(Ref<EntityStore> reference, Store<EntityStore> store) {
+		var player = PlayerAccessors.getPlayerFrom(reference, store);
 		if (player.isEmpty()) {
 			return false;
 		}
 
-		Intangible intangible = reference.getStore().getComponent(reference, Intangible.getComponentType());
+		Intangible intangible = store.getComponent(reference, Intangible.getComponentType());
 		if (intangible == null) {
-			setGameModeToSpectator(player.get());
+			setGameModeToSpectator(player.get(), store);
 			return true;
 
 		} else {
-			disableSpectatorModeForPlayer(player.get());
+			disableSpectatorModeForPlayer(player.get(), store);
 			return false;
 		}
 	}
 
-	public static void disableSpectatorModeForPlayer(PlayerComponents player) {
+	public static void disableSpectatorModeForPlayer(PlayerComponents player, ComponentAccessor<EntityStore> store) {
 		var reference = player.reference();
 		if (!reference.isValid()) return;
 
@@ -68,9 +69,8 @@ public class SpectatorMode extends CommandBase {
 		}
 
 		// Remove spectator mode
-		Store<EntityStore> store = reference.getStore();
-		store.removeComponentIfExists(reference, Intangible.getComponentType());
-		store.removeComponentIfExists(reference, Invulnerable.getComponentType());
+		store.tryRemoveComponent(reference, Intangible.getComponentType());
+		store.tryRemoveComponent(reference, Invulnerable.getComponentType());
 		showPlayerToAll(player.refComponent(), player.refComponent().getUuid());
 
 		MovementManager movementManager = store.getComponent(reference, MovementManager.getComponentType());
@@ -104,7 +104,7 @@ public class SpectatorMode extends CommandBase {
 		}
 	}
 
-	public static void setGameModeToSpectator(PlayerComponents player) {
+	public static void setGameModeToSpectator(PlayerComponents player, ComponentAccessor<EntityStore> store) {
 		// Get effect from asset store
 //                EntityEffect effect = EntityEffect.getAssetMap().getAsset("Spectator");
 //                if (effect == null) {
@@ -123,7 +123,7 @@ public class SpectatorMode extends CommandBase {
 		var gameState = WorldAccessors.gameModeStateForPlayerWorld(reference);
 		updatePlayerCountsOnPlayerDeath(player.refComponent(), player.info().getCurrentRoundRole(), gameState);
 
-		MovementManager movementManager = reference.getStore().getComponent(reference, MovementManager.getComponentType());
+		MovementManager movementManager = store.getComponent(reference, MovementManager.getComponentType());
 		MovementSettings movementSettings = movementManager.getSettings();
 		if (movementSettings == null) {
 			return;
@@ -131,12 +131,12 @@ public class SpectatorMode extends CommandBase {
 		movementSettings.canFly = true;
 		movementManager.update(player.refComponent().getPacketHandler());
 
-		reference.getStore().ensureComponent(reference, Intangible.getComponentType());
-		reference.getStore().ensureComponent(reference, Invulnerable.getComponentType());
-		hidePlayerFromAllNonSpectators(player.refComponent(), player.refComponent().getUuid());
+		store.ensureAndGetComponent(reference, Intangible.getComponentType());
+		store.ensureAndGetComponent(reference, Invulnerable.getComponentType());
+		hidePlayerFromAllNonSpectators(player.refComponent(), player.refComponent().getUuid(), store);
 	}
 
-	static void hidePlayerFromAllNonSpectators(PlayerRef playerRef, UUID playerUuid) {
+	static void hidePlayerFromAllNonSpectators(PlayerRef playerRef, UUID playerUuid, ComponentAccessor<EntityStore> store) {
 		Universe.get().getWorlds().forEach((worldName, world) -> world.execute(() -> {
 			for (PlayerRef targetRef : world.getPlayerRefs()) {
 				if (targetRef.equals(playerRef)) {
@@ -148,12 +148,12 @@ public class SpectatorMode extends CommandBase {
 					continue;
 				}
 
-				Player targetPlayer = targetEntityRef.getStore().getComponent(targetEntityRef, Player.getComponentType());
+				Player targetPlayer = store.getComponent(targetEntityRef, Player.getComponentType());
 				if (targetPlayer == null) {
 					continue;
 				}
 
-				PlayerGameModeInfo targetPlayerInfo = targetEntityRef.getStore().getComponent(
+				PlayerGameModeInfo targetPlayerInfo = store.getComponent(
 						targetEntityRef,
 						PlayerGameModeInfo.componentType
 				);
@@ -195,7 +195,7 @@ public class SpectatorMode extends CommandBase {
 			}
 
 			reference.getStore().getExternalData().getWorld()
-					.execute(() -> toggleSpectatorMode(reference));
+					.execute(() -> toggleSpectatorMode(reference, reference.getStore()));
 			return;
 
 		} else {
@@ -207,7 +207,7 @@ public class SpectatorMode extends CommandBase {
 			return;
 		}
 
-		boolean result = toggleSpectatorMode(reference);
+		boolean result = toggleSpectatorMode(reference, reference.getStore());
 		if (result) {
 			ctx.sendMessage(Message.raw("Spectator mode applied for target."));
 		} else {

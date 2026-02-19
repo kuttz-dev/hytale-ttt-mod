@@ -6,6 +6,7 @@ import ar.ncode.plugin.commands.loot.LootSpawnCommand;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
 import ar.ncode.plugin.component.death.LostInCombat;
+import ar.ncode.plugin.config.CustomRole;
 import ar.ncode.plugin.config.DebugConfig;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.model.GameModeState;
@@ -155,30 +156,41 @@ public class GameModeSystem {
 				continue;
 			}
 
-			int expectedAssignedPlayers = playerCount / role.getRatio();
-			expectedAssignedPlayers = Math.max(role.getMinimumAssignedPlayersWithRole(), expectedAssignedPlayers);
+			setPlayerRole(state, players, playerCount, role, assigned);
+		}
 
-			int assignedPlayers = 0;
+		for (var role : roles) {
+			if (!INNOCENT.equals(role.getRoleGroup())) {
+				setPlayerRole(state, players, playerCount, role, assigned);
+			}
+		}
+	}
 
-			for (var player : players) {
-				UUID uuid = player.refComponent().getUuid();
-				if (assigned.contains(uuid)) {
-					continue;
-				}
+	private static void setPlayerRole(GameModeState state, List<PlayerComponents> players, int playerCount, CustomRole role, Set<UUID> assigned) {
+		int expectedAssignedPlayers = playerCount / role.getRatio();
+		expectedAssignedPlayers = Math.max(role.getMinimumAssignedPlayersWithRole(), expectedAssignedPlayers);
 
-				if (assignedPlayers >= expectedAssignedPlayers) {
-					break;
-				}
-				player.info().setCurrentRoundRole(role);
-				assignedPlayers++;
-				assigned.add(uuid);
+		int assignedPlayers = 0;
 
-				if (TRAITOR.equals(role.getRoleGroup())) {
-					state.traitorsAlive.add(player.refComponent().getUuid());
+		for (var player : players) {
+			UUID uuid = player.refComponent().getUuid();
+			if (assigned.contains(uuid)) {
+				//TODO: Unccomment this:
+				// continue;
+			}
 
-				} else {
-					state.innocentsAlice.add(player.refComponent().getUuid());
-				}
+			if (assignedPlayers >= expectedAssignedPlayers) {
+				break;
+			}
+			player.info().setCurrentRoundRole(role);
+			assignedPlayers++;
+			assigned.add(uuid);
+
+			if (TRAITOR.equals(role.getRoleGroup())) {
+				state.traitorsAlive.add(player.refComponent().getUuid());
+
+			} else {
+				state.innocentsAlice.add(player.refComponent().getUuid());
 			}
 		}
 	}
@@ -236,7 +248,7 @@ public class GameModeSystem {
 				reference.getStore().tryRemoveComponent(reference, LostInCombat.componentType);
 
 				if (player.info().isSpectator()) {
-					SpectatorMode.disableSpectatorModeForPlayer(player);
+					SpectatorMode.disableSpectatorModeForPlayer(player, reference.getStore());
 				}
 
 				player.info().setCurrentRoundRole(null);

@@ -29,7 +29,7 @@ public class Shop extends CommandBase {
 	}
 
 	private static void openShopForPlayer(@NonNullDecl CommandContext ctx, Ref<EntityStore> reference) {
-		var player = PlayerAccessors.getPlayerFrom(reference);
+		var player = PlayerAccessors.getPlayerFrom(reference, reference.getStore());
 
 		if (player.isEmpty()) {
 			ctx.sendMessage(Message.raw("An error occurred while trying to access your component information."));

@@ -13,6 +13,7 @@ import ar.ncode.plugin.system.DeathSystem;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
 import com.hypixel.hytale.common.util.CompletableFutureUtil;
 import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.dependency.Dependency;
@@ -51,14 +52,18 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			DeathSystems.PlayerDeathScreen.class, OrderPriority.FURTHEST));
 
 	public static void updatePlayerCountsOnPlayerDeath(PlayerRef playerRef, CustomRole role, GameModeState gameModeState) {
+		gameModeState.spectators.add(playerRef.getUuid());
+
+		if (role == null) {
+			return;
+		}
+
 		if (RoleGroup.TRAITOR.equals(role.getRoleGroup())) {
 			gameModeState.traitorsAlive.remove(playerRef.getUuid());
 
 		} else if (RoleGroup.INNOCENT.equals(role.getRoleGroup())) {
 			gameModeState.innocentsAlice.remove(playerRef.getUuid());
 		}
-
-		gameModeState.spectators.add(playerRef.getUuid());
 	}
 
 	private static int calculateKarmaForAttacker(CustomRole attackerRole, CustomRole attackedRole) {
@@ -77,7 +82,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 		return value;
 	}
 
-	private static void updateAttackerKarma(@NonNullDecl DeathComponent deathComponent, PlayerComponents player, GameModeState gameModeState) {
+	private static void updateAttackerKarma(@NonNullDecl DeathComponent deathComponent, PlayerComponents player, GameModeState gameModeState, ComponentAccessor<EntityStore> store) {
 		if (deathComponent.getDeathInfo() == null) {
 			return;
 		}
@@ -85,7 +90,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 		Damage.Source source = deathComponent.getDeathInfo().getSource();
 
 		if (source instanceof Damage.EntitySource attackerRef) {
-			var attacker = getPlayerFrom(attackerRef.getRef()).orElse(null);
+			var attacker = getPlayerFrom(attackerRef.getRef(), store).orElse(null);
 			if (attacker == null) return;
 
 			if (attacker.refComponent() != null && attacker.info() != null) {
@@ -108,7 +113,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			graveStone.setCauseOfDeath(damageCause);
 		}
 
-		DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, player.reference());
+		DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, player.reference(), player.reference().getStore());
 	}
 
 	@Nonnull
@@ -123,7 +128,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 	) {
 
 		// Get reference to the damaged entity
-		var player = getPlayerFrom(reference).orElse(null);
+		var player = getPlayerFrom(reference, commandBuffer).orElse(null);
 		if (player == null) return;
 
 		World world = player.component().getWorld();
@@ -134,20 +139,20 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			deathComponent.setShowDeathMenu(false);
 			deathComponent.setItemsLossMode(DeathConfig.ItemsLossMode.ALL);
 			deathComponent.setItemsDurabilityLossPercentage(0.0F);
-			CompletableFutureUtil._catch(DeathComponent.respawn(store, reference));
+			CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference));
 
 			GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
 			if (gameModeState == null || !RoundState.IN_GAME.equals(gameModeState.roundState)) {
 				return;
 			}
 
-			player.reference().getStore().ensureComponent(player.reference(), LostInCombat.componentType);
-			player.component().getInventory().clear();
-			SpectatorMode.setGameModeToSpectator(player);
+			commandBuffer.ensureComponent(player.reference(), LostInCombat.componentType);
+			SpectatorMode.setGameModeToSpectator(player, commandBuffer);
 			updatePlayerCountsOnPlayerDeath(player.refComponent(), player.info().getCurrentRoundRole(), gameModeState);
+			player.component().getInventory().clear();
 			player.info().getHud().update();
 
-			updateAttackerKarma(deathComponent, player, gameModeState);
+			updateAttackerKarma(deathComponent, player, gameModeState, commandBuffer);
 
 			spawnGraveStone(deathComponent, gameModeState, player, world);
 

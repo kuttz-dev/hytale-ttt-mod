@@ -4,23 +4,15 @@ import ar.ncode.plugin.accessors.PlayerAccessors;
 import ar.ncode.plugin.model.enums.RoleGroup;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
-import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.component.spatial.SpatialResource;
-import com.hypixel.hytale.component.spatial.SpatialStructure;
 import com.hypixel.hytale.logger.HytaleLogger;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.protocol.Color;
 import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.InteractionType;
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
@@ -29,7 +21,6 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public class TestPlayerRolePotion extends SimpleInstantInteraction {
@@ -56,7 +47,7 @@ public class TestPlayerRolePotion extends SimpleInstantInteraction {
 		World world = commandBuffer.getExternalData().getWorld();
 
 		world.execute(() -> {
-			var playerOpt = PlayerAccessors.getPlayerFrom(ctx.getOwningEntity());
+			var playerOpt = PlayerAccessors.getPlayerFrom(ctx.getOwningEntity(), ctx.getOwningEntity().getStore());
 			var targetPlayerTransform = commandBuffer.getComponent(ctx.getOwningEntity(), TransformComponent.getComponentType());
 
 			if (playerOpt.isEmpty() || targetPlayerTransform == null) {

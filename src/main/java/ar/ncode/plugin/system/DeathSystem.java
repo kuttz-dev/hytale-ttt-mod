@@ -4,9 +4,9 @@ import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.component.DeadPlayerGravestoneComponent;
 import ar.ncode.plugin.component.DeadPlayerInfoComponent;
 import com.hypixel.hytale.component.AddReason;
+import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.function.consumer.TriConsumer;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.util.ChunkUtil;
@@ -36,14 +36,14 @@ public class DeathSystem {
 	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
 	public static void spawnRemainsAtPlayerDeath(World world, DeadPlayerInfoComponent graveStone,
-	                                             Ref<EntityStore> reference
+	                                             Ref<EntityStore> reference, ComponentAccessor<EntityStore> store
 	) {
 		if (!config.get().playersLeaveRemainsWhenDie()) {
 			return;
 		}
 
 		try {
-			TransformComponent transform = reference.getStore().getComponent(reference, TransformComponent.getComponentType());
+			TransformComponent transform = store.getComponent(reference, TransformComponent.getComponentType());
 			if (transform == null) {
 				return;
 			}
@@ -67,27 +67,27 @@ public class DeathSystem {
 						return;
 					}
 
-					addPlayerRemainsToWorld(world, worldChunk, graveStone, reference);
+					addPlayerRemainsToWorld(world, worldChunk, graveStone, reference, store);
 				});
 				return;
 			}
 
-			world.execute(() -> addPlayerRemainsToWorld(world, chunk, graveStone, reference));
+			world.execute(() -> addPlayerRemainsToWorld(world, chunk, graveStone, reference, store));
 		} catch (Exception exception) {
 			LOGGER.atSevere().log("Could not create gravestone for component, exception: {}", exception);
 		}
 	}
 
-	private static void addPlayerRemainsToWorld(World world, WorldChunk worldChunk, DeadPlayerInfoComponent deadPlayerInfo, Ref<EntityStore> reference) {
+	private static void addPlayerRemainsToWorld(World world, WorldChunk worldChunk, DeadPlayerInfoComponent deadPlayerInfo, Ref<EntityStore> reference, ComponentAccessor<EntityStore> store) {
 		if (config.get().playersLeaveGravestonesWhenDie()) {
 			addGraveStoneWithNamePlateToWorld(world, worldChunk, deadPlayerInfo);
 
 		} else {
-			addCorpseToWorld(world, deadPlayerInfo, reference);
+			addCorpseToWorld(world, deadPlayerInfo, reference, store);
 		}
 	}
 
-	private static void addCorpseToWorld(World world, DeadPlayerInfoComponent deadPlayerInfo, Ref<EntityStore> reference) {
+	private static void addCorpseToWorld(World world, DeadPlayerInfoComponent deadPlayerInfo, Ref<EntityStore> reference, ComponentAccessor<EntityStore> store) {
 		TransformComponent transformComponent = new TransformComponent(deadPlayerInfo.getPosition().toVector3d(), deadPlayerInfo.getRotation());
 		Model newModel = Model.createScaledModel(ModelAsset.getAssetMap().getAsset("Player"), 1.0F);
 
@@ -102,18 +102,16 @@ public class DeathSystem {
 		}
 
 		Ref<EntityStore> newEntityRef = pair.first();
-		Store<EntityStore> newEntityStore = newEntityRef.getStore();
-
 		gameModeStateForWorld.get(world.getWorldConfig().getUuid()).corpses.add(newEntityRef);
-		newEntityStore.addComponent(newEntityRef, DeadPlayerInfoComponent.componentType, deadPlayerInfo);
+		store.addComponent(newEntityRef, DeadPlayerInfoComponent.componentType, deadPlayerInfo);
 
 		if (reference.isValid()) {
 
-			PlayerSkinComponent playerSkinComponent = reference.getStore().getComponent(reference, PlayerSkinComponent.getComponentType());
+			PlayerSkinComponent playerSkinComponent = store.getComponent(reference, PlayerSkinComponent.getComponentType());
 
 			if (playerSkinComponent != null) {
 				PlayerSkinComponent skinComp = new PlayerSkinComponent(playerSkinComponent.getPlayerSkin().clone());
-				newEntityStore.addComponent(newEntityRef, PlayerSkinComponent.getComponentType(), skinComp);
+				store.addComponent(newEntityRef, PlayerSkinComponent.getComponentType(), skinComp);
 				skinComp.setNetworkOutdated();
 			}
 		}

@@ -1,5 +1,6 @@
 package ar.ncode.plugin.system.event.handler;
 
+import ar.ncode.plugin.config.CustomRole;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;
 import ar.ncode.plugin.model.enums.RoundState;
@@ -44,6 +45,11 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 
 	public static void updateEachPlayer(List<PlayerComponents> players) {
 		for (var player : players) {
+			CustomRole currentRoundRole = player.info().getCurrentRoundRole();
+			if (currentRoundRole == null) {
+				continue;
+			}
+
 			Ref<EntityStore> reference = player.reference();
 
 			EntityStatMap stats = reference.getStore().getComponent(reference, EntityStatMap.getComponentType());
@@ -51,7 +57,7 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 
 			// Inventory
 			player.component().getInventory().setActiveHotbarSlot((byte) 0);
-			var itemGroups = config.get().getItems(player.info().getCurrentRoundRole().getStartingItems());
+			var itemGroups = config.get().getItems(currentRoundRole.getStartingItems());
 			addItemsToPlayer(itemGroups, player.component().getInventory().getCombinedHotbarFirst());
 
 			// GUI
@@ -71,20 +77,20 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 			}
 
 			NotificationStyle notificationStyle;
-			if (TRAITOR.equals(player.info().getCurrentRoundRole().getRoleGroup())) {
+			if (TRAITOR.equals(currentRoundRole.getRoleGroup())) {
 				notificationStyle = NotificationStyle.Danger;
 
 			} else {
 				notificationStyle = NotificationStyle.Success;
 			}
 
-			player.info().setCredits(player.info().getCurrentRoundRole().getStartingCredits());
+			player.info().setCredits(currentRoundRole.getStartingCredits());
 
 
 			NotificationUtil.sendNotification(
 					player.refComponent().getPacketHandler(),
 					Message.translation(PLAYER_ASSIGNED_ROLE_NOTIFICATION.get())
-							.param("role", Message.translation(player.info().getCurrentRoundRole().getTranslationKey())),
+							.param("role", Message.translation(currentRoundRole.getTranslationKey())),
 					notificationStyle
 			);
 		}
