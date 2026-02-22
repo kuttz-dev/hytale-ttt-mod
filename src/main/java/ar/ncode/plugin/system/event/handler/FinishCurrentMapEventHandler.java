@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.currentInstance;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.worldPreviews;
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
@@ -59,6 +60,8 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 		if (world == null) return;
 
 		world.execute(() -> {
+			gameModeStateForWorld.get(currentInstance).playersAreVotingMap(true);
+
 			EventTitleUtil.showEventTitleToWorld(
 					Message.translation(MAP_VOTE_NOTIFICATION.get()),
 					Message.raw(""),
@@ -121,6 +124,7 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 					// Check if world is still alive before executing (prevents memory leak from stale references)
 					if (!currentWorld.isAlive()) return;
 					ChangeWorldCommand.loadInstance(currentWorld, newWorldName);
+					gameModeStateForWorld.get(currentInstance).playersAreVotingMap(false);
 				},
 				config.get().getTimeBeforeChangingMapInSeconds(),
 				TimeUnit.SECONDS

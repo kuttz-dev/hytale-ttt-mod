@@ -84,13 +84,8 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 		var builder = new UICommandBuilder();
 		setHudRoleValues(builder, gameModeState);
 
-		if (RoundState.IN_GAME.equals(gameModeState.roundState)) {
-			LocalTime roundRemainingTime = gameModeState.getRoundRemainingTime();
-			builder.set("#LeftRoundTime.Text", roundRemainingTime.format(timeFormatter));
-
-		} else {
-			builder.set("#LeftRoundTime.Text", "--" + ":" + "--");
-		}
+		LocalTime remainingTime = gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap());
+		builder.set("#LeftRoundTime.Text", remainingTime.format(timeFormatter));
 
 		update(false, builder);
 	}

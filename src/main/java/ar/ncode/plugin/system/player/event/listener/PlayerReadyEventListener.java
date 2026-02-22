@@ -68,7 +68,6 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 
 		world.execute(() -> {
 			PlayerRef playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
-
 			if (playerRef == null) {
 				return;
 			}
@@ -82,7 +81,6 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 				gameModeState = new GameModeState();
 				gameModeStateForWorld.put(world.getWorldConfig().getUuid(), gameModeState);
 			}
-
 
 			var player = new PlayerComponents(playerComponent, playerRef, playerInfo, reference);
 			player.info().setWorldInstance(world.getWorldConfig().getUuid());
@@ -110,7 +108,6 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 			playerInfo.setHud(hud);
 
 			if (canStartNewRound(gameModeState, world)) {
-
 				HytaleServer.get().getEventBus()
 						.dispatchForAsync(StartNewRoundEvent.class)
 						.dispatch(new StartNewRoundEvent(world.getWorldConfig().getUuid()));

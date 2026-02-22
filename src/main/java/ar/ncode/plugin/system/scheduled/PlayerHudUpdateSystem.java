@@ -1,7 +1,6 @@
 package ar.ncode.plugin.system.scheduled;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.model.GameModeState;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -30,7 +29,7 @@ public class PlayerHudUpdateSystem extends EntityTickingSystem<EntityStore> {
 		World world = store.getExternalData().getWorld();
 		GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
 
-		if (gameModeState != null && RoundState.IN_GAME.equals(gameModeState.roundState)) {
+		if (gameModeState != null) {
 			PlayerGameModeInfo playerInfo = archetypeChunk.getComponent(index, PlayerGameModeInfo.componentType);
 
 			if (playerInfo == null || playerInfo.getHud() == null) {
