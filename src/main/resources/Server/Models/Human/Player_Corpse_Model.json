@@ -1,0 +1,54 @@
+{
+  "Parent": "Player",
+  "EyeHeight": 0.6,
+  "HitBox": {
+    "Min": {
+      "X": -1.5,
+      "Y": 0,
+      "Z": -1.0
+    },
+    "Max": {
+      "X": 1.5,
+      "Y": 1.2,
+      "Z": 1.0
+    }
+  },
+  "AnimationSets": {
+    "Dead": {
+      "Animations": [
+        {
+          "Animation": "Characters/Animations/Corpse/Player_Death_Pose.blockyanim",
+          "Looping": true,
+          "BlendingDuration": 0.0
+        }
+      ]
+    },
+    "Idle": {
+      "Animations": [
+        {
+          "Animation": "Characters/Animations/Corpse/Player_Death_Pose.blockyanim",
+          "Looping": true,
+          "BlendingDuration": 0.0
+        }
+      ]
+    },
+    "Walk": {
+      "Animations": [
+        {
+          "Animation": "Characters/Animations/Corpse/Player_Death_Pose.blockyanim",
+          "Looping": true,
+          "BlendingDuration": 0.0
+        }
+      ]
+    },
+    "Run": {
+      "Animations": [
+        {
+          "Animation": "Characters/Animations/Corpse/Player_Death_Pose.blockyanim",
+          "Looping": true,
+          "BlendingDuration": 0.0
+        }
+      ]
+    }
+  }
+}

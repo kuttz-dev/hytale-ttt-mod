@@ -38,7 +38,7 @@
         {
           "Type": "PlayAnimation",
           "Slot": "Status",
-          "Animation": "Sleep"
+          "Animation": "Dead"
         }
       ],
       "Continue": true
@@ -69,7 +69,7 @@
             },
             "Actions": [
               {
-                "Type": "OpenDeadPlayerInfo",
+                "Type": "SeeDeadPlayerInfoAction",
                 "Shop": "Kweebec_Merchant"
               }
             ]
