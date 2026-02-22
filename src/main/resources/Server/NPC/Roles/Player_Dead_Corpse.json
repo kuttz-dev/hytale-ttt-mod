@@ -1,52 +1,116 @@
 {
   "Type": "Generic",
-  "Parameters": {
-    "Invulnerable": {
-      "Value": true,
-      "Description": "Whether this NPC is invulnerable."
-    },
-    "NameTranslationKey": {
-      "Value": "server.npcRoles.Kweebec_Merchant.name",
-      "Description": "Translation key for NPC name display"
-    }
-  },
+  "StartState": "Dead",
   "DefaultNPCAttitude": "Ignore",
-  "DefaultPlayerAttitude": "Ignore",
-  "Appearance": "Player",
-  "MaxHealth": 100,
-  "IsMemory": false,
-  "Invulnerable": {
-    "Compute": "Invulnerable"
-  },
+  "DefaultPlayerAttitude": "Neutral",
+  "Appearance": "Player_Corpse_Model",
+  "MaxHealth": 1,
+  "Invulnerable": true,
+  "KnockbackScale": 0,
+  "DisableDamageGroups": [
+    "Self"
+  ],
+  "BusyStates": [
+    "$Interaction"
+  ],
   "MotionControllerList": [
     {
       "Type": "Walk",
-      "MaxWalkSpeed": 5,
+      "MaxWalkSpeed": 0.02,
+      "MinWalkSpeed": 0.01,
       "Gravity": 10,
-      "RunThreshold": 0.3,
-      "MaxFallSpeed": 15,
-      "MaxRotationSpeed": 360,
-      "Acceleration": 10
+      "MaxFallSpeed": 8,
+      "Acceleration": 0.01
     }
   ],
   "Instructions": [
     {
-      "Sensor": {
-        "Type": "Any"
-      },
-      "Actions": [
+      "Instructions": [
         {
-          "Type": "PlayAnimation",
-          "Slot": "Status",
-          "Animation": "Dead"
+          "Sensor": {
+            "Type": "State",
+            "State": "Dead"
+          },
+          "Instructions": [
+            {
+              "Sensor": {
+                "Type": "Any"
+              },
+              "BodyMotion": {
+                "Type": "Nothing"
+              },
+              "HeadMotion": {
+                "Type": "Nothing"
+              },
+              "Actions": [
+                {
+                  "Type": "PlayAnimation",
+                  "Slot": "Status",
+                  "Animation": "Dead"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$Comment": "Interaction state - triggered when player interacts",
+          "Sensor": {
+            "Type": "State",
+            "State": "$Interaction"
+          },
+          "Instructions": [
+            {
+              "$Comment": "Return to Dead after interaction ends",
+              "Sensor": {
+                "Type": "Any"
+              },
+              "Actions": [
+                {
+                  "Type": "Timeout",
+                  "Delay": [
+                    1,
+                    1
+                  ],
+                  "Action": {
+                    "Type": "Sequence",
+                    "Actions": [
+                      {
+                        "Type": "ReleaseTarget"
+                      },
+                      {
+                        "Type": "State",
+                        "State": "Dead"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
-      ],
-      "Continue": true
+      ]
     }
   ],
   "InteractionInstruction": {
     "Instructions": [
       {
+        "$Comment": "Disable interaction if player cannot interact (out of range, wrong angle)",
+        "Sensor": {
+          "Type": "Not",
+          "Sensor": {
+            "Type": "CanInteract",
+            "ViewSector": 360
+          }
+        },
+        "Actions": [
+          {
+            "Type": "SetInteractable",
+            "Interactable": false
+          }
+        ]
+      },
+      {
+        "$Comment": "Enable interaction for all players who can interact",
         "Continue": true,
         "Sensor": {
           "Type": "Any"
@@ -59,18 +123,29 @@
         ]
       },
       {
+        "$Comment": "When player interacts, open the corpse loot page",
         "Sensor": {
           "Type": "HasInteracted"
         },
         "Instructions": [
           {
             "Sensor": {
-              "Type": "Any"
+              "Type": "Not",
+              "Sensor": {
+                "Type": "State",
+                "State": "$Interaction"
+              }
             },
             "Actions": [
               {
-                "Type": "SeeDeadPlayerInfoAction",
-                "Shop": "Kweebec_Merchant"
+                "Type": "LockOnInteractionTarget"
+              },
+              {
+                "Type": "SeeDeadPlayerInfoAction"
+              },
+              {
+                "Type": "State",
+                "State": "$Interaction"
               }
             ]
           }
@@ -78,7 +153,5 @@
       }
     ]
   },
-  "NameTranslationKey": {
-    "Compute": "NameTranslationKey"
-  }
+  "NameTranslationKey": "dead_corpse_npc_name"
 }

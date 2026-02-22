@@ -144,12 +144,14 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			deathComponent.setItemsLossMode(DeathConfig.ItemsLossMode.ALL);
 			deathComponent.setItemsDurabilityLossPercentage(0.0F);
 			commandBuffer.tryRemoveComponent(reference, DeferredCorpseRemoval.getComponentType());
-			CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference));
 
 			GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
 			if (gameModeState == null || !RoundState.IN_GAME.equals(gameModeState.roundState)) {
+				CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference));
 				return;
 			}
+
+			spawnGraveStone(deathComponent, gameModeState, player, world, commandBuffer);
 
 			commandBuffer.ensureComponent(player.reference(), LostInCombat.componentType);
 			SpectatorMode.setGameModeToSpectator(player, commandBuffer);
@@ -158,13 +160,14 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 			player.info().getHud().update();
 
 			updateKdaAndKarma(deathComponent, player, gameModeState, commandBuffer);
-			spawnGraveStone(deathComponent, gameModeState, player, world, commandBuffer);
 
 			if (roundShouldEnd(gameModeState)) {
 				HytaleServer.get().getEventBus()
 						.dispatchForAsync(FinishCurrentRoundEvent.class)
 						.dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
 			}
+
+			CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference));
 		});
 	}
 

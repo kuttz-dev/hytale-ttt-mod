@@ -9,4 +9,3 @@ pluginManagement {
 }
 
 rootProject.name = 'ttt'
-//includeBuild('scoreboard-plugin')

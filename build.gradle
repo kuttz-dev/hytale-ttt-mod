@@ -73,8 +73,6 @@ repositories {
 def isCI = System.getenv("CI") != null
 
 dependencies {
-    //compileOnly("ar.ncode:scoreboard-plugin:0.1.0")
-
     if (isCI) {
         compileOnly("com.hypixel.hytale:Server:${project.findProperty("hytaleServerVersion")}")
         testImplementation("com.hypixel.hytale:Server:${project.findProperty("hytaleServerVersion")}")

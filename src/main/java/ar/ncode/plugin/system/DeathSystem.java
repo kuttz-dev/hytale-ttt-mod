@@ -7,14 +7,17 @@ import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.function.consumer.TriConsumer;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.protocol.AnimationSlot;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.model.config.Model;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
+import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.ProjectileComponent;
 import com.hypixel.hytale.server.core.entity.nameplate.Nameplate;
@@ -26,7 +29,6 @@ import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
-import it.unimi.dsi.fastutil.Pair;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
@@ -43,36 +45,39 @@ public class DeathSystem {
 		}
 
 		try {
-			TransformComponent transform = store.getComponent(reference, TransformComponent.getComponentType());
-			if (transform == null) {
-				return;
-			}
+			world.execute(() -> {
+				TransformComponent transform = store.getComponent(reference, TransformComponent.getComponentType());
+				if (transform == null) {
+					return;
+				}
 
-			TransformComponent newTransform = transform.clone();
-			Vector3i emptyPosition = findEmptyPlaceNearPosition(world, newTransform.getPosition(), 5);
+				TransformComponent newTransform = transform.clone();
+				Vector3i emptyPosition = findEmptyPlaceNearPosition(world, newTransform.getPosition(), 5);
 
-			if (emptyPosition == null) {
-				return;
-			}
+				if (emptyPosition == null) {
+					return;
+				}
 
-			graveStone.setGraveAndNameplatePosition(emptyPosition);
-			graveStone.setRotation(newTransform.getRotation());
+				graveStone.setGraveAndNameplatePosition(emptyPosition);
+				graveStone.setRotation(newTransform.getRotation());
 
-			long chunkIndex = ChunkUtil.indexChunkFromBlock(emptyPosition.x, emptyPosition.z);
-			WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
+				long chunkIndex = ChunkUtil.indexChunkFromBlock(emptyPosition.x, emptyPosition.z);
+				WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
 
-			if (chunk == null) {
-				world.getChunkAsync(chunkIndex).thenAccept(worldChunk -> {
-					if (worldChunk == null) {
-						return;
-					}
+				if (chunk == null) {
+					world.getChunkAsync(chunkIndex).thenAccept(worldChunk -> {
+						if (worldChunk == null) {
+							return;
+						}
 
-					addPlayerRemainsToWorld(world, worldChunk, graveStone, reference, store);
-				});
-				return;
-			}
+						addPlayerRemainsToWorld(world, worldChunk, graveStone, reference, store);
+					});
+					return;
+				}
 
-			world.execute(() -> addPlayerRemainsToWorld(world, chunk, graveStone, reference, store));
+				addPlayerRemainsToWorld(world, chunk, graveStone, reference, store);
+			});
+
 		} catch (Exception exception) {
 			LOGGER.atSevere().log("Could not create gravestone for component, exception: {}", exception);
 		}
@@ -88,33 +93,88 @@ public class DeathSystem {
 	}
 
 	private static void addCorpseToWorld(World world, DeadPlayerInfoComponent deadPlayerInfo, Ref<EntityStore> reference, ComponentAccessor<EntityStore> store) {
-		TransformComponent transformComponent = new TransformComponent(deadPlayerInfo.getPosition().toVector3d(), deadPlayerInfo.getRotation());
-		Model newModel = Model.createScaledModel(ModelAsset.getAssetMap().getAsset("Player"), 1.0F);
+		TransformComponent transformComponent = new TransformComponent(
+				deadPlayerInfo.getPosition().toVector3d().clone(),
+				deadPlayerInfo.getRotation().clone()
+		);
 
-		Pair<Ref<EntityStore>, NPCEntity> pair = NPCPlugin.get()
-				.spawnEntity(
-						world.getEntityStore().getStore(), NPCPlugin.get().getIndex("DeadCorpse"),
-						transformComponent.getPosition(), transformComponent.getRotation(), newModel, (TriConsumer) null
-				);
+		ModelAsset playerModelAsset = ModelAsset.getAssetMap().getAsset("Player");
+		ModelAsset modelWithDeathAnimation = ModelAsset.getAssetMap().getAsset("Player_Corpse_Model");
+		Model npcModel = null;
 
-		if (pair == null) {
-			return;
+		if (playerModelAsset != null && modelWithDeathAnimation != null) {
+			Model playerModel = Model.createScaledModel(playerModelAsset, 1.0F, null);
+			npcModel = addAnimationsToExistingModel(playerModel, modelWithDeathAnimation);
+
+		} else if (playerModelAsset != null) {
+			npcModel = Model.createScaledModel(playerModelAsset, 1.0F);
 		}
 
-		Ref<EntityStore> newEntityRef = pair.first();
-		gameModeStateForWorld.get(world.getWorldConfig().getUuid()).corpses.add(newEntityRef);
-		store.addComponent(newEntityRef, DeadPlayerInfoComponent.componentType, deadPlayerInfo);
+		addNpcToWorld(
+				world, transformComponent, npcModel,
+				((npc, newEntityRef, scopeStore) -> {
+					gameModeStateForWorld.get(world.getWorldConfig().getUuid()).corpses.add(newEntityRef);
+					store.addComponent(newEntityRef, DeadPlayerInfoComponent.componentType, deadPlayerInfo);
 
-		if (reference.isValid()) {
+					if (reference.isValid()) {
+						PlayerSkinComponent playerSkinComponent = store.getComponent(reference, PlayerSkinComponent.getComponentType());
 
-			PlayerSkinComponent playerSkinComponent = store.getComponent(reference, PlayerSkinComponent.getComponentType());
+						if (playerSkinComponent != null) {
+							PlayerSkinComponent skinComp = new PlayerSkinComponent(playerSkinComponent.getPlayerSkin().clone());
+							store.addComponent(newEntityRef, PlayerSkinComponent.getComponentType(), skinComp);
+							skinComp.setNetworkOutdated();
+						}
 
-			if (playerSkinComponent != null) {
-				PlayerSkinComponent skinComp = new PlayerSkinComponent(playerSkinComponent.getPlayerSkin().clone());
-				store.addComponent(newEntityRef, PlayerSkinComponent.getComponentType(), skinComp);
-				skinComp.setNetworkOutdated();
+					}
+
+					npc.setDespawning(false);
+					npc.setDespawnCheckRemainingSeconds(Float.MAX_VALUE);
+					AnimationUtils.playAnimation(newEntityRef, AnimationSlot.Status, "Dead", false, store);
+				})
+		);
+	}
+
+	private static void addNpcToWorld(World world, TransformComponent transformComponent, Model npcModel, TriConsumer<NPCEntity, Ref<EntityStore>, Store<EntityStore>> postSpawn) {
+		world.execute(() -> {
+			var result = NPCPlugin.get()
+					.spawnEntity(
+							world.getEntityStore().getStore(),
+							NPCPlugin.get().getIndex("Player_Dead_Corpse"),
+							transformComponent.getPosition(), transformComponent.getRotation(), npcModel,
+							postSpawn
+					);
+
+			if (result == null) {
+				LOGGER.atSevere().log("Error adding corpse to world");
 			}
-		}
+		});
+	}
+
+	private static Model addAnimationsToExistingModel(Model playerModel, ModelAsset corpseModelAsset) {
+		return new Model(
+				playerModel.getModelAssetId(),
+				playerModel.getScale(),
+				playerModel.getRandomAttachmentIds(),
+				playerModel.getAttachments(),
+				playerModel.getBoundingBox(),
+				playerModel.getModel(),
+				playerModel.getTexture(),
+				playerModel.getGradientSet(),
+				playerModel.getGradientId(),
+				playerModel.getEyeHeight(),
+				playerModel.getCrouchOffset(),
+				playerModel.getSittingOffset(),
+				playerModel.getSleepingOffset(),
+				corpseModelAsset.getAnimationSetMap(),
+				playerModel.getCamera(),
+				playerModel.getLight(),
+				playerModel.getParticles(),
+				playerModel.getTrails(),
+				playerModel.getPhysicsValues(),
+				playerModel.getDetailBoxes(),
+				playerModel.getPhobia(),
+				playerModel.getPhobiaModelAssetId()
+		);
 	}
 
 	private static void addGraveStoneWithNamePlateToWorld(World world, WorldChunk worldChunk, DeadPlayerInfoComponent deadPlayerInfo) {

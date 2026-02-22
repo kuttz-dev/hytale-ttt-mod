@@ -194,10 +194,10 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 		// Register NPC core action builder here so it's available when NPC JSON files are loaded
 		if (NPCPlugin.get() != null) {
-			NPCPlugin.get().registerCoreComponentType("OpenDeadPlayerInfo", SeeDeadPlayerInfoAction.Builder::new);
-			LOGGER.atInfo().log("Registered NPC core component builder: OpenDeadPlayerInfo");
+			NPCPlugin.get().registerCoreComponentType("SeeDeadPlayerInfoAction", SeeDeadPlayerInfoAction.Builder::new);
+			LOGGER.atInfo().log("Registered NPC core component builder: SeeDeadPlayerInfoAction");
 		} else {
-			LOGGER.atSevere().log("NPCPlugin not available yet; OpenDeadPlayerInfo builder not registered in setup().");
+			LOGGER.atSevere().log("NPCPlugin not available yet; SeeDeadPlayerInfoAction builder not registered in setup().");
 		}
 		LOGGER.atInfo().log("Plugin " + this.getName() + " setup completed!");
 	}
