@@ -1,6 +1,6 @@
 ## Trouble in Trork Town (TTT) – Hytale Mod
 
-[![Discord Support](https://img.shields.io/badge/Support-Discord-5865F2?style=for-the-badge&logo=discord)](https://discord.gg/qpCBxXpF)
+[![Discord Support](https://img.shields.io/badge/Support-Discord-5865F2?style=for-the-badge&logo=discord)](https://discord.gg/eECVkthTfQ)
 
 **Trouble in Trork Town** is an open-source gamemode for **Hytale**, inspired by the classic _Trouble in Terrorist Town_
 from Garry’s Mod. It can also be configured to be played as Murder Mystery. And its published in github, curseforge and modtale, supporting the latest Hytale version. 
