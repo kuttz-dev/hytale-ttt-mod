@@ -46,6 +46,10 @@ public class DeathSystem {
 
 		try {
 			world.execute(() -> {
+				if (reference == null || !reference.isValid()) {
+					return;
+				}
+
 				TransformComponent transform = store.getComponent(reference, TransformComponent.getComponentType());
 				if (transform == null) {
 					return;

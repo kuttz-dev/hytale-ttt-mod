@@ -74,7 +74,7 @@ public class WorldPreviewLoader {
 			AssetModule.get().registerPack("worlds_assets", assetsRoot, manifest, false);
 
 		} catch (Exception ignored) {
-			LOGGER.atSevere().log("Failed to load worlds assets -8 {}", ignored);
+			LOGGER.atSevere().log("Failed to load worlds assets - %s", ignored);
 		}
 
 		if (result.isEmpty()) {

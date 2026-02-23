@@ -134,7 +134,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 				);
 			}
 		} catch (Exception ignored) {
-			LOGGER.atSevere().log("Failed to instances configs - {}", ignored.getMessage());
+			LOGGER.atSevere().log("Failed to load instances configs - %s", ignored.getMessage());
 		}
 	}
 
@@ -231,14 +231,14 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 					throw new RuntimeException(e);
 				}
 
-				LOGGER.atInfo().log("Copied default instance config for {} from template.", world);
+				LOGGER.atInfo().log("Copied default instance config for %s from template.", world);
 			}
 
 			if (!Files.exists(worldConfigPath)) {
-				instanceCfg.save().thenRun(() -> LOGGER.atInfo().log("Saved instance config for {}", world));
+				instanceCfg.save().thenRun(() -> LOGGER.atInfo().log("Saved instance config for %s", world));
 			}
 
-			instanceCfg.load().thenRun(() -> LOGGER.atInfo().log("Instance config loaded for {}", world));
+			instanceCfg.load().thenRun(() -> LOGGER.atInfo().log("Instance config loaded for %s", world));
 		});
 	}
 

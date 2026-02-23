@@ -8,6 +8,7 @@ public class CustomPermissions {
 	public static final String TTT_TRAITOR_CHAT = TTT_PREFIX + ".traitor.chat";
 	public static final String TTT_MAP_VOTE = TTT_PREFIX + ".map.vote";
 	public static final String TTT_MAP_FINISH = TTT_PREFIX + ".map.finish";
+	public static final String TTT_MAP_SAVE = TTT_PREFIX + ".map.save";
 	public static final String TTT_MAP_CRUD = TTT_PREFIX + ".map.crud";
 	public static final String TTT_SHOP_OPEN = TTT_PREFIX + ".shop.open";
 	public static final String TTT_INFO_SEE = TTT_PREFIX + ".info.see";
