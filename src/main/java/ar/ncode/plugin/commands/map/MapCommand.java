@@ -8,7 +8,8 @@ public class MapCommand extends AbstractCommandCollection {
 		super("map", "Commands related to map management");
 		addSubCommand(new MapVoteCommand());
 		addSubCommand(new FinishCurrentMapCommand());
-		addSubCommand(new CrudMapCommand.SaveMapCommand());
+		addSubCommand(new MapConfig());
+		addSubCommand(new MapConfig.SaveMapCommand());
 		addSubCommand(new CrudMapCommand.CreateMapCommand());
 		addSubCommand(new CrudMapCommand.ReadMapsCommand());
 		addSubCommand(new CrudMapCommand.UpdateMapCommand());

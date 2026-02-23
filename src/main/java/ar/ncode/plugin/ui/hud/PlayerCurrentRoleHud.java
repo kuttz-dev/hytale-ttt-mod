@@ -42,6 +42,9 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 		if (RoundState.PREPARING.equals(gameModeState.roundState)) {
 			this.messageId = TranslationKey.HUD_CURRENT_STATUS_PREPARING.get();
 			this.backgroundColor = TranslationKey.HUD_CURRENT_STATUS_PREPARING.getMessageColor();
+		} else if (gameModeState.playersAreVotingMap()) {
+			this.messageId = TranslationKey.HUD_CURRENT_STATUS_PREPARING.get();
+			this.backgroundColor = TranslationKey.HUD_CURRENT_STATUS_PREPARING.getMessageColor();
 		}
 
 		if (playerInfo.getCurrentRoundRole() == null) {

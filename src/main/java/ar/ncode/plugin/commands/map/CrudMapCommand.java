@@ -39,54 +39,7 @@ public class CrudMapCommand {
 
 	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-	public static class SaveMapCommand extends AbstractAsyncCommand {
-
-		public SaveMapCommand() {
-			super("save", "Saves the changes made to the map");
-			requirePermission(TTT_MAP_SAVE);
-		}
-
-		protected void executeSync(@Nonnull CommandContext ctx) throws Exception {
-			World currentWorld = Universe.get().getWorld(TroubleInTrorkTownPlugin.currentInstance);
-			if (currentWorld == null) {
-				ctx.sendMessage(Message.raw("Error obtaining world"));
-				return;
-			}
-
-			String mapName = WorldAccessors.getWorldNameForInstance(currentWorld);
-			if (mapName == null) {
-				ctx.sendMessage(Message.raw("Error obtaining world name"));
-				return;
-			}
-
-			Path mapFolder = TroubleInTrorkTownPlugin.instance.templatesPath.resolve(mapName, "chunks");
-
-			Path maps = Paths.get("universe/worlds");
-			Path currentChunksFolder = maps.resolve(currentWorld.getName(), "chunks");
-
-			try (Stream<Path> stream = Files.walk(currentChunksFolder)) {
-				copyFiles(stream, currentChunksFolder, mapFolder);
-			}
-
-			reloadMaps();
-			ctx.sendMessage(Message.raw("Changes made to map " + mapName + " have been saved."));
-			LOGGER.atInfo().log("dUpdated a map. Map folder %s - Chunks folder: %s", mapFolder.toString(), currentChunksFolder.toString());
-		}
-
-		@Nonnull
-		@Override
-		protected CompletableFuture<Void> executeAsync(@Nonnull CommandContext ctx) {
-			return CompletableFuture.runAsync(() -> {
-				try {
-					executeSync(ctx);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
-	}
-
-	private static void reloadMaps() throws Exception {
+	public static void reloadMaps() throws Exception {
 		TroubleInTrorkTownPlugin.worldPreviews = WorldPreviewLoader.load(
 				TroubleInTrorkTownPlugin.instance.templatesPath,
 				TroubleInTrorkTownPlugin.instance.getDataDirectory()
@@ -96,7 +49,7 @@ public class CrudMapCommand {
 		TroubleInTrorkTownPlugin.instance.loadMapsConfig();
 	}
 
-	private static void copyFiles(Stream<Path> stream, Path currentChunksFolder, Path mapFolder) {
+	public static void copyFiles(Stream<Path> stream, Path currentChunksFolder, Path mapFolder) {
 		stream.forEach(src -> {
 			try {
 				Path rel = currentChunksFolder.relativize(src);

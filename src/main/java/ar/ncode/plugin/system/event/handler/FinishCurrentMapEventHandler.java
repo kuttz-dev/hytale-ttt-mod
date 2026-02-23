@@ -75,6 +75,8 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 			var players = getPlayersAt(world);
 
 			for (var player : players) {
+				player.info().setCurrentRoundRole(null);
+
 				if (player.info().getHud() != null) {
 					player.info().getHud().update();
 				}

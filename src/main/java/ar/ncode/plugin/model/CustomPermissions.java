@@ -8,6 +8,7 @@ public class CustomPermissions {
 	public static final String TTT_TRAITOR_CHAT = TTT_PREFIX + ".traitor.chat";
 	public static final String TTT_MAP_VOTE = TTT_PREFIX + ".map.vote";
 	public static final String TTT_MAP_FINISH = TTT_PREFIX + ".map.finish";
+	public static final String TTT_MAP_CONFIG_SPAWN_POINT = TTT_PREFIX + ".map.config.spawn-point";
 	public static final String TTT_MAP_SAVE = TTT_PREFIX + ".map.save";
 	public static final String TTT_MAP_CRUD = TTT_PREFIX + ".map.crud";
 	public static final String TTT_SHOP_OPEN = TTT_PREFIX + ".shop.open";
@@ -27,7 +28,8 @@ public class CustomPermissions {
 			TTT_INFO_SEE,
 			TTT_ROLE_SET,
 			TTT_MAP_FINISH,
-			TTT_MAP_CRUD
+			TTT_MAP_CRUD,
+			TTT_MAP_CONFIG_SPAWN_POINT
 	);
 	public static final String TTT_USER_GROUP = TTT_PREFIX + ".groups.user";
 	public static final String TTT_ADMIN_GROUP = TTT_PREFIX + ".groups.admin";
