@@ -36,6 +36,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.weaponsConfig;
 import static ar.ncode.plugin.accessors.WorldAccessors.getWorldNameForInstance;
+import static ar.ncode.plugin.accessors.WorldAccessors.saveInstanceConfig;
 import static ar.ncode.plugin.system.DeathSystem.findEmptyPlaceNearPosition;
 
 public class LootSpawnCommand extends AbstractCommandCollection {
@@ -211,9 +212,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 				System.arraycopy(lootSpawnPoints, 0, newLootSpawnPoints, 0, lootSpawnPoints.length);
 				newLootSpawnPoints[lootSpawnPoints.length] = lootSpawnPoint;
 				instanceConfig.setLootSpawnPoints(newLootSpawnPoints);
-
-				WorldAccessors.getWorldInstanceConfigFile(world).ifPresent(Config::save);
-				ctx.sendMessage(Message.raw("Loot position added at your current location."));
+				saveInstanceConfig(ctx, world);
 			});
 		}
 

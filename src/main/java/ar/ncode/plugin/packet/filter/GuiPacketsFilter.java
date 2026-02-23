@@ -69,7 +69,11 @@ public class GuiPacketsFilter implements PlayerPacketFilter {
 			} else if (ChatMessage.PACKET_ID == packet.getId() && packet instanceof ChatMessage chatMessage) {
 				String message = chatMessage.message;
 				if (message != null && message.startsWith("/gm ")) {
-					player.getPageManager().openCustomPage(reference, reference.getStore(), new ScoreBoardPage(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction));
+					try {
+						player.getPageManager().openCustomPage(reference, reference.getStore(), new ScoreBoardPage(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction));
+					} catch (Exception e) {
+						LOGGER.atSevere().log("Error opening scoreboard: %s", e.getMessage());
+					}
 				}
 			}
 		});

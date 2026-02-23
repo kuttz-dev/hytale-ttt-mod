@@ -130,7 +130,6 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 	public void onComponentAdded(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl DeathComponent deathComponent,
 	                             @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer
 	) {
-
 		// Get reference to the damaged entity
 		var player = getPlayerFrom(reference, commandBuffer).orElse(null);
 		if (player == null) return;
@@ -151,10 +150,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 				return;
 			}
 
-			spawnGraveStone(deathComponent, gameModeState, player, world, commandBuffer);
-
 			commandBuffer.ensureComponent(player.reference(), LostInCombat.componentType);
-			SpectatorMode.setGameModeToSpectator(player, commandBuffer);
 			updatePlayerCountsOnPlayerDeath(player.refComponent(), player.info().getCurrentRoundRole(), gameModeState);
 			player.component().getInventory().clear();
 			player.info().getHud().update();
@@ -165,6 +161,9 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 				HytaleServer.get().getEventBus()
 						.dispatchForAsync(FinishCurrentRoundEvent.class)
 						.dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
+			} else {
+				spawnGraveStone(deathComponent, gameModeState, player, world, commandBuffer);
+				SpectatorMode.setGameModeToSpectator(player, commandBuffer);
 			}
 
 			CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference));

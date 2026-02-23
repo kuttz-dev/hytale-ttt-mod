@@ -8,15 +8,22 @@ import ar.ncode.plugin.model.PlayerComponents;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.Config;
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +32,8 @@ import java.util.UUID;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 
 public class WorldAccessors {
+
+	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
 	public static InstanceConfig getWorldInstanceConfig(World world) {
 		String worldName = getWorldName(world);
@@ -117,4 +126,43 @@ public class WorldAccessors {
 	}
 
 
+    public static boolean saveInstanceConfigPermanently(World world) {
+        String name = getWorldNameForInstance(world);
+		if (name == null) {
+			return false;
+		}
+
+		Path sourceFile = TroubleInTrorkTownPlugin.instance.getDataDirectory()
+						.resolve(name + "_config.json");
+
+		Path targetFile = TroubleInTrorkTownPlugin.instance.getDataDirectory()
+				.resolve("maps", name, "config.json");
+
+		try {
+			Files.copy(
+					sourceFile,
+					targetFile,
+					StandardCopyOption.REPLACE_EXISTING
+			);
+		} catch (Exception e) {
+			LOGGER.atSevere().log("Error saving config: %s - Source: %s - Target: %s", e.getMessage(), sourceFile.toString(), targetFile.toString());
+			return false;
+		}
+
+		return true;
+    }
+
+	public static void saveInstanceConfig(@NonNullDecl CommandContext ctx, World world) {
+		WorldAccessors.getWorldInstanceConfigFile(world)
+				.ifPresentOrElse(config -> {
+					config.save();
+					boolean success = WorldAccessors.saveInstanceConfigPermanently(world);
+					if (success) {
+						ctx.sendMessage(Message.raw("Spawn position added at your current location."));
+					} else {
+						ctx.sendMessage(Message.raw("Could not save spawn position. Error making position permanent"));
+					}
+
+				}, () -> ctx.sendMessage(Message.raw("Could not save spawn position.")));
+	}
 }
