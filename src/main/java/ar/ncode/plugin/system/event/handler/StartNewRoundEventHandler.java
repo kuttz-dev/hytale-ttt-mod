@@ -36,7 +36,6 @@ import static ar.ncode.plugin.model.enums.RoundState.PREPARING;
 
 public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 
-	public static final int STARTING_CREDITS = 1;
 	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
 	public static boolean canStartNewRound(GameModeState gameModeState, World world) {
@@ -56,7 +55,6 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 			if (stats == null) continue;
 
 			// Inventory
-			player.component().getInventory().setActiveHotbarSlot((byte) 0);
 			var itemGroups = config.get().getItems(currentRoundRole.getStartingItems());
 			addItemsToPlayer(itemGroups, player.component().getInventory().getCombinedHotbarFirst());
 

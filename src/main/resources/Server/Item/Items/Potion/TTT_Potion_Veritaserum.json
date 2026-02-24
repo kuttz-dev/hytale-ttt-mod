@@ -1,8 +1,8 @@
 {
   "Parent": "Potion_Template",
   "TranslationProperties": {
-    "Name": "veritaserum_potion_name",
-    "Description": "veritaserum_potion_description"
+    "Name": "ncodeTTT.server.items.veritaserum_potion.name",
+    "Description": "ncodeTTT.server.items.veritaserum_potion.description"
   },
   "Icon": "Icons/ItemsGenerated/TTT_Potion_Veritaserum_II.png",
   "Interactions": {

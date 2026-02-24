@@ -16,12 +16,15 @@ import com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.ParticleUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestPlayerRolePotion extends SimpleInstantInteraction {
 
@@ -67,6 +70,12 @@ public class TestPlayerRolePotion extends SimpleInstantInteraction {
 			boolean isTraitor = role.getRoleGroup() == RoleGroup.TRAITOR;
 			String effect = isTraitor ? "TTT_Potion_Veritaserum_Particles_Traitor" : "TTT_Potion_Veritaserum_Particles_Innocent";
 
+			var playersHwoCanSeeTheEffect = world.getPlayerRefs()
+					.stream()
+					.filter(p -> p.getReference() != null && p.getReference().isValid())
+					.map(PlayerRef::getReference)
+					.collect(Collectors.toList());
+
 			ParticleUtil.spawnParticleEffect(
 					effect,
 					targetPlayerTransform.getPosition().getX(),
@@ -78,7 +87,7 @@ public class TestPlayerRolePotion extends SimpleInstantInteraction {
 					1f,
 					new Color(Byte.MIN_VALUE, Byte.MAX_VALUE, Byte.MIN_VALUE),
 					null,
-					List.of(player.reference()),
+					playersHwoCanSeeTheEffect,
 					world.getEntityStore().getStore()
 			);
 

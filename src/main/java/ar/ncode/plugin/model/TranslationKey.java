@@ -61,7 +61,7 @@ public enum TranslationKey {
 	TRAITORS_CHAT_PREFIX,
 	;
 
-	public static final String LANG_FILE_NAME = "ncodeTTT";
+		public static final String LANG_FILE_NAME = "ncodeTTT";
 	@Getter
 	private String messageColor;
 
