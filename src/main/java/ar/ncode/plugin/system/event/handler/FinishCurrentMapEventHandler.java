@@ -69,8 +69,7 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 					world.getEntityStore().getStore()
 			);
 
-			gameModeStateForWorld.get(currentInstance).playersAreVotingMap(true);
-			gameModeStateForWorld.get(currentInstance).updateRoundState(RoundState.AFTER_GAME);
+			gameModeStateForWorld.get(currentInstance).updateRoundState(RoundState.AFTER_GAME, true, false);
 
 			var players = getPlayersAt(world);
 
@@ -109,9 +108,12 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 	private void endVotesAndChangeWorld(World currentWorld) {
 		UUID oldWorldId = currentWorld.getWorldConfig().getUuid();
 		var gameState = gameModeStateForWorld.get(oldWorldId);
+		gameState.updateRoundState(RoundState.AFTER_GAME, false, true);
+
 		String newWorldName = getNextMap(gameState);
 
 		// Remove old GameModeState to prevent memory leak when loading new instance
+		// Update round state to reset timer
 		gameModeStateForWorld.remove(oldWorldId);
 
 		EventTitleUtil.showEventTitleToWorld(
@@ -128,7 +130,7 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 					// Check if world is still alive before executing (prevents memory leak from stale references)
 					if (!currentWorld.isAlive()) return;
 					ChangeWorldCommand.loadInstance(currentWorld, newWorldName);
-					gameModeStateForWorld.get(currentInstance).playersAreVotingMap(false);
+					gameModeStateForWorld.get(currentInstance).updateRoundState(RoundState.PREPARING, false, false);
 				},
 				config.get().getTimeBeforeChangingMapInSeconds(),
 				TimeUnit.SECONDS

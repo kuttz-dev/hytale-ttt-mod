@@ -35,7 +35,7 @@ public class WorldRoundTimeSystem extends TickingSystem<EntityStore> {
 			return;
 		}
 
-		LocalTime remainingTime = gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap());
+		LocalTime remainingTime = gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap(), gameModeState.mapIsAboutToChange());
 		if (remainingTime.getMinute() > 0 || remainingTime.getSecond() > 0) {
 			return;
 		}

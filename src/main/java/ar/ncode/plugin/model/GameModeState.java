@@ -44,6 +44,8 @@ public class GameModeState {
 	public Map<String, Integer> mapVotes = new HashMap<>();
 	@Accessors(fluent = true)
 	private boolean playersAreVotingMap = false;
+	@Accessors(fluent = true)
+	private boolean mapIsAboutToChange = false;
 
 	public void addGraveStone(DeadPlayerInfoComponent graveStone) {
 		this.graveStones.add(graveStone);
@@ -58,7 +60,7 @@ public class GameModeState {
 		return Duration.between(roundStateUpdatedAt, currentDateTime);
 	}
 
-	public LocalTime getRemainingTime(RoundState roundState, boolean playersAreVotingMap) {
+	public LocalTime getRemainingTime(RoundState roundState, boolean playersAreVotingMap, boolean mapIsAboutToChange) {
 		Duration roundElapsedTime = getElapsedTimeSinceRoundUpdate();
 
 		int stateDuration = 0;
@@ -70,6 +72,10 @@ public class GameModeState {
 
 		} else if (RoundState.AFTER_GAME.equals(roundState) && playersAreVotingMap) {
 			stateDuration = config.get().getTimeToVoteMapInSeconds();
+
+		}  else if (RoundState.AFTER_GAME.equals(roundState) && mapIsAboutToChange) {
+			stateDuration = config.get().getTimeBeforeChangingMapInSeconds();
+
 		} else {
 			stateDuration = config.get().getTimeAfterRoundInSeconds();
 		}
@@ -101,6 +107,12 @@ public class GameModeState {
 	public void updateRoundState(RoundState state) {
 		roundState = state;
 		roundStateUpdatedAt = LocalDateTime.now();
+	}
+
+	public void updateRoundState(RoundState state, boolean playersAreVotingMap, boolean mapIsAboutToChange) {
+		this.playersAreVotingMap = playersAreVotingMap;
+		this.mapIsAboutToChange = mapIsAboutToChange;
+		updateRoundState(state);
 	}
 
 }

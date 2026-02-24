@@ -39,13 +39,13 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 	}
 
 	private void setHudRoleValues(@NonNullDecl UICommandBuilder builder, GameModeState gameModeState) {
-		if (RoundState.PREPARING.equals(gameModeState.roundState)) {
+		if (RoundState.PREPARING.equals(gameModeState.roundState) || gameModeState.mapIsAboutToChange()) {
 			this.messageId = TranslationKey.HUD_CURRENT_STATUS_PREPARING.get();
 			this.backgroundColor = TranslationKey.HUD_CURRENT_STATUS_PREPARING.getMessageColor();
 
 		} else if (gameModeState.playersAreVotingMap()) {
-			this.messageId = TranslationKey.HUD_CURRENT_STATUS_PREPARING.get();
-			this.backgroundColor = TranslationKey.HUD_CURRENT_STATUS_PREPARING.getMessageColor();
+			this.messageId = TranslationKey.HUD_CURRENT_STATUS_VOTING_MAP.get();
+			this.backgroundColor = TranslationKey.HUD_CURRENT_STATUS_VOTING_MAP.getMessageColor();
 
 		} else if (playerInfo.isSpectator()) {
 			this.messageId = TranslationKey.HUD_CURRENT_STATUS_SPECTATOR.get();
@@ -82,7 +82,7 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 		var builder = new UICommandBuilder();
 		setHudRoleValues(builder, gameModeState);
 
-		LocalTime remainingTime = gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap());
+		LocalTime remainingTime = gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap(), gameModeState.mapIsAboutToChange());
 		builder.set("#LeftRoundTime.Text", remainingTime.format(timeFormatter));
 
 		update(false, builder);

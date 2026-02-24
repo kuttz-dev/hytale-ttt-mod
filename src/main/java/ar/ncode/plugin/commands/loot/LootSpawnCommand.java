@@ -30,6 +30,9 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.Config;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -58,12 +61,19 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 		private static void addLoot(World world, LootSpawnPoint lootSpawnPoint) {
 			for (String lootTableId : lootSpawnPoint.getLootTables()) {
 				LootTable lootTable = weaponsConfig.get().getLootTableById(lootTableId);
-
 				if (lootTable == null) {
 					continue;
 				}
 
+				List<LootItem> items = Arrays.asList(lootTable.getItems());
+				Collections.shuffle(items);
+
+				int spawnedItems = 0;
 				for (LootItem item : lootTable.getItems()) {
+					if (lootTable.getMaxItems() != null && spawnedItems == lootTable.getMaxItems()) {
+						break;
+					}
+
 					if (!chance(item.getProbability())) {
 						continue;
 					}
@@ -79,6 +89,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
 					}
 
 					spawnItemInWorld(world, emptyPosition, lootSpawnPoint.getSpawnPoint().getRotation(), item.getItemId(), item.getAmount());
+					spawnedItems++;
 
 					for (IncludedLootItem included : item.getIncludes()) {
 						spawnItemInWorld(world, emptyPosition, lootSpawnPoint.getSpawnPoint().getRotation(), included.getItemId(), included.getAmount());

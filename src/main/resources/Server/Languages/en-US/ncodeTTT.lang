@@ -3,6 +3,7 @@ hud_current_status_spectator = Spectator
 hud_current_role_innocent = Innocent
 hud_current_role_traitor = Traitor
 hud_current_role_detective = Detective
+hud_current_status_voting_map = Voting map
 
 scoreboard_title = Scoreboard
 scoreboard_titles_player = Player

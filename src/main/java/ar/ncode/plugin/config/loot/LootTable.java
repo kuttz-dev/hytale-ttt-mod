@@ -24,11 +24,16 @@ public class LootTable {
 					(c, value, extraInfo) -> c.items = value,
 					(c, extraInfo) -> c.items)
 			.add()
+			.append(new KeyedCodec<>("MaxItems", Codec.INTEGER),
+					(c, value, extraInfo) -> c.maxItems = value,
+					(c, extraInfo) -> c.maxItems)
+			.add()
 			.build();
 
 
 	private String id;
 	private LootItem[] items = new LootItem[]{};
+	private Integer maxItems;
 
 	@Override
 	public String toString() {

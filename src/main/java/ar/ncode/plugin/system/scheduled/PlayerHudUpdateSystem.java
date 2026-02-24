@@ -27,21 +27,20 @@ public class PlayerHudUpdateSystem extends EntityTickingSystem<EntityStore> {
 	                 @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer
 	) {
 		World world = store.getExternalData().getWorld();
-		GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+		if (!world.isAlive()) {
+			return;
+		}
 
-		if (gameModeState != null) {
-			PlayerGameModeInfo playerInfo = archetypeChunk.getComponent(index, PlayerGameModeInfo.componentType);
+		PlayerGameModeInfo playerInfo = archetypeChunk.getComponent(index, PlayerGameModeInfo.componentType);
+		if (playerInfo == null || playerInfo.getHud() == null) {
+			return;
+		}
 
-			if (playerInfo == null || playerInfo.getHud() == null) {
-				return;
-			}
+		playerInfo.setElapsedTimeSinceLastUpdate(playerInfo.getElapsedTimeSinceLastUpdate() + dt);
 
-			playerInfo.setElapsedTimeSinceLastUpdate(playerInfo.getElapsedTimeSinceLastUpdate() + dt);
-
-			if (playerInfo.getElapsedTimeSinceLastUpdate() >= 1) {
-				updatePlayerHud(playerInfo);
-				playerInfo.setElapsedTimeSinceLastUpdate(0);
-			}
+		if (playerInfo.getElapsedTimeSinceLastUpdate() >= 1) {
+			updatePlayerHud(playerInfo);
+			playerInfo.setElapsedTimeSinceLastUpdate(0);
 		}
 	}
 

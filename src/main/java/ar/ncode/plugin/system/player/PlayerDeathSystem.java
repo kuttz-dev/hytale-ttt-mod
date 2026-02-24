@@ -106,7 +106,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 
 	private static void spawnGraveStone(@NonNullDecl DeathComponent deathComponent, GameModeState gameModeState, PlayerComponents player, World world, ComponentAccessor<EntityStore> store) {
 		DeadPlayerInfoComponent graveStone = DeadPlayerInfoComponent.builder()
-				.timeOfDeath(gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap()).format(timeFormatter))
+				.timeOfDeath(gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap(), gameModeState.mapIsAboutToChange()).format(timeFormatter))
 				.deadPlayerReference(player.reference())
 				.deadPlayerRole(player.info().getCurrentRoundRole())
 				.deadPlayerName(player.component().getDisplayName())
