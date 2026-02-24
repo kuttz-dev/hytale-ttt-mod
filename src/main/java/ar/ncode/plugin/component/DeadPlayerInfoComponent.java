@@ -74,13 +74,14 @@ public class DeadPlayerInfoComponent implements Component<EntityStore> {
 	private CustomRole deadPlayerRole;
 	private String deadPlayerName;
 	private String timeOfDeath;
+	private int credits;
 
 
 	@NullableDecl
 	@Override
 	public Component<EntityStore> clone() {
 		return new DeadPlayerInfoComponent(position, namePlatePosition, rotation, namePlateReference,
-				deadPlayerReference, causeOfDeath, deadPlayerRole, deadPlayerName, timeOfDeath);
+				deadPlayerReference, causeOfDeath, deadPlayerRole, deadPlayerName, timeOfDeath, credits);
 	}
 
 	@NullableDecl

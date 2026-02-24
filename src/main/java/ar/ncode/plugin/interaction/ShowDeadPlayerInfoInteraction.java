@@ -1,8 +1,10 @@
 package ar.ncode.plugin.interaction;
 
+import ar.ncode.plugin.accessors.PlayerAccessors;
 import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.component.DeadPlayerGravestoneComponent;
-import ar.ncode.plugin.ui.pages.GravePlatePage;
+import ar.ncode.plugin.component.DeadPlayerInfoComponent;
+import ar.ncode.plugin.npc.ShowDeadPlayerInfoAction;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
@@ -11,12 +13,9 @@ import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.InteractionType;
-import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
-import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
-import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -54,20 +53,16 @@ public class ShowDeadPlayerInfoInteraction extends SimpleInstantInteraction {
 		}
 
 		Ref<EntityStore> reference = interactionContext.getEntity();
-
 		world.execute(() -> {
-			Player player = reference.getStore().getComponent(reference, Player.getComponentType());
-			PlayerRef playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
+			var player = PlayerAccessors.getPlayerFrom(reference, reference.getStore());
 
-			if (player == null || playerRef == null) {
+			if (player.isEmpty()) {
 				interactionContext.getState().state = InteractionState.Failed;
 				return;
 			}
 
-			player.getPageManager().openCustomPage(
-					reference, reference.getStore(),
-					new GravePlatePage(playerRef, CustomPageLifetime.CanDismiss, graveStone.getDeadPlayerInfoComponent())
-			);
+			DeadPlayerInfoComponent deadPlayerInfoComponent = graveStone.getDeadPlayerInfoComponent();
+			ShowDeadPlayerInfoAction.inspectDeadCorpse(deadPlayerInfoComponent, reference, player.get());
 		});
 	}
 

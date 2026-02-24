@@ -110,6 +110,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 				.deadPlayerReference(player.reference())
 				.deadPlayerRole(player.info().getCurrentRoundRole())
 				.deadPlayerName(player.component().getDisplayName())
+				.credits(player.info().getCredits())
 				.build();
 
 		if (deathComponent.getDeathCause() != null) {

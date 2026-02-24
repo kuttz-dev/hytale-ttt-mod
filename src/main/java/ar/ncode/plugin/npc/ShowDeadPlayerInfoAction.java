@@ -2,6 +2,8 @@ package ar.ncode.plugin.npc;
 
 import ar.ncode.plugin.accessors.PlayerAccessors;
 import ar.ncode.plugin.component.DeadPlayerInfoComponent;
+import ar.ncode.plugin.config.CustomRole;
+import ar.ncode.plugin.model.PlayerComponents;
 import ar.ncode.plugin.ui.pages.GravePlatePage;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -17,10 +19,11 @@ import com.hypixel.hytale.server.npc.sensorinfo.InfoProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Optional;
 
-public class SeeDeadPlayerInfoAction extends ActionBase {
+public class ShowDeadPlayerInfoAction extends ActionBase {
 
-	public SeeDeadPlayerInfoAction(@Nonnull BuilderActionBase builderActionBase) {
+	public ShowDeadPlayerInfoAction(@Nonnull BuilderActionBase builderActionBase) {
 		super(builderActionBase);
 	}
 
@@ -43,11 +46,25 @@ public class SeeDeadPlayerInfoAction extends ActionBase {
 			return false;
 		}
 
-		player.get().component().getPageManager().openCustomPage(
-				playerReference, playerReference.getStore(),
-				new GravePlatePage(player.get().refComponent(), CustomPageLifetime.CanDismiss, deadPlayerInfo)
-		);
+		inspectDeadCorpse(deadPlayerInfo, playerReference, player.get());
 		return true;
+	}
+
+	public static void inspectDeadCorpse(DeadPlayerInfoComponent deadPlayerInfo, Ref<EntityStore> playerReference, PlayerComponents player) {
+		var playerRole = player.info().getCurrentRoundRole();
+		giveRemainingCreditsToPlayerIfIsSpecialRole(deadPlayerInfo, player, playerRole);
+
+		player.component().getPageManager().openCustomPage(
+				playerReference, playerReference.getStore(),
+				new GravePlatePage(player.refComponent(), CustomPageLifetime.CanDismiss, deadPlayerInfo)
+		);
+	}
+
+	private static void giveRemainingCreditsToPlayerIfIsSpecialRole(DeadPlayerInfoComponent deadPlayerInfo, PlayerComponents player, CustomRole playerRole) {
+		if (!player.info().isSpectator() && playerRole != null && playerRole.getStartingCredits() > 0) {
+			player.info().setCredits(player.info().getCredits() + deadPlayerInfo.getCredits());
+			deadPlayerInfo.setCredits(0);
+		}
 	}
 
 	public static class Builder extends BuilderActionBase {
@@ -66,7 +83,7 @@ public class SeeDeadPlayerInfoAction extends ActionBase {
 		@Nullable
 		@Override
 		public Action build(BuilderSupport builderSupport) {
-			return new SeeDeadPlayerInfoAction(this);
+			return new ShowDeadPlayerInfoAction(this);
 		}
 
 		@Nullable

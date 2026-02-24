@@ -42,21 +42,16 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 		if (RoundState.PREPARING.equals(gameModeState.roundState)) {
 			this.messageId = TranslationKey.HUD_CURRENT_STATUS_PREPARING.get();
 			this.backgroundColor = TranslationKey.HUD_CURRENT_STATUS_PREPARING.getMessageColor();
+
 		} else if (gameModeState.playersAreVotingMap()) {
 			this.messageId = TranslationKey.HUD_CURRENT_STATUS_PREPARING.get();
 			this.backgroundColor = TranslationKey.HUD_CURRENT_STATUS_PREPARING.getMessageColor();
-		}
 
-		if (playerInfo.getCurrentRoundRole() == null) {
-			setHudRoleValues(builder);
-			return;
-		}
-
-		if (playerInfo.isSpectator()) {
+		} else if (playerInfo.isSpectator()) {
 			this.messageId = TranslationKey.HUD_CURRENT_STATUS_SPECTATOR.get();
 			this.backgroundColor = TranslationKey.HUD_CURRENT_STATUS_SPECTATOR.getMessageColor();
 
-		} else {
+		} else if (playerInfo.getCurrentRoundRole() != null) {
 			this.messageId = playerInfo.getCurrentRoundRole().getTranslationKey();
 
 			if (playerInfo.getCurrentRoundRole().getCustomGuiColor() != null) {

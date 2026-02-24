@@ -19,7 +19,7 @@ import ar.ncode.plugin.interaction.TestPlayerRole;
 import ar.ncode.plugin.interaction.TestPlayerRolePotion;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.WorldPreview;
-import ar.ncode.plugin.npc.SeeDeadPlayerInfoAction;
+import ar.ncode.plugin.npc.ShowDeadPlayerInfoAction;
 import ar.ncode.plugin.packet.filter.GuiPacketsFilter;
 import ar.ncode.plugin.system.ItemPickUpSystem;
 import ar.ncode.plugin.system.event.FinishCurrentMapEvent;
@@ -194,10 +194,10 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 		// Register NPC core action builder here so it's available when NPC JSON files are loaded
 		if (NPCPlugin.get() != null) {
-			NPCPlugin.get().registerCoreComponentType("SeeDeadPlayerInfoAction", SeeDeadPlayerInfoAction.Builder::new);
-			LOGGER.atInfo().log("Registered NPC core component builder: SeeDeadPlayerInfoAction");
+			NPCPlugin.get().registerCoreComponentType("ShowDeadPlayerInfoAction", ShowDeadPlayerInfoAction.Builder::new);
+			LOGGER.atInfo().log("Registered NPC core component builder: ShowDeadPlayerInfoAction");
 		} else {
-			LOGGER.atSevere().log("NPCPlugin not available yet; SeeDeadPlayerInfoAction builder not registered in setup().");
+			LOGGER.atSevere().log("NPCPlugin not available yet; ShowDeadPlayerInfoAction builder not registered in setup().");
 		}
 		LOGGER.atInfo().log("Plugin " + this.getName() + " setup completed!");
 	}

@@ -141,7 +141,7 @@
                 "Type": "LockOnInteractionTarget"
               },
               {
-                "Type": "SeeDeadPlayerInfoAction"
+                "Type": "ShowDeadPlayerInfoAction"
               },
               {
                 "Type": "State",
