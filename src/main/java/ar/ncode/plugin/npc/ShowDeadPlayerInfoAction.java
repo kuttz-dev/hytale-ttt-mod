@@ -35,13 +35,13 @@ public class ShowDeadPlayerInfoAction extends ActionBase {
 	public boolean execute(@Nonnull Ref<EntityStore> ref, @Nonnull Role role, InfoProvider sensorInfo, double dt, @Nonnull Store<EntityStore> store) {
 		super.execute(ref, role, sensorInfo, dt, store);
 
-		var deadPlayerInfo = ref.getStore().getComponent(ref, DeadPlayerInfoComponent.componentType);
+		var deadPlayerInfo = store.getComponent(ref, DeadPlayerInfoComponent.componentType);
 		Ref<EntityStore> playerReference = role.getStateSupport().getInteractionIterationTarget();
-		if (playerReference == null) {
+		if (playerReference == null || deadPlayerInfo == null) {
 			return false;
 		}
 
-		var player = PlayerAccessors.getPlayerFrom(playerReference, playerReference.getStore());
+		var player = PlayerAccessors.getPlayerFrom(playerReference, store);
 		if (player.isEmpty()) {
 			return false;
 		}

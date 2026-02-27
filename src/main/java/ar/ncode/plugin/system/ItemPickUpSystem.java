@@ -28,6 +28,7 @@ import com.hypixel.hytale.server.core.modules.entity.item.PreventPickup;
 import com.hypixel.hytale.server.core.modules.entity.player.PlayerItemEntityPickupSystem;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lombok.Getter;
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import javax.annotation.Nonnull;
@@ -35,6 +36,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.weaponsConfig;
 import static com.hypixel.hytale.common.util.ArrayUtil.contains;
@@ -98,68 +101,80 @@ public class ItemPickUpSystem extends EntityTickingSystem<EntityStore> {
 				return;
 			}
 
-			var isCurrentlyPreventingPickup = commandBuffer.getComponent(closest, PreventPickup.getComponentType()) != null;
-
-			try {
-				if (playerInfo.isSpectator() && !isCurrentlyPreventingPickup) {
-					commandBuffer.ensureComponent(itemRef, PreventPickup.getComponentType());
-					return;
-
-				} else if (playerInfo.isSpectator()) {
-					return;
-				}
-
-			} catch (Exception e) {
-				LOGGER.atSevere().log("Error on item pickup handler", e);
-			}
-
+			if (preventItemPickupOnSpectatorMode(commandBuffer, closest, playerInfo, itemRef)) return;
 
 			Optional<WeaponTypeConfig> config = weaponsConfig.get().getByItemId(itemComponent.getItemStack().getItemId());
 			if (config.isEmpty()) {
-				// By default, all items should be blocked from picking up
+				// By default, all items should be blocked from being picked up
 				commandBuffer.ensureComponent(itemRef, PreventPickup.getComponentType());
 				return;
 			}
 
-			boolean shouldPreventPickup = false;
-
-			Map<String, Integer> map = new HashMap<>();
-			map.put(config.get().getTypeId(), 1);
-
-			ItemContainer storage = player.getInventory().getCombinedStorageFirst();
-			for (short slot = 0; slot < storage.getCapacity(); slot++) {
-				ItemStack itemStack = storage.getItemStack(slot);
-
-				if (itemStack == null || ItemStack.EMPTY.isEquivalentType(itemStack)) {
-					continue;
-				}
-
-				if (contains(config.get().getItemIds(), itemStack.getItemId())) {
-					map.compute(
-							config.get().getTypeId(),
-							(k, v) -> v == null ? itemStack.getQuantity() : v + itemStack.getQuantity()
-					);
-				}
-
-				if (map.get(config.get().getTypeId()) > config.get().getAllowedItemsOfSameType()) {
-					shouldPreventPickup = true;
-					break;
-				}
-			}
-
-			try {
-				if (shouldPreventPickup) {
-					commandBuffer.ensureComponent(itemRef, PreventPickup.getComponentType());
-
-				} else {
-					commandBuffer.tryRemoveComponent(itemRef, PreventPickup.getComponentType());
-				}
-
-			} catch (Exception e) {
-				LOGGER.atSevere().log("Error on item pickup handler", e);
-			}
-
+			preventItemPickupBasedOnConfig(commandBuffer, config, player, itemRef);
 		});
+	}
+
+	private static boolean preventItemPickupOnSpectatorMode(@NonNullDecl CommandBuffer<EntityStore> commandBuffer, Ref<EntityStore> closest, PlayerGameModeInfo playerInfo, Ref<EntityStore> itemRef) {
+		var isCurrentlyPreventingPickup = commandBuffer.getComponent(closest, PreventPickup.getComponentType()) != null;
+		try {
+			if (playerInfo.isSpectator() && !isCurrentlyPreventingPickup) {
+				commandBuffer.ensureComponent(itemRef, PreventPickup.getComponentType());
+				return true;
+
+			} else if (playerInfo.isSpectator()) {
+				return true;
+			}
+
+		} catch (Exception e) {
+			LOGGER.atSevere().log("Error on item pickup handler", e);
+		}
+		return false;
+	}
+
+	private void preventItemPickupBasedOnConfig(@NonNullDecl CommandBuffer<EntityStore> commandBuffer, Optional<WeaponTypeConfig> config, Player player, Ref<EntityStore> itemRef) {
+		try {
+			Map<String, Integer> playerItems = new HashMap<>();
+			playerItems.put(config.get().getTypeId(), 1);
+			ItemContainer playerInventory = player.getInventory().getCombinedStorageFirst();
+			boolean shouldPreventPickup = shouldPreventItemPickup(config, playerInventory, playerItems);
+
+			if (shouldPreventPickup) {
+				commandBuffer.ensureComponent(itemRef, PreventPickup.getComponentType());
+
+			} else {
+				commandBuffer.tryRemoveComponent(itemRef, PreventPickup.getComponentType());
+			}
+
+		} catch (Exception e) {
+			LOGGER.atSevere().log("Error on item pickup handler", e);
+
+		}
+	}
+
+	private static boolean shouldPreventItemPickup(Optional<WeaponTypeConfig> config, ItemContainer storage, Map<String, Integer> playerItems) {
+		boolean shouldPreventPickup = false;
+
+		for (short slot = 0; slot < storage.getCapacity(); slot++) {
+			ItemStack itemStack = storage.getItemStack(slot);
+
+			if (itemStack == null || ItemStack.EMPTY.isEquivalentType(itemStack)) {
+				continue;
+			}
+
+			if (contains(config.get().getItemIds(), itemStack.getItemId())) {
+				playerItems.compute(
+						config.get().getTypeId(),
+						(k, v) -> v == null ? itemStack.getQuantity() : v + itemStack.getQuantity()
+				);
+			}
+
+			if (playerItems.get(config.get().getTypeId()) > config.get().getAllowedItemsOfSameType()) {
+				shouldPreventPickup = true;
+				break;
+			}
+		}
+
+		return shouldPreventPickup;
 	}
 
 	@NullableDecl

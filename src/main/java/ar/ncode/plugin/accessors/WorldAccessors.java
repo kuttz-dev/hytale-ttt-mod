@@ -6,6 +6,7 @@ import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;
 import com.hypixel.hytale.component.Component;
+import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -94,14 +95,14 @@ public class WorldAccessors {
 	}
 
 
-	public static List<PlayerComponents> getPlayersAt(World world) {
+	public static List<PlayerComponents> getPlayersAt(World world, ComponentAccessor<EntityStore> componentAccessor) {
 		List<PlayerComponents> result = new ArrayList<>();
 		for (PlayerRef playerRef : world.getPlayerRefs()) {
 			var reference = playerRef.getReference();
 			if (reference == null || !reference.isValid()) continue;
 
-			var player = reference.getStore().getComponent(reference, Player.getComponentType());
-			var playerInfo = reference.getStore().getComponent(reference, PlayerGameModeInfo.componentType);
+			var player = componentAccessor.getComponent(reference, Player.getComponentType());
+			var playerInfo = componentAccessor.getComponent(reference, PlayerGameModeInfo.componentType);
 
 			if (player == null || playerInfo == null) continue;
 

@@ -1,5 +1,6 @@
 package ar.ncode.plugin.ui.pages;
 
+import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -19,6 +20,7 @@ import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -27,6 +29,7 @@ import java.util.List;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.model.TranslationKey.*;
+import static ar.ncode.plugin.model.enums.RoundState.IN_GAME;
 
 public class ShopPage extends InteractiveCustomUIPage<ShopPage.ShopInteractionEvent> {
 
@@ -112,7 +115,30 @@ public class ShopPage extends InteractiveCustomUIPage<ShopPage.ShopInteractionEv
 			return;
 		}
 
-		store.getExternalData().getWorld().execute(() -> {
+		if (playerInfo.getCurrentRoundRole() == null || playerInfo.getCurrentRoundRole().getStartingCredits() == 0) {
+			NotificationUtil.sendNotification(
+					playerRef.getPacketHandler(),
+					Message.translation(SHOP_ONLY_FOR_TRAITORS_OR_DETECTIVES.get()),
+					NotificationStyle.Danger
+			);
+			close();
+			return;
+		}
+
+		World world = store.getExternalData().getWorld();
+		var gameState = TroubleInTrorkTownPlugin.gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+
+		if (!IN_GAME.equals(gameState.getRoundState())) {
+			NotificationUtil.sendNotification(
+					playerRef.getPacketHandler(),
+					Message.translation(SHOP_ITEMS_CAN_ONLY_BE_PURCHASED_DURING_GAME.get()),
+					NotificationStyle.Danger
+			);
+			close();
+			return;
+		}
+
+		world.execute(() -> {
 			Player player = store.getComponent(reference, Player.getComponentType());
 
 			if (player == null || event == null) {

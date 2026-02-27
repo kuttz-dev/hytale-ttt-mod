@@ -129,7 +129,7 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 		World world = Universe.get().getWorld(super.playerRef.getWorldUuid());
 		if (world == null) return;
 
-		addRowForEachPlayerToScoreBoard(builder, getPlayersAt(world));
+		addRowForEachPlayerToScoreBoard(builder, getPlayersAt(world, world.getEntityStore().getStore()));
 
 		LOGGER.at(Level.FINER).log("Custom scoreboard build");
 	}

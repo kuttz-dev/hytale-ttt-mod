@@ -49,13 +49,11 @@ public class GameModeSystem {
 
 	public static final GameModeSystem INSTANCE = new GameModeSystem();
 
-	private static void updatePlayersKdaAndKarma(GameModeState gameModeState) {
+	private static void updatePlayersKdaAndKarma(GameModeState gameModeState, List<PlayerComponents> players) {
 		var world = Universe.get().getWorld(TroubleInTrorkTownPlugin.currentInstance);
 		if (world == null) {
 			return;
 		}
-
-		var players = WorldAccessors.getPlayersAt(world);
 
 		for (var player : players) {
 			UUID playerUUID = player.refComponent().getUuid();
@@ -135,7 +133,7 @@ public class GameModeSystem {
 		gameModeState.graveStones.clear();
 	}
 
-	private static void showRoundResultInEventTitle(GameModeState gameModeState, World world) {
+	private static void showRoundResult(GameModeState gameModeState, World world) {
 		if (!gameModeState.innocentsAlive.isEmpty()) {
 			EventTitleUtil.showEventTitleToWorld(
 					Message.translation(ROUND_INNOCENTS_WIN_MSG.get()),
@@ -209,9 +207,12 @@ public class GameModeSystem {
 	public void doAfterRound(World world, GameModeState state) {
 		world.execute(() -> {
 			// Show result
-			showRoundResultInEventTitle(state, world);
+			showRoundResult(state, world);
 
 			// Clean world
+			state.innocentsAlive.clear();
+			state.traitorsAlive.clear();
+
 			removeGraveStones(state, world);
 			removeCorpses(state);
 			removeDroppedItems(world);
@@ -221,9 +222,9 @@ public class GameModeSystem {
 			state.playedRounds++;
 
 			// Update players
-			updatePlayersKdaAndKarma(state);
+			var players = getPlayersAt(world, world.getEntityStore().getStore());
+			updatePlayersKdaAndKarma(state, players);
 
-			var players = getPlayersAt(world);
 			for (var player : players) {
 				player.component().getInventory().clear();
 				player.info().getHud().update();
@@ -251,7 +252,7 @@ public class GameModeSystem {
 			InstanceConfig instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName).get();
 			if (instanceConfig == null) return;
 
-			var players = getPlayersAt(world);
+			var players = getPlayersAt(world, world.getEntityStore().getStore());
 			for (var player : players) {
 				Ref<EntityStore> reference = player.reference();
 				teleportPlayerToRandomSpawnPoint(reference, reference.getStore(), instanceConfig, world);
@@ -270,11 +271,7 @@ public class GameModeSystem {
 
 	public void doAtRoundStart(World world, GameModeState state) {
 		world.execute(() -> {
-			// Clear spectators and traitors
-			state.spectators.clear();
-			state.traitorsAlive.clear();
-
-			var players = getPlayersAt(world);
+			var players = getPlayersAt(world, world.getEntityStore().getStore());
 			setPlayersRoles(state, players, world.getPlayerCount());
 			updateEachPlayer(players);
 

@@ -18,21 +18,21 @@ public class PlayerConnectEventListener implements Consumer<PlayerConnectEvent> 
 	public void accept(PlayerConnectEvent playerConnectEvent) {
 		// Handle world instance transitions
 		if (TroubleInTrorkTownPlugin.currentInstance == null) {
-			createNewWorldInNoneExists(playerConnectEvent);
+			createNewWorldIfNoneExists(playerConnectEvent);
 		}
 
 		// Instance exists, teleport player
 		World targetWorld = Universe.get().getWorld(TroubleInTrorkTownPlugin.currentInstance);
 		if (targetWorld == null) {
 			TroubleInTrorkTownPlugin.currentInstance = null;
-			createNewWorldInNoneExists(playerConnectEvent);
+			createNewWorldIfNoneExists(playerConnectEvent);
 			return;
 		}
 
 		playerConnectEvent.setWorld(targetWorld);
 	}
 
-	private static void createNewWorldInNoneExists(PlayerConnectEvent playerConnectEvent) {
+	private static void createNewWorldIfNoneExists(PlayerConnectEvent playerConnectEvent) {
 		// No current instance exists, load a new map
 		GameModeState gameModeState = new GameModeState();
 		String nextMap = getNextMap(gameModeState);

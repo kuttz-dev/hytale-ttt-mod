@@ -25,6 +25,7 @@ shop_title = Tienda de Equipamiento
 shop_credits = Créditos:
 shop_buy = Comprar
 shop_not_enough_credits = Sin créditos suficientes!
+shop_items_can_only_be_purchased_during_game = ¡Los objetos solo pueden ser comprados durante la partida!
 shop_item_bought = Has comprado: {item_name}
 shop_no_space = No tienes espacio para este objeto!
 shop_close = Cerrar

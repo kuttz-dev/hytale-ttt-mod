@@ -7,6 +7,7 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.Packet;
 import com.hypixel.hytale.protocol.packets.interface_.ChatMessage;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
+import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.protocol.packets.window.ClientOpenWindow;
 import com.hypixel.hytale.protocol.packets.window.CloseWindow;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -60,7 +61,6 @@ public class GuiPacketsFilter implements PlayerPacketFilter {
 			}
 
 			if (CloseWindow.PACKET_ID == packet.getId()) {
-				player.getWindowManager().closeAllWindows(reference, reference.getStore());
 //                component.getPageManager().setPage(reference, reference.getStore(), Page.None);
 
 			} else if (ClientOpenWindow.PACKET_ID == packet.getId()) {

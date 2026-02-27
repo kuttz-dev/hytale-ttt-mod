@@ -37,7 +37,7 @@ public class DeathSystem {
 
 	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-	public static void spawnRemainsAtPlayerDeath(World world, DeadPlayerInfoComponent graveStone,
+	public static void spawnRemainsAtPlayerDeath(World world, DeadPlayerInfoComponent deadPlayerInfo,
 	                                             Ref<EntityStore> reference, ComponentAccessor<EntityStore> store
 	) {
 		if (!config.get().playersLeaveRemainsWhenDie()) {
@@ -62,8 +62,8 @@ public class DeathSystem {
 					return;
 				}
 
-				graveStone.setGraveAndNameplatePosition(emptyPosition);
-				graveStone.setRotation(newTransform.getRotation());
+				deadPlayerInfo.setGraveAndNameplatePosition(emptyPosition);
+				deadPlayerInfo.setRotation(newTransform.getRotation());
 
 				long chunkIndex = ChunkUtil.indexChunkFromBlock(emptyPosition.x, emptyPosition.z);
 				WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
@@ -74,12 +74,12 @@ public class DeathSystem {
 							return;
 						}
 
-						addPlayerRemainsToWorld(world, worldChunk, graveStone, reference, store);
+						addPlayerRemainsToWorld(world, worldChunk, deadPlayerInfo, reference, store);
 					});
 					return;
 				}
 
-				addPlayerRemainsToWorld(world, chunk, graveStone, reference, store);
+				addPlayerRemainsToWorld(world, chunk, deadPlayerInfo, reference, store);
 			});
 
 		} catch (Exception exception) {
@@ -133,7 +133,7 @@ public class DeathSystem {
 
 					npc.setDespawning(false);
 					npc.setDespawnCheckRemainingSeconds(Float.MAX_VALUE);
-					AnimationUtils.playAnimation(newEntityRef, AnimationSlot.Status, "Dead", false, store);
+//					AnimationUtils.playAnimation(newEntityRef, AnimationSlot.Status, "Dead", true, store);
 				})
 		);
 	}

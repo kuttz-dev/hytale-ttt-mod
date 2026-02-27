@@ -1,6 +1,8 @@
 package ar.ncode.plugin.system.event.handler;
 
+import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.commands.ChangeWorldCommand;
+import ar.ncode.plugin.exception.ConfigError;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.system.event.FinishCurrentMapEvent;
@@ -35,10 +37,11 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 
 	public static String getNextMap(GameModeState gameState) {
 		if (worldPreviews.isEmpty()) {
-			throw new RuntimeException("There are no maps configured for the gamemode");
+			LOGGER.atSevere().log("There are no maps configured for the game mode - using default world");
+			return "default";
 		}
 
-		String newWorldName = null;
+		String newWorldName;
 		if (gameState.mapVotes.isEmpty()) {
 			// Choose a random map
 			int randomIndex = (int) (Math.random() * worldPreviews.size());
@@ -71,7 +74,7 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 
 			gameModeStateForWorld.get(currentInstance).updateRoundState(RoundState.AFTER_GAME, true, false);
 
-			var players = getPlayersAt(world);
+			var players = getPlayersAt(world, world.getEntityStore().getStore());
 
 			for (var player : players) {
 				player.info().setCurrentRoundRole(null);

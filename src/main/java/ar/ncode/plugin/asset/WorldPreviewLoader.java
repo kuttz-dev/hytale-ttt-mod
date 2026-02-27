@@ -1,5 +1,6 @@
 package ar.ncode.plugin.asset;
 
+import ar.ncode.plugin.exception.ConfigError;
 import ar.ncode.plugin.model.WorldPreview;
 import com.hypixel.hytale.common.plugin.PluginManifest;
 import com.hypixel.hytale.common.semver.Semver;
@@ -12,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class WorldPreviewLoader {
@@ -55,9 +57,15 @@ public class WorldPreviewLoader {
 				Path instanceOutput = instancesFolder.resolve(worldName);
 				Files.createDirectories(instanceOutput);
 
-				Files.copy(preview, previewOutput, StandardCopyOption.REPLACE_EXISTING);
-				copyFiles(world, instanceOutput);
-				copyFiles(world.resolve("chunks"), instanceOutput.resolve("chunks"));
+				try {
+					Files.copy(preview, previewOutput, StandardCopyOption.REPLACE_EXISTING);
+					copyDirectories(world, instanceOutput);
+					copyDirectories(world.resolve("chunks"), instanceOutput.resolve("chunks"));
+				} catch (Exception e) {
+					LOGGER.atSevere().log("Failed to copy world template for world %s - %s", worldName, e);
+					continue;
+				}
+
 				result.add(new WorldPreview(worldName));
 			}
 
@@ -78,13 +86,16 @@ public class WorldPreviewLoader {
 		}
 
 		if (result.isEmpty()) {
-			throw new RuntimeException("There are no maps configured, gamemode can not start.");
+			throw new ConfigError("There are no maps configured, game mode can not start.");
 		}
 
 		return result;
 	}
 
-	public static void copyFiles(Path sourceDir, Path targetDir) throws IOException {
+	public static void copyDirectories(Path sourceDir, Path targetDir) throws IOException {
+		Objects.requireNonNull(sourceDir, "sourceDir must not be null");
+		Objects.requireNonNull(targetDir, "targetDir must not be null");
+
 		if (!Files.isDirectory(sourceDir)) {
 			throw new IllegalArgumentException("Source is not a directory: " + sourceDir);
 		}
@@ -92,21 +103,20 @@ public class WorldPreviewLoader {
 		Files.createDirectories(targetDir);
 
 		try (Stream<Path> paths = Files.list(sourceDir)) {
-			paths.filter(Files::isRegularFile)
-					.forEach(sourceFile -> {
-						Path targetFile = targetDir.resolve(sourceFile.getFileName());
-						try {
-							Files.copy(
-									sourceFile,
-									targetFile,
-									StandardCopyOption.REPLACE_EXISTING
-							);
-						} catch (IOException e) {
-							throw new RuntimeException(
-									"Failed to copy " + sourceFile + " to " + targetFile, e
-							);
-						}
-					});
+			for (Path sourceFile : paths.toList()) {
+				if (!Files.isRegularFile(sourceFile)) {
+					continue;
+				}
+
+				Path targetFile = targetDir.resolve(sourceFile.getFileName());
+
+				Files.copy(
+						sourceFile,
+						targetFile,
+						StandardCopyOption.REPLACE_EXISTING,
+						StandardCopyOption.COPY_ATTRIBUTES
+				);
+			}
 		}
 	}
 }

@@ -104,8 +104,8 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 		}
 	}
 
-	private static void spawnGraveStone(@NonNullDecl DeathComponent deathComponent, GameModeState gameModeState, PlayerComponents player, World world, ComponentAccessor<EntityStore> store) {
-		DeadPlayerInfoComponent graveStone = DeadPlayerInfoComponent.builder()
+	private static void spawnDeadPlayerRemains(@NonNullDecl DeathComponent deathComponent, GameModeState gameModeState, PlayerComponents player, World world, ComponentAccessor<EntityStore> store) {
+		DeadPlayerInfoComponent deadPlayerInfo = DeadPlayerInfoComponent.builder()
 				.timeOfDeath(gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap(), gameModeState.mapIsAboutToChange()).format(timeFormatter))
 				.deadPlayerReference(player.reference())
 				.deadPlayerRole(player.info().getCurrentRoundRole())
@@ -115,10 +115,10 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 
 		if (deathComponent.getDeathCause() != null) {
 			DamageCause damageCause = DamageCause.valueOf(deathComponent.getDeathCause().getId().toUpperCase());
-			graveStone.setCauseOfDeath(damageCause);
+			deadPlayerInfo.setCauseOfDeath(damageCause);
 		}
 
-		DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, player.reference(), store);
+		DeathSystem.spawnRemainsAtPlayerDeath(world, deadPlayerInfo, player.reference(), store);
 	}
 
 	@Nonnull
@@ -163,7 +163,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 						.dispatchForAsync(FinishCurrentRoundEvent.class)
 						.dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
 			} else {
-				spawnGraveStone(deathComponent, gameModeState, player, world, commandBuffer);
+				spawnDeadPlayerRemains(deathComponent, gameModeState, player, world, commandBuffer);
 				SpectatorMode.setGameModeToSpectator(player, commandBuffer);
 			}
 

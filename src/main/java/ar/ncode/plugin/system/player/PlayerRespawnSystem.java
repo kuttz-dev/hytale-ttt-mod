@@ -26,27 +26,22 @@ public class PlayerRespawnSystem extends RespawnSystems.OnRespawnSystem {
 	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
 	public static void teleportPlayerToRandomSpawnPoint(@NonNullDecl Ref<EntityStore> reference,
-	                                                    @NonNullDecl Store<EntityStore> store, InstanceConfig instanceConfig, World world) {
+	                                                    @NonNullDecl Store<EntityStore> store, InstanceConfig instanceConfig, World world
+	) {
 		SpawnPoint[] points = instanceConfig.getPlayerSpawnPoints();
-		if (points == null || points.length == 0) {
+		if (points == null || points.length == 0 || !reference.isValid()) {
 			return;
 		}
 
 		SpawnPoint randomPoint = points[ThreadLocalRandom.current().nextInt(points.length)];
-
-		TransformComponent transform = store.getComponent(reference, TransformComponent.getComponentType());
-
-		if (transform == null) {
-			return;
-		}
-
 		Teleport teleport = Teleport.createForPlayer(
 				world,                          // World reference (required!)
 				randomPoint.getPosition().clone(),          // Target position
 				randomPoint.getRotation().clone()           // Target rotation (pitch, yaw, roll)
 		);
 
-		store.addComponent(reference, Teleport.getComponentType(), teleport);
+		store.removeComponentIfExists(reference, Teleport.getComponentType());
+		store.putComponent(reference, Teleport.getComponentType(), teleport);
 	}
 
 	@Nonnull

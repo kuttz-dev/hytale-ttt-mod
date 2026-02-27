@@ -217,29 +217,31 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 	}
 
 	public void loadMapsConfig() {
-		instanceConfig.forEach((world, instanceCfg) -> {
+		for (Map.Entry<String, Config<InstanceConfig>> entry : instanceConfig.entrySet()) {
+			var world = entry.getKey();
+			var instanceCfg = entry.getValue();
 			String instanceConfigFile = "/" + world + "_config.json";
-			Path worldConfigPath = Paths.get(getDataDirectory().toString(), instanceConfigFile);
+			Path instanceConfigPath = Paths.get(getDataDirectory().toString(), instanceConfigFile);
 
-			Path instanceConfigPath = templatesPath.resolve(world);
-			instanceConfigPath = instanceConfigPath.resolve("config.json");
+			Path worldTemplatePath = templatesPath.resolve(world);
+			worldTemplatePath = worldTemplatePath.resolve("config.json");
 
-			if (Files.exists(instanceConfigPath)) {
+			if (Files.exists(worldTemplatePath)) {
 				try {
-					Files.copy(instanceConfigPath, worldConfigPath, StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+					Files.copy(worldTemplatePath, instanceConfigPath, StandardCopyOption.REPLACE_EXISTING);
+				} catch (Exception e) {
+					LOGGER.atSevere().log("Failed to copy map config file from %s to %s", worldTemplatePath, instanceConfigPath);
 				}
 
 				LOGGER.atInfo().log("Copied default instance config for %s from template.", world);
 			}
 
-			if (!Files.exists(worldConfigPath)) {
+			if (!Files.exists(instanceConfigPath)) {
 				instanceCfg.save().thenRun(() -> LOGGER.atInfo().log("Saved instance config for %s", world));
 			}
 
 			instanceCfg.load().thenRun(() -> LOGGER.atInfo().log("Instance config loaded for %s", world));
-		});
+		}
 	}
 
 	private Path getConfigFilePath() {
