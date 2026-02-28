@@ -2,15 +2,14 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.internal.jvm.Jvm
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
-
 import java.nio.file.Files
+import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
     id 'java'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.3'
     //id("app.ultradev.hytalegradle") version "1.5.0"
 }
-
 
 ext {
     if (project.hasProperty('hytale_home')) {
@@ -113,14 +112,76 @@ tasks.register('updatePluginManifest') {
         }
         def manifestJson = new JsonSlurper().parseText(manifestFile.text)
         manifestJson.Version = version
+        manifestJson.ServerVersion = project.findProperty("hytaleServerVersion")
         manifestJson.IncludesAssetPack = includes_pack.toBoolean()
         manifestFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(manifestJson))
+    }
+}
+
+tasks.register('updateHytaleServerVersion') {
+    group = "versioning"
+
+    doLast {
+        def propertiesFile = rootProject.file("gradle.properties")
+        def properties = new Properties()
+
+        if (propertiesFile.exists()) {
+            propertiesFile.withInputStream { properties.load(it) }
+        }
+
+        def patchline = properties.getProperty("patchline")
+        if (!patchline) {
+            throw new GradleException("Property 'patchline' not found")
+        }
+
+        def metadataUrl =
+                "https://maven.hytale.com/${patchline}/com/hypixel/hytale/Server/maven-metadata.xml"
+
+        println "Fetching: $metadataUrl"
+
+        def connection = new URL(metadataUrl).openConnection()
+        connection.setConnectTimeout(5000)
+        connection.setReadTimeout(5000)
+
+        def inputStream = connection.inputStream
+
+        // Secure XML parsing
+        def factory = DocumentBuilderFactory.newInstance()
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false)
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false)
+
+        def builder = factory.newDocumentBuilder()
+        def document = builder.parse(inputStream)
+
+        def releaseNodes = document.getElementsByTagName("release")
+
+        if (releaseNodes.length == 0) {
+            throw new GradleException("No <release> tag found")
+        }
+
+        def releaseVersion = releaseNodes.item(0).textContent
+
+        println "Latest release version: $releaseVersion"
+
+        properties.setProperty("hytaleServerVersion", releaseVersion)
+
+        propertiesFile.withOutputStream {
+            properties.store(it, "Updated automatically")
+        }
+
+        println "Updated hytaleServerVersion to $releaseVersion"
     }
 }
 
 // Makes sure the plugin manifest is up to date.
 tasks.named('processResources') {
     dependsOn 'updatePluginManifest'
+}
+
+// Ensure it runs before build
+tasks.named("updatePluginManifest") {
+    dependsOn updateHytaleServerVersion
 }
 
 def createServerRunArguments(String srcDir) {
