@@ -1,6 +1,7 @@
 ## Trouble in Trork Town (TTT) – Hytale Mod
 
-[![Github Badge](https://img.shields.io/badge/project-github-repo?style=for-the-badge&logo=github)](https://github.com/kuttz-dev/hytale-ttt-mod) [![Discord Support](https://img.shields.io/badge/Support-Discord-5865F2?style=for-the-badge&logo=discord)](https://discord.gg/eECVkthTfQ) [![TTT - Curseforge](https://img.shields.io/badge/TTT-Curseforge-page?style=for-the-badge&logo=curseforge)](https://www.curseforge.com/hytale/mods/ttt)
+[![Github Badge](https://img.shields.io/badge/project-github-repo?style=for-the-badge&logo=github)](https://github.com/kuttz-dev/hytale-ttt-mod) [![Discord Support](https://img.shields.io/badge/Support-Discord-5865F2?style=for-the-badge&logo=discord)](https://discord.gg/eECVkthTfQ) [![TTT - Curseforge](https://img.shields.io/badge/TTT-Curseforge-page?style=for-the-badge&logo=curseforge)](https://www.curseforge.com/hytale/mods/ttt) [![TTT Maps - Curseforge](https://img.shields.io/badge/TTT_Maps-Curseforge-page?style=for-the-badge&logo=curseforge)](https://www.curseforge.com/hytale/mods/ttt-maps)
+
 
 
 **Trouble in Trork Town** is an open-source gamemode for **Hytale**, inspired by the classic _Trouble in Terrorist Town_
