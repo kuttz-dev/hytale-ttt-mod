@@ -20,7 +20,7 @@ import ar.ncode.plugin.interaction.TestPlayerRolePotion;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.WorldPreview;
 import ar.ncode.plugin.npc.ShowDeadPlayerInfoAction;
-import ar.ncode.plugin.packet.filter.GuiPacketsFilter;
+import ar.ncode.plugin.packet.filter.PacketsFilter;
 import ar.ncode.plugin.system.ItemPickUpSystem;
 import ar.ncode.plugin.system.event.FinishCurrentMapEvent;
 import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
@@ -169,7 +169,6 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		events.add(getEventRegistry().registerGlobal(FinishCurrentRoundEvent.class, new FinishCurrentRoundEventHandler()));
 		events.add(getEventRegistry().registerGlobal(FinishCurrentMapEvent.class, new FinishCurrentMapEventHandler()));
 
-		commands.add(getCommandRegistry().registerCommand(new ExampleCommand(this.getName(), this.getManifest().getVersion().toString())));
 		commands.add(getCommandRegistry().registerCommand(new SpectatorMode()));
 		commands.add(getCommandRegistry().registerCommand(new ChangeWorldCommand()));
 		commands.add(getCommandRegistry().registerCommand(new TttCommand()));
@@ -265,7 +264,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		getEntityStoreRegistry().registerSystem(new InteractiveItemPickUpListener());
 		getEntityStoreRegistry().registerSystem(new ItemPickUpSystem());
 
-		inboundPacketFilters.add(PacketAdapters.registerInbound(new GuiPacketsFilter()));
+		inboundPacketFilters.add(PacketAdapters.registerInbound(new PacketsFilter()));
 
 		Universe.get().getWorlds().forEach((s, world) -> {
 			gameModeStateForWorld.put(world.getWorldConfig().getUuid(), new GameModeState());

@@ -15,6 +15,8 @@ public class DebugConfig {
 	private boolean canPlaceAndDestroyBlocks = false;
 	@Accessors(fluent = true)
 	private boolean entitiesShouldDisappearAfterRound = true;
+	@Accessors(fluent = true)
+	private boolean canPickUpAllItems = false;
 
 	public static DebugConfig get() {
 		return INSTANCE;

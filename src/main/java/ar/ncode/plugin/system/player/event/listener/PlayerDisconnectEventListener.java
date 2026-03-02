@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.model.GameModeState.timeFormatter;
-import static ar.ncode.plugin.model.TranslationKey.THERE_ARE_NOT_ENOUGH_PLAYERS;
+import static ar.ncode.plugin.model.enums.TranslationKey.THERE_ARE_NOT_ENOUGH_PLAYERS;
 
 public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectEvent> {
 

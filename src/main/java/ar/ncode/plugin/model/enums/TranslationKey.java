@@ -1,4 +1,4 @@
-package ar.ncode.plugin.model;
+package ar.ncode.plugin.model.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +19,9 @@ public enum TranslationKey {
 	SCOREBOARD_TITLES_KILLS,
 	SCOREBOARD_TITLES_DEATHS,
 	SCOREBOARD_TITLES_PING,
+	SCOREBOARD_SEPARATOR_SPECTATORS,
+	SCOREBOARD_SEPARATOR_LOST_IN_COMBAT,
+	SCOREBOARD_SEPARATOR_CONFIRMED_DEATHS,
 
 	PLAYER_ASSIGNED_ROLE_NOTIFICATION,
 
@@ -61,9 +64,11 @@ public enum TranslationKey {
 	TRAITORS_CHAT_COMMAND_DESCRIPTION,
 	TRAITORS_CHAT_COMMAND_WORLD_ERROR,
 	TRAITORS_CHAT_PREFIX,
+	DETECTIVE_CHAT_PREFIX,
+	DEAD_PLAYER_CHAT_PREFIX("#888888"),
 	;
 
-		public static final String LANG_FILE_NAME = "ncodeTTT";
+	public static final String LANG_FILE_NAME = "ncodeTTT";
 	@Getter
 	private String messageColor;
 

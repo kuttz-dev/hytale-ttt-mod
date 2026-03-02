@@ -1,6 +1,7 @@
 package ar.ncode.plugin.config.instance;
 
 import ar.ncode.plugin.config.loot.LootSpawnPoint;
+import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
@@ -23,9 +24,14 @@ public class InstanceConfig {
 							(c, value, extraInfo) -> c.playerSpawnPoints = value,
 							(c, extraInfo) -> c.playerSpawnPoints)
 					.add()
+					.append(new KeyedCodec<>("IsMapDestructibleByExplosions", Codec.BOOLEAN),
+							(c, value, extraInfo) -> c.isMapDestructibleByExplosions = value,
+							(c, extraInfo) -> c.isMapDestructibleByExplosions)
+					.add()
 					.build();
 
 	LootSpawnPoint[] lootSpawnPoints = new LootSpawnPoint[]{};
 	SpawnPoint[] playerSpawnPoints = new SpawnPoint[]{};
+	boolean isMapDestructibleByExplosions = true;
 
 }

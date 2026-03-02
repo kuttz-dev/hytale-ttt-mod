@@ -1,6 +1,6 @@
 package ar.ncode.plugin.config;
 
-import ar.ncode.plugin.model.TranslationKey;
+import ar.ncode.plugin.model.enums.TranslationKey;
 import ar.ncode.plugin.model.enums.RoleGroup;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -58,6 +58,10 @@ public class CustomRole {
 					(c, v, extraInfo) -> c.startingCredits = v,
 					(c, extraInfo) -> c.startingCredits)
 			.add()
+			.append(new KeyedCodec<>("PublicRoleMessagesPrefix", Codec.STRING),
+					(c, v, extraInfo) -> c.publicRoleMessagesPrefix = v,
+					(c, extraInfo) -> c.publicRoleMessagesPrefix)
+			.add()
 			.build();
 
 	private String id;
@@ -75,6 +79,7 @@ public class CustomRole {
 	private String[] storeItems;
 	@Builder.Default
 	private int startingCredits = 0;
+	private String publicRoleMessagesPrefix;
 
 	public boolean hasStore() {
 		return storeItems != null && storeItems.length > 0;

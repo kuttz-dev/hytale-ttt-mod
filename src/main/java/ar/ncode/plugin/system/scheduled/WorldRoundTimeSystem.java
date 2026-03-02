@@ -15,7 +15,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import java.time.LocalTime;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.model.TranslationKey.ROUND_TIME_FINISHED;
+import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_TIME_FINISHED;
 
 public class WorldRoundTimeSystem extends TickingSystem<EntityStore> {
 

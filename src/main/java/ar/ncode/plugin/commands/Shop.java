@@ -18,7 +18,7 @@ import java.util.List;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.model.CustomPermissions.TTT_SHOP_OPEN;
-import static ar.ncode.plugin.model.TranslationKey.SHOP_ONLY_FOR_TRAITORS_OR_DETECTIVES;
+import static ar.ncode.plugin.model.enums.TranslationKey.SHOP_ONLY_FOR_TRAITORS_OR_DETECTIVES;
 
 public class Shop extends CommandBase {
 

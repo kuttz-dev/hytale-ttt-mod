@@ -1,6 +1,7 @@
 package ar.ncode.plugin.system;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
+import ar.ncode.plugin.config.DebugConfig;
 import ar.ncode.plugin.config.WeaponTypeConfig;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
@@ -94,6 +95,12 @@ public class ItemPickUpSystem extends EntityTickingSystem<EntityStore> {
 
 
 		world.execute(() -> {
+			if (DebugConfig.INSTANCE.canPickUpAllItems()) {
+				commandBuffer.tryRemoveComponent(closest, PreventPickup.getComponentType());
+				return;
+			}
+
+
 			var playerInfo = closest.getStore().getComponent(closest, PlayerGameModeInfo.componentType);
 			var player = closest.getStore().getComponent(closest, Player.getComponentType());
 

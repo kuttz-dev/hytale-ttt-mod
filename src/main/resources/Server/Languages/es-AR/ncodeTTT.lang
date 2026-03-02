@@ -12,6 +12,9 @@ scoreboard_titles_karma = Karma
 scoreboard_titles_kills = Asesinatos
 scoreboard_titles_deaths = Muertes
 scoreboard_titles_ping = Ping
+scoreboard_separator_spectators = Espectadores
+scoreboard_separator_lost_in_combat = Perdidos en combate
+scoreboard_separator_confirmed_deaths = Muertes confirmadas
 
 player_assigned_role_notification = Tu rol ahora es: {role}
 
@@ -63,6 +66,8 @@ traitors_chat_only_for_traitors = Solo los traidores pueden usar este comando!
 traitors_chat_command_description = Envia un mensaje a los demás traidores (solo para traidores con vida).
 traitors_chat_command_world_error = El jugador debe estar en un mundo para usar este comando!
 traitors_chat_prefix = [TRAIDOR]
+detective_chat_prefix = [DETECTIVE]
+dead_player_chat_prefix = [MUERTO]
 
 server.items.veritaserum_potion.name = Poción Veritaserum
 server.items.veritaserum_potion.description = Obliga a quien la consuma a revelar la <color is="#33CC76">verdad</color>

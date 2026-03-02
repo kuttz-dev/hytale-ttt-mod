@@ -1,8 +1,6 @@
 package ar.ncode.plugin.system.event.handler;
 
-import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.commands.ChangeWorldCommand;
-import ar.ncode.plugin.exception.ConfigError;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.system.event.FinishCurrentMapEvent;
@@ -27,8 +25,8 @@ import static ar.ncode.plugin.TroubleInTrorkTownPlugin.currentInstance;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.worldPreviews;
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
-import static ar.ncode.plugin.model.TranslationKey.MAP_VOTE_NOTIFICATION;
-import static ar.ncode.plugin.model.TranslationKey.MAP_VOTE_NOTIFICATION_NEXT_MAP;
+import static ar.ncode.plugin.model.enums.TranslationKey.MAP_VOTE_NOTIFICATION;
+import static ar.ncode.plugin.model.enums.TranslationKey.MAP_VOTE_NOTIFICATION_NEXT_MAP;
 
 public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEvent> {
 

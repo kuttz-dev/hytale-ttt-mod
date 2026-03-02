@@ -1,7 +1,6 @@
 package ar.ncode.plugin.system;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
-import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.commands.SpectatorMode;
 import ar.ncode.plugin.commands.loot.LootSpawnCommand;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
@@ -37,9 +36,9 @@ import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
 import static ar.ncode.plugin.accessors.WorldAccessors.getWorldNameForInstance;
-import static ar.ncode.plugin.model.TranslationKey.ROUND_INNOCENTS_WIN_MSG;
-import static ar.ncode.plugin.model.TranslationKey.ROUND_START_MSG;
-import static ar.ncode.plugin.model.TranslationKey.ROUND_TRAITORS_WIN_MSG;
+import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_INNOCENTS_WIN_MSG;
+import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_START_MSG;
+import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_TRAITORS_WIN_MSG;
 import static ar.ncode.plugin.model.enums.RoleGroup.INNOCENT;
 import static ar.ncode.plugin.model.enums.RoleGroup.TRAITOR;
 import static ar.ncode.plugin.system.event.handler.StartNewRoundEventHandler.updateEachPlayer;

@@ -1,6 +1,6 @@
 package ar.ncode.plugin.config;
 
-import ar.ncode.plugin.model.TranslationKey;
+import ar.ncode.plugin.model.enums.TranslationKey;
 import ar.ncode.plugin.model.enums.RoleGroup;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import static ar.ncode.plugin.model.enums.TranslationKey.DETECTIVE_CHAT_PREFIX;
 
 @Getter
 public class CustomConfig {
@@ -114,7 +116,9 @@ public class CustomConfig {
 					"TTT_Potion_Veritaserum:30",
 					"Weapon_Deployable_Healing_Totem:1"
 			})
+			.publicRoleMessagesPrefix(DETECTIVE_CHAT_PREFIX.get())
 			.build();
+
 	public static final CustomRole INNOCENT_ROLE = CustomRole.builder()
 			.id("innocent")
 			.translationKey(TranslationKey.getWithPrefix("hud_current_role_innocent"))

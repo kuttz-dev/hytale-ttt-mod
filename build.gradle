@@ -60,9 +60,8 @@ javadoc {
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://maven.hytale.com/release")
-    }
+        maven {url = uri("https://maven.hytale.com/release")}
+        maven {url = uri("https://maven.hytale.com/pre-release")}
 }
 
 

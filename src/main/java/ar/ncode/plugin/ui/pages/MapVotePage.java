@@ -24,9 +24,9 @@ import java.util.List;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.model.TranslationKey.MAP_VOTE_TITLE;
-import static ar.ncode.plugin.model.TranslationKey.MAP_VOTE_VOTE_FOR_MAP;
-import static ar.ncode.plugin.model.TranslationKey.MAP_VOTE_YOU_HAVE_ALREADY_VOTED;
+import static ar.ncode.plugin.model.enums.TranslationKey.MAP_VOTE_TITLE;
+import static ar.ncode.plugin.model.enums.TranslationKey.MAP_VOTE_VOTE_FOR_MAP;
+import static ar.ncode.plugin.model.enums.TranslationKey.MAP_VOTE_YOU_HAVE_ALREADY_VOTED;
 
 public class MapVotePage extends InteractiveCustomUIPage<MapVotePage.MapVoteInteractionEvent> {
 

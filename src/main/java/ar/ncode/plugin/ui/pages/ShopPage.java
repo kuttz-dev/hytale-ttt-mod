@@ -28,7 +28,7 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import java.util.List;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
-import static ar.ncode.plugin.model.TranslationKey.*;
+import static ar.ncode.plugin.model.enums.TranslationKey.*;
 import static ar.ncode.plugin.model.enums.RoundState.IN_GAME;
 
 public class ShopPage extends InteractiveCustomUIPage<ShopPage.ShopInteractionEvent> {

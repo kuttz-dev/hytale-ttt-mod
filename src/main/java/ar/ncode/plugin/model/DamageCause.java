@@ -1,6 +1,6 @@
 package ar.ncode.plugin.model;
 
-import static ar.ncode.plugin.model.TranslationKey.LANG_FILE_NAME;
+import static ar.ncode.plugin.model.enums.TranslationKey.LANG_FILE_NAME;
 
 public enum DamageCause {
 

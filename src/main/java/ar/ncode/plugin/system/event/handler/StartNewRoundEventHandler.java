@@ -29,8 +29,8 @@ import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.model.TranslationKey.PLAYER_ASSIGNED_ROLE_NOTIFICATION;
-import static ar.ncode.plugin.model.TranslationKey.ROUND_ABOUT_TO_START_MSG;
+import static ar.ncode.plugin.model.enums.TranslationKey.PLAYER_ASSIGNED_ROLE_NOTIFICATION;
+import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_ABOUT_TO_START_MSG;
 import static ar.ncode.plugin.model.enums.RoleGroup.TRAITOR;
 import static ar.ncode.plugin.model.enums.RoundState.PREPARING;
 

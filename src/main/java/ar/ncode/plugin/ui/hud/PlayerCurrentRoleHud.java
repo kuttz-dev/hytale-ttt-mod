@@ -2,7 +2,7 @@ package ar.ncode.plugin.ui.hud;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.TranslationKey;
+import ar.ncode.plugin.model.enums.TranslationKey;
 import ar.ncode.plugin.model.enums.RoundState;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;

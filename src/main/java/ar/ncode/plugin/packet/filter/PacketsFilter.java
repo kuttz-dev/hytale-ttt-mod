@@ -7,7 +7,6 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.Packet;
 import com.hypixel.hytale.protocol.packets.interface_.ChatMessage;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
-import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.protocol.packets.window.ClientOpenWindow;
 import com.hypixel.hytale.protocol.packets.window.CloseWindow;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -19,7 +18,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.util.Set;
 
-public class GuiPacketsFilter implements PlayerPacketFilter {
+public class PacketsFilter implements PlayerPacketFilter {
 
 	public static final Set<Integer> WINDOW_PACKETS = Set.of(CloseWindow.PACKET_ID, ClientOpenWindow.PACKET_ID,
 			ChatMessage.PACKET_ID);
@@ -51,7 +50,6 @@ public class GuiPacketsFilter implements PlayerPacketFilter {
 			} else if (message != null && message.startsWith("/gm ")) {
 				result = true;
 			}
-
 		}
 
 		world.execute(() -> {

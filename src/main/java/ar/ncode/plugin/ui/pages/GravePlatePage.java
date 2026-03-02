@@ -3,7 +3,7 @@ package ar.ncode.plugin.ui.pages;
 import ar.ncode.plugin.component.DeadPlayerInfoComponent;
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.component.death.ConfirmedDeath;
-import ar.ncode.plugin.model.TranslationKey;
+import ar.ncode.plugin.model.enums.TranslationKey;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;

@@ -17,6 +17,7 @@ public class DebugToggleCommand extends AbstractCommandCollection {
 		addSubCommand(new ToggleBlockPlacementCommand());
 		addSubCommand(new TogglePersistentGravestonesCommand());
 		addSubCommand(new ToggleEntitiesPersistenceCommand());
+		addSubCommand(new ToggleItemPickUpAll());
 	}
 
 	public static class ToggleGamemodeCommand extends AbstractAsyncCommand {
@@ -94,6 +95,27 @@ public class DebugToggleCommand extends AbstractCommandCollection {
 				config.entitiesShouldDisappearAfterRound(newValue);
 				ctx.sendMessage(
 						Message.raw("entities should disappear after round: " + (newValue ? "true" : "false") + ".")
+				);
+			});
+		}
+	}
+
+
+	public static class ToggleItemPickUpAll extends AbstractAsyncCommand {
+
+		public ToggleItemPickUpAll() {
+			super("pickup", "Enable / Disable picking up all items");
+		}
+
+		@Nonnull
+		@Override
+		protected CompletableFuture<Void> executeAsync(@Nonnull CommandContext ctx) {
+			return CompletableFuture.runAsync(() -> {
+				DebugConfig config = DebugConfig.INSTANCE;
+				boolean newValue = !config.canPickUpAllItems();
+				config.canPickUpAllItems(newValue);
+				ctx.sendMessage(
+						Message.raw("all items can be picked up: " + (newValue ? "true" : "false") + ".")
 				);
 			});
 		}

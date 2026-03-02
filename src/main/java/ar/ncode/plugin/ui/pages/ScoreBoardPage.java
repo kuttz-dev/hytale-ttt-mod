@@ -26,12 +26,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
-import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLE;
-import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLES_DEATHS;
-import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLES_KARMA;
-import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLES_KILLS;
-import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLES_PING;
-import static ar.ncode.plugin.model.TranslationKey.SCOREBOARD_TITLES_PLAYER;
+import static ar.ncode.plugin.model.enums.TranslationKey.*;
 import static ar.ncode.plugin.model.enums.RoleGroup.TRAITOR;
 
 public class ScoreBoardPage extends BasicCustomUIPage {
@@ -152,21 +147,24 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 		buildTableRecords(builder, table.alivePlayers, showTraitors);
 
 		if (showLostInCombat) {
-			builder.append("#Content", "Pages/Scoreboard/scoreboard-lost-in-combat.ui");
+			builder.append("#Content", "Pages/Scoreboard/scoreboard-separator.ui");
+			builder.set("#SeparatorLabel.Text", Message.translation(SCOREBOARD_SEPARATOR_LOST_IN_COMBAT.get()));
 			rowNumber++;
 
 			buildTableRecords(builder, table.lostInCombat, showTraitors);
 		}
 
 		if (!table.confirmedDeaths.isEmpty()) {
-			builder.append("#Content", "Pages/Scoreboard/scoreboard-confirmed-death.ui");
+			builder.append("#Content", "Pages/Scoreboard/scoreboard-separator.ui");
+			builder.set("#SeparatorLabel.Text", Message.translation(SCOREBOARD_SEPARATOR_CONFIRMED_DEATHS.get()));
 			rowNumber++;
 
 			buildTableRecords(builder, table.confirmedDeaths, true);
 		}
 
 		if (!table.spectators.isEmpty()) {
-			builder.append("#Content", "Pages/Scoreboard/scoreboard-spectators.ui");
+			builder.append("#Content", "Pages/Scoreboard/scoreboard-separator.ui");
+			builder.set("#SeparatorLabel.Text", Message.translation(SCOREBOARD_SEPARATOR_SPECTATORS.get()));
 			rowNumber++;
 
 			buildTableRecords(builder, table.spectators, showTraitors);

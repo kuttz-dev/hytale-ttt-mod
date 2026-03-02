@@ -2,7 +2,7 @@ package ar.ncode.plugin.commands.traitor;
 
 import ar.ncode.plugin.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.TranslationKey;
+import ar.ncode.plugin.model.enums.TranslationKey;
 import ar.ncode.plugin.model.enums.RoleGroup;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.Message;

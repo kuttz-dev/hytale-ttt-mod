@@ -16,9 +16,9 @@
 Group #row {
     LayoutMode: Left;
     Anchor: (Bottom: 5, Horizontal: 1);
-    Label #LostInCombatLabel {
+    Label #SeparatorLabel {
       Style: (@CustomLabelStyle);
       Anchor: (Horizontal: 1);
-      Text: "Perdidos en combate";
+      Text: "---";
     }
 }
