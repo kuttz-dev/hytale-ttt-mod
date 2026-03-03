@@ -17,6 +17,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -31,45 +33,64 @@ import static ar.ncode.plugin.model.enums.TranslationKey.DEAD_PLAYER_CHAT_PREFIX
  * <p>
  * Closes #8
  */
-public class ChatListener implements Consumer<PlayerChatEvent> {
+public class ChatListener {
 
-	@Override
-	public void accept(PlayerChatEvent event) {
+	public static ChatListener INSTANCE = new ChatListener();
+
+	public static ChatListener get() {
+		return INSTANCE;
+	}
+
+	public PlayerChatEvent accept(PlayerChatEvent event) {
 		PlayerRef sender = event.getSender();
 		var ref = sender.getReference();
 		if (ref == null || !ref.isValid() || sender.getWorldUuid() == null) {
-			return;
+			return event;
 		}
 
 		Store<EntityStore> store = sender.getReference().getStore();
 		World world = Universe.get().getWorld(sender.getWorldUuid());
-		if (world == null) return;
+		if (world == null) return event;
 
+		CountDownLatch latch = new CountDownLatch(1);
 		world.execute(() -> {
-			var player = PlayerAccessors.getPlayerFrom(sender, store);
-			if (player.isEmpty()) {
-				return;
+			try {
+				var player = PlayerAccessors.getPlayerFrom(sender, store);
+				if (player.isEmpty()) {
+					return;
+				}
+
+				// Check if sender is a spectator using thread-safe set
+				boolean isSenderDead = player.get().info().isSpectator();
+
+				// Filter targets to only include players with same alive/dead status
+				List<PlayerRef> filteredTargets = event.getTargets().stream()
+						.filter(target -> {
+							if (target == null) return false;
+							var targetPlayer = PlayerAccessors.getPlayerFrom(target, store);
+							if (targetPlayer.isEmpty()) return false;
+
+							// Check if target is spectator using thread-safe set
+							boolean isTargetDead = targetPlayer.get().info().isSpectator();
+							return (isSenderDead == isTargetDead) || isTargetDead;
+
+						}).collect(Collectors.toList());
+
+				event.setTargets(filteredTargets);
+				addTagPrefixToMessage(event, isSenderDead, player.get());
+
+			} finally {
+				latch.countDown();
 			}
-
-			// Check if sender is a spectator using thread-safe set
-			boolean isSenderDead = player.get().info().isSpectator();
-
-			// Filter targets to only include players with same alive/dead status
-			List<PlayerRef> filteredTargets = event.getTargets().stream()
-					.filter(target -> {
-						if (target == null) return false;
-						var targetPlayer = PlayerAccessors.getPlayerFrom(target, store);
-						if (targetPlayer.isEmpty()) return false;
-
-						// Check if target is spectator using thread-safe set
-						boolean isTargetDead = targetPlayer.get().info().isSpectator();
-						return (isSenderDead == isTargetDead) || isTargetDead;
-
-					}).collect(Collectors.toList());
-
-			event.setTargets(filteredTargets);
-			addTagPrefixToMessage(event, isSenderDead, player.get());
 		});
+
+		try {
+			latch.await(5, TimeUnit.SECONDS);
+		} catch (InterruptedException ignored) {
+			Thread.currentThread().interrupt();
+		}
+
+		return event;
 	}
 
 	private static void addTagPrefixToMessage(PlayerChatEvent event, boolean isSenderDead, PlayerComponents player) {
@@ -77,9 +98,7 @@ public class ChatListener implements Consumer<PlayerChatEvent> {
 		if (isSenderDead) {
 			event.setFormatter((playerRef, msg) ->
 					Message.join(
-							Message.raw("[").color(DEAD_PLAYER_CHAT_PREFIX.getMessageColor()),
 							Message.translation(DEAD_PLAYER_CHAT_PREFIX.get()).color(DEAD_PLAYER_CHAT_PREFIX.getMessageColor()),
-							Message.raw("]").color(DEAD_PLAYER_CHAT_PREFIX.getMessageColor()),
 							Message.raw(" - "),
 							Message.raw(playerRef.getUsername() + ": " + msg)
 					)
@@ -89,15 +108,18 @@ public class ChatListener implements Consumer<PlayerChatEvent> {
 
 		CustomRole currentRole = player.info().getCurrentRoundRole();
 		String publicRoleMessagesPrefix = currentRole.getPublicRoleMessagesPrefix();
-		String guiColor = currentRole.getRoleGroup().guiColor;
 
-		if (publicRoleMessagesPrefix != null && !publicRoleMessagesPrefix.isEmpty()) {
-			event.setContent("prueba");
+		String guiColor;
+		if (currentRole.getCustomGuiColor() == null || currentRole.getCustomGuiColor().isBlank()) {
+			guiColor = currentRole.getRoleGroup().guiColor;
+		} else {
+            guiColor = currentRole.getCustomGuiColor();
+        }
+
+        if (publicRoleMessagesPrefix != null && !publicRoleMessagesPrefix.isEmpty()) {
 			event.setFormatter((playerRef, msg) ->
 					Message.join(
-							Message.raw("[").color(guiColor),
 							Message.translation(publicRoleMessagesPrefix).color(guiColor),
-							Message.raw("]").color(guiColor),
 							Message.raw(" - "),
 							Message.translation("server.chat.playerMessage")
 									.param("username", playerRef.getUsername())

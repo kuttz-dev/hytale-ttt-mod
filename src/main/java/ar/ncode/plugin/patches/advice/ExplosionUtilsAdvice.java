@@ -1,4 +1,4 @@
-package ar.ncode.plugin.patches;
+package ar.ncode.plugin.patches.advice;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.accessors.WorldAccessors;
@@ -6,11 +6,8 @@ import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.server.core.entity.ExplosionConfig;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import net.bytebuddy.asm.Advice;
-import net.bytebuddy.implementation.bind.annotation.AllArguments;
-import net.bytebuddy.implementation.bind.annotation.SuperCall;
 
 import java.lang.reflect.Field;
-import java.util.concurrent.Callable;
 
 public class ExplosionUtilsAdvice {
 

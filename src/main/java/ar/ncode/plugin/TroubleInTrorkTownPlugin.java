@@ -76,6 +76,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -167,7 +169,18 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		events.add(getEventRegistry().registerGlobal(PlayerReadyEvent.class, new PlayerReadyEventListener()));
 		events.add(getEventRegistry().registerGlobal(PlayerConnectEvent.class, new PlayerConnectEventListener()));
 		events.add(getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, new PlayerDisconnectEventListener()));
-		events.add(getEventRegistry().registerGlobal(PlayerChatEvent.class, new ChatListener()));
+		events.add(getEventRegistry().registerAsyncGlobal(PlayerChatEvent.class, future ->
+				future.thenCompose(e -> {
+					// If the event was already cancelled by another plugin, skip processing to avoid unnecessary overhead
+					if (e.isCancelled()) {
+						return CompletableFuture.completedFuture(e);
+					}
+
+					return CompletableFuture.supplyAsync(() -> new ChatListener().accept(e));
+				})
+			)
+		);
+
 		events.add(getEventRegistry().registerGlobal(StartNewRoundEvent.class, new StartNewRoundEventHandler()));
 		events.add(getEventRegistry().registerGlobal(FinishCurrentRoundEvent.class, new FinishCurrentRoundEventHandler()));
 		events.add(getEventRegistry().registerGlobal(FinishCurrentMapEvent.class, new FinishCurrentMapEventHandler()));
