@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     uses: kuttz-dev/hytale-plugin-workflows/.github/workflows/gradle-plugin-ci.yml@v1.1
-    inputs:
+    with:
       use-fat-jar: true
     secrets:
       MODTALE_API_KEY: ${{ secrets.MODTALE_API_KEY }}
