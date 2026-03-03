@@ -125,6 +125,20 @@ class ScoreBoardPageTest {
 		Assertions.assertEquals(0, result.alivePlayers.size());
 	}
 
+	@Test
+	void testScenario_SpectatorFlagWithRole_ShouldBeSpectator() {
+		Collection<PlayerComponents> players = new ArrayList<>();
+		PlayerComponents spectatorWithRole = createPlayer(INNOCENT_ROLE, "dead_spectator", false, false);
+		spectatorWithRole.info().setSpectator(true);
+		players.add(spectatorWithRole);
+
+		var result = ScoreBoardPage.getTableRows(players, false);
+
+		Assertions.assertEquals(0, result.alivePlayers.size(), "Spectator-flagged players should not be alive");
+		Assertions.assertEquals(1, result.spectators.size(), "Spectator-flagged players should be listed as spectators");
+		Assertions.assertEquals("dead_spectator", result.spectators.get(0).component().getDisplayName());
+	}
+
 	/**
 	 * Scenario A: Active Player
 	 * A player entity exists with a valid player role component but no death-related components.
