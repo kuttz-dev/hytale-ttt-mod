@@ -60,8 +60,12 @@ javadoc {
 
 repositories {
     mavenCentral()
-        maven {url = uri("https://maven.hytale.com/release")}
-        maven {url = uri("https://maven.hytale.com/pre-release")}
+    maven {url = uri("https://maven.hytale.com/release")}
+    maven {url = uri("https://maven.hytale.com/pre-release")}
+
+    maven {
+        url "https://cursemaven.com"
+    }
 }
 
 
@@ -82,6 +86,9 @@ dependencies {
         testImplementation(serverJar)
         println "Local build detected -> using LOCAL jar"
     }
+
+    implementation "net.bytebuddy:byte-buddy:1.18.7"
+    implementation "net.bytebuddy:byte-buddy-agent:1.18.7"
 
     compileOnly("org.projectlombok:lombok:1.18.42")
     annotationProcessor("org.projectlombok:lombok:1.18.42")
@@ -184,7 +191,7 @@ tasks.named("updatePluginManifest") {
 }
 
 def createServerRunArguments(String srcDir) {
-    def programParameters = '--allow-op --disable-sentry --assets="' + "${hytaleHome}/install/$patchline/package/game/latest/Assets.zip" + '"'
+    def programParameters = '--allow-op --disable-sentry --accept-early-plugins --assets="' + "${hytaleHome}/install/$patchline/package/game/latest/Assets.zip" + '"'
     def modPaths = []
     if (includes_pack.toBoolean()) {
         modPaths << srcDir
@@ -235,19 +242,6 @@ tasks.register('generateVSCodeLaunch') {
         launchFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(launchConfig))
     }
 }
-
-/*
-hytale {
-    // Add `--allow-op` to server args (allows you to run `/op self` in-game)
-    allowOp.set(true)
-
-    // Set the patchline to use, currently there are "release" and "pre-release"
-    patchline.set("release")
-
-    // Load mods from the local Hytale installation
-    includeLocalMods.set(true)
-}
- */
 
 test {
     useJUnitPlatform()

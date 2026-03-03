@@ -1,6 +1,6 @@
 package ar.ncode.plugin.accessors;
 
-import ar.ncode.plugin.component.PlayerGameModeInfo;
+import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.PlayerComponents;
 import com.hypixel.hytale.component.ComponentAccessor;
 import com.hypixel.hytale.component.Ref;

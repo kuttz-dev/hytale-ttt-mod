@@ -1,6 +1,6 @@
 package ar.ncode.plugin.ui.hud;
 
-import ar.ncode.plugin.component.PlayerGameModeInfo;
+import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.enums.TranslationKey;
 import ar.ncode.plugin.model.enums.RoundState;

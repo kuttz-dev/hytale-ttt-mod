@@ -1,6 +1,6 @@
 package ar.ncode.plugin.model;
 
-import ar.ncode.plugin.component.DeadPlayerInfoComponent;
+import ar.ncode.plugin.ecs.component.DeadPlayerInfoComponent;
 import ar.ncode.plugin.model.enums.RoundState;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;

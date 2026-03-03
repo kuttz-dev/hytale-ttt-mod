@@ -1,47 +1,48 @@
 package ar.ncode.plugin;
 
 import ar.ncode.plugin.asset.WorldPreviewLoader;
-import ar.ncode.plugin.commands.ChangeWorldCommand;
-import ar.ncode.plugin.commands.SpectatorMode;
-import ar.ncode.plugin.commands.TttCommand;
-import ar.ncode.plugin.commands.traitor.TraitorChatCommand;
-import ar.ncode.plugin.component.DeadPlayerGravestoneComponent;
-import ar.ncode.plugin.component.DeadPlayerInfoComponent;
-import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.component.death.ConfirmedDeath;
-import ar.ncode.plugin.component.death.LostInCombat;
+import ar.ncode.plugin.ecs.commands.ChangeWorldCommand;
+import ar.ncode.plugin.ecs.commands.SpectatorMode;
+import ar.ncode.plugin.ecs.commands.TttCommand;
+import ar.ncode.plugin.ecs.commands.traitor.TraitorChatCommand;
+import ar.ncode.plugin.ecs.component.DeadPlayerGravestoneComponent;
+import ar.ncode.plugin.ecs.component.DeadPlayerInfoComponent;
+import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
+import ar.ncode.plugin.ecs.component.death.ConfirmedDeath;
+import ar.ncode.plugin.ecs.component.death.LostInCombat;
 import ar.ncode.plugin.config.CustomConfig;
 import ar.ncode.plugin.config.WeaponsConfig;
 import ar.ncode.plugin.config.instance.InstanceConfig;
-import ar.ncode.plugin.interaction.PickUpWeaponInteraction;
-import ar.ncode.plugin.interaction.ShowDeadPlayerInfoInteraction;
-import ar.ncode.plugin.interaction.TestPlayerRole;
-import ar.ncode.plugin.interaction.TestPlayerRolePotion;
+import ar.ncode.plugin.ecs.interaction.PickUpWeaponInteraction;
+import ar.ncode.plugin.ecs.interaction.ShowDeadPlayerInfoInteraction;
+import ar.ncode.plugin.ecs.interaction.TestPlayerRole;
+import ar.ncode.plugin.ecs.interaction.TestPlayerRolePotion;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.WorldPreview;
-import ar.ncode.plugin.npc.ShowDeadPlayerInfoAction;
+import ar.ncode.plugin.ecs.npc.ShowDeadPlayerInfoAction;
 import ar.ncode.plugin.packet.filter.PacketsFilter;
-import ar.ncode.plugin.system.ItemPickUpSystem;
-import ar.ncode.plugin.system.event.FinishCurrentMapEvent;
-import ar.ncode.plugin.system.event.FinishCurrentRoundEvent;
-import ar.ncode.plugin.system.event.StartNewRoundEvent;
-import ar.ncode.plugin.system.event.handler.FinishCurrentMapEventHandler;
-import ar.ncode.plugin.system.event.handler.FinishCurrentRoundEventHandler;
-import ar.ncode.plugin.system.event.handler.StartNewRoundEventHandler;
-import ar.ncode.plugin.system.event.listener.ChatListener;
-import ar.ncode.plugin.system.event.listener.InteractiveItemPickUpListener;
-import ar.ncode.plugin.system.event.listener.SpectatorModeDamageListener;
-import ar.ncode.plugin.system.event.listener.block.BreakBlockListener;
-import ar.ncode.plugin.system.event.listener.block.DamageBlockListener;
-import ar.ncode.plugin.system.event.listener.block.PlaceBlockListener;
-import ar.ncode.plugin.system.player.PlayerDeathSystem;
-import ar.ncode.plugin.system.player.PlayerRespawnSystem;
-import ar.ncode.plugin.system.player.event.listener.PlayerConnectEventListener;
-import ar.ncode.plugin.system.player.event.listener.PlayerDisconnectEventListener;
-import ar.ncode.plugin.system.player.event.listener.PlayerReadyEventListener;
-import ar.ncode.plugin.system.scheduled.DoubleTapDetector;
-import ar.ncode.plugin.system.scheduled.PlayerHudUpdateSystem;
-import ar.ncode.plugin.system.scheduled.WorldRoundTimeSystem;
+import ar.ncode.plugin.ecs.system.ItemPickUpSystem;
+import ar.ncode.plugin.ecs.system.event.FinishCurrentMapEvent;
+import ar.ncode.plugin.ecs.system.event.FinishCurrentRoundEvent;
+import ar.ncode.plugin.ecs.system.event.StartNewRoundEvent;
+import ar.ncode.plugin.ecs.system.event.handler.FinishCurrentMapEventHandler;
+import ar.ncode.plugin.ecs.system.event.handler.FinishCurrentRoundEventHandler;
+import ar.ncode.plugin.ecs.system.event.handler.StartNewRoundEventHandler;
+import ar.ncode.plugin.ecs.system.event.listener.ChatListener;
+import ar.ncode.plugin.ecs.system.event.listener.InteractiveItemPickUpListener;
+import ar.ncode.plugin.ecs.system.event.listener.SpectatorModeDamageListener;
+import ar.ncode.plugin.ecs.system.event.listener.block.BreakBlockListener;
+import ar.ncode.plugin.ecs.system.event.listener.block.DamageBlockListener;
+import ar.ncode.plugin.ecs.system.event.listener.block.PlaceBlockListener;
+import ar.ncode.plugin.ecs.system.player.PlayerDeathSystem;
+import ar.ncode.plugin.ecs.system.player.PlayerRespawnSystem;
+import ar.ncode.plugin.ecs.system.player.event.listener.PlayerConnectEventListener;
+import ar.ncode.plugin.ecs.system.player.event.listener.PlayerDisconnectEventListener;
+import ar.ncode.plugin.ecs.system.player.event.listener.PlayerReadyEventListener;
+import ar.ncode.plugin.ecs.system.scheduled.DoubleTapDetector;
+import ar.ncode.plugin.ecs.system.scheduled.PlayerHudUpdateSystem;
+import ar.ncode.plugin.ecs.system.scheduled.WorldRoundTimeSystem;
+import ar.ncode.plugin.patches.CancelExplosionInteraction;
 import com.hypixel.hytale.event.EventRegistration;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.registry.Registration;
@@ -61,6 +62,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.util.Config;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import lombok.SneakyThrows;
+import net.bytebuddy.agent.ByteBuddyAgent;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -122,6 +124,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 		loadMapsEntries();
 		LOGGER.atInfo().log("Starting plugin: " + this.getName() + " - version " + this.getManifest().getVersion().toString());
+		ByteBuddyAgent.install();
 	}
 
 	public void loadMapsEntries() throws IOException {
@@ -198,6 +201,10 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 		} else {
 			LOGGER.atSevere().log("NPCPlugin not available yet; ShowDeadPlayerInfoAction builder not registered in setup().");
 		}
+
+		// Apply patches
+		new CancelExplosionInteraction().apply();
+
 		LOGGER.atInfo().log("Plugin " + this.getName() + " setup completed!");
 	}
 

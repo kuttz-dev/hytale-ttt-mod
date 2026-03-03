@@ -1,7 +1,7 @@
 package ar.ncode.plugin.accessors;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
-import ar.ncode.plugin.component.PlayerGameModeInfo;
+import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;

@@ -1,6 +1,6 @@
 package ar.ncode.plugin.ui.pages;
 
-import ar.ncode.plugin.component.PlayerGameModeInfo;
+import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.WorldPreview;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
