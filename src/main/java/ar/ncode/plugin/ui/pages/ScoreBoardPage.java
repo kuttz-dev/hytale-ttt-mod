@@ -75,7 +75,7 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 				continue;
 			}
 
-			if (player.info().isSpectator() || player.info().getCurrentRoundRole() == null) {
+			if (player.info().getCurrentRoundRole() == null) {
 				result.spectators.add(player);
 				continue;
 			}
@@ -115,7 +115,6 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 
 	@Override
 	public void build(@NonNullDecl UICommandBuilder builder) {
-		rowNumber = 1;
 		buildBaseScoreBoard(builder);
 
 		if (super.playerRef.getWorldUuid() == null) {
