@@ -1,11 +1,11 @@
 package ar.ncode.plugin.ui.pages;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
-import ar.ncode.plugin.component.PlayerGameModeInfo;
-import ar.ncode.plugin.component.death.ConfirmedDeath;
-import ar.ncode.plugin.component.death.LostInCombat;
 import ar.ncode.plugin.config.CustomConfig;
 import ar.ncode.plugin.config.CustomRole;
+import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
+import ar.ncode.plugin.ecs.component.death.ConfirmedDeath;
+import ar.ncode.plugin.ecs.component.death.LostInCombat;
 import ar.ncode.plugin.model.PlayerComponents;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
