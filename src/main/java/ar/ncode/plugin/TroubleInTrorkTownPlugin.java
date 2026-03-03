@@ -63,6 +63,7 @@ import com.hypixel.hytale.server.core.util.Config;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import lombok.SneakyThrows;
 import net.bytebuddy.agent.ByteBuddyAgent;
+import org.bstats.hytale.Metrics;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -117,6 +118,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 	private List<EventRegistration> events = new ArrayList<>();
 	private List<CommandRegistration> commands = new ArrayList<>();
 	private List<PacketFilter> inboundPacketFilters = new ArrayList<>();
+	private Metrics metrics;
 
 	public TroubleInTrorkTownPlugin(@Nonnull JavaPluginInit init) throws Exception {
 		super(init);
@@ -217,6 +219,9 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
 		// Apply patches
 		new CancelExplosionInteraction().apply();
+
+		// Metrics
+		this.metrics = new Metrics(this, 29880);
 
 		LOGGER.atInfo().log("Plugin " + this.getName() + " setup completed!");
 	}

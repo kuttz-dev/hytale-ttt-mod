@@ -8,7 +8,8 @@ import javax.xml.parsers.DocumentBuilderFactory
 plugins {
     id 'java'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.3'
-    //id("app.ultradev.hytalegradle") version "1.5.0"
+    id("com.gradleup.shadow") version "9.3.1"
+
 }
 
 ext {
@@ -87,14 +88,16 @@ dependencies {
         println "Local build detected -> using LOCAL jar"
     }
 
+    implementation("org.bstats:bstats-hytale:3.2.1")
+
     implementation "net.bytebuddy:byte-buddy:1.18.7"
     implementation "net.bytebuddy:byte-buddy-agent:1.18.7"
 
     compileOnly("org.projectlombok:lombok:1.18.42")
     annotationProcessor("org.projectlombok:lombok:1.18.42")
-
     testCompileOnly("org.projectlombok:lombok:1.18.42")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
+
     testImplementation(platform('org.junit:junit-bom:5.14.2'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
@@ -345,4 +348,17 @@ tasks.register("generateSources") {
         process.waitFor()
         outputThread.join(1000)
     }
+}
+
+tasks.shadowJar {
+    configurations = [project.configurations.runtimeClasspath]
+
+    dependencies {
+        // Only merge bStats into the final jar, no other dependencies
+        exclude { it.moduleGroup != "org.bstats" }
+    }
+
+    // Relocate bStats into the plugin's package to avoid conflicts with other
+    // plugins using bStats
+    relocate("org.bstats", project.group.toString())
 }
