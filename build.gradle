@@ -216,6 +216,7 @@ idea.project.settings.runConfigurations {
         moduleName = project.idea.module.name + '.main'
         programParameters = createServerRunArguments(sourceSets.main.java.srcDirs.first().parentFile.absolutePath)
         workingDirectory = serverRunDir.absolutePath
+        jvmArgs = '-Dbstats.relocatecheck=false'
     }
 }
 

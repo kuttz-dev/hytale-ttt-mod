@@ -95,7 +95,7 @@ public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEv
 				);
 			}
 
-			executor.schedule(() -> {
+			HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
 						// Check if world is still alive before executing (prevents memory leak from stale references)
 						if (!world.isAlive()) return;
 						endVotesAndChangeWorld(world);

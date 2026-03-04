@@ -10,17 +10,17 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.function.consumer.TriConsumer;
 import com.hypixel.hytale.logger.HytaleLogger;
+import com.hypixel.hytale.math.shape.Box;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3i;
-import com.hypixel.hytale.protocol.AnimationSlot;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.asset.type.model.config.Model;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
-import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.ProjectileComponent;
 import com.hypixel.hytale.server.core.entity.nameplate.Nameplate;
+import com.hypixel.hytale.server.core.inventory.Inventory;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.player.PlayerSkinComponent;
 import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
@@ -103,15 +103,17 @@ public class DeathSystem {
 		);
 
 		ModelAsset playerModelAsset = ModelAsset.getAssetMap().getAsset("Player");
-		ModelAsset modelWithDeathAnimation = ModelAsset.getAssetMap().getAsset("Player_Corpse_Model");
+		ModelAsset corpseModelAsset = ModelAsset.getAssetMap().getAsset("Player_Corpse_Model");
 		Model npcModel = null;
 
-		if (playerModelAsset != null && modelWithDeathAnimation != null) {
+		if (playerModelAsset != null && corpseModelAsset != null) {
 			Model playerModel = Model.createScaledModel(playerModelAsset, 1.0F, null);
-			npcModel = addAnimationsToExistingModel(playerModel, modelWithDeathAnimation);
+			npcModel = mergeModels(playerModel, corpseModelAsset);
 
 		} else if (playerModelAsset != null) {
-			npcModel = Model.createScaledModel(playerModelAsset, 1.0F);
+			var min = new Vector3d(-1, 0, -1);
+			var max = new Vector3d(0.5, 0.5, 1);
+			npcModel = Model.createScaledModel(playerModelAsset, 1.0F, null, new Box(min, max), false);
 		}
 
 		addNpcToWorld(
@@ -152,33 +154,6 @@ public class DeathSystem {
 				LOGGER.atSevere().log("Error adding corpse to world");
 			}
 		});
-	}
-
-	private static Model addAnimationsToExistingModel(Model playerModel, ModelAsset corpseModelAsset) {
-		return new Model(
-				playerModel.getModelAssetId(),
-				playerModel.getScale(),
-				playerModel.getRandomAttachmentIds(),
-				playerModel.getAttachments(),
-				playerModel.getBoundingBox(),
-				playerModel.getModel(),
-				playerModel.getTexture(),
-				playerModel.getGradientSet(),
-				playerModel.getGradientId(),
-				playerModel.getEyeHeight(),
-				playerModel.getCrouchOffset(),
-				playerModel.getSittingOffset(),
-				playerModel.getSleepingOffset(),
-				corpseModelAsset.getAnimationSetMap(),
-				playerModel.getCamera(),
-				playerModel.getLight(),
-				playerModel.getParticles(),
-				playerModel.getTrails(),
-				playerModel.getPhysicsValues(),
-				playerModel.getDetailBoxes(),
-				playerModel.getPhobia(),
-				playerModel.getPhobiaModelAssetId()
-		);
 	}
 
 	private static void addGraveStoneWithNamePlateToWorld(World world, WorldChunk worldChunk, DeadPlayerInfoComponent deadPlayerInfo) {
@@ -259,4 +234,32 @@ public class DeathSystem {
 
 		return null;
 	}
+
+	private static Model mergeModels(Model playerModel, ModelAsset corpseModelAsset) {
+		return new Model(
+				playerModel.getModelAssetId(),
+				playerModel.getScale(),
+				playerModel.getRandomAttachmentIds(),
+				playerModel.getAttachments(),
+				corpseModelAsset.getBoundingBox(),
+				playerModel.getModel(),
+				playerModel.getTexture(),
+				corpseModelAsset.getGradientSet(),
+				corpseModelAsset.getGradientId(),
+				corpseModelAsset.getEyeHeight(),
+				corpseModelAsset.getCrouchOffset(),
+				corpseModelAsset.getSittingOffset(),
+				corpseModelAsset.getSleepingOffset(),
+				corpseModelAsset.getAnimationSetMap(),
+				corpseModelAsset.getCamera(),
+				corpseModelAsset.getLight(),
+				corpseModelAsset.getParticles(),
+				corpseModelAsset.getTrails(),
+				corpseModelAsset.getPhysicsValues(),
+				null,
+				corpseModelAsset.getPhobia(),
+				corpseModelAsset.getPhobiaModelAssetId()
+		);
+	}
+
 }

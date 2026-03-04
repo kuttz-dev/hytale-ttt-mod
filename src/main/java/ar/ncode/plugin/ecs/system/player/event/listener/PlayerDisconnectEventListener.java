@@ -44,7 +44,7 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
 			PlayerDeathSystem.updatePlayerCountsOnPlayerDeath(playerRef, playerInfo.getCurrentRoundRole(), gameModeState);
 			graveStone.setDeadPlayerRole(playerInfo.getCurrentRoundRole());
 			graveStone.setTimeOfDeath(
-					gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap(), gameModeState.mapIsAboutToChange())
+					gameModeState.getRemainingTime()
 						.format(timeFormatter)
 			);
 		}

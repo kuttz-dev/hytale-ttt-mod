@@ -60,7 +60,12 @@ public class GameModeState {
 		return Duration.between(roundStateUpdatedAt, currentDateTime);
 	}
 
-	public LocalTime getRemainingTime(RoundState roundState, boolean playersAreVotingMap, boolean mapIsAboutToChange) {
+	public boolean roundHasTimeRemaining() {
+		var remainingTime = getRemainingTime();
+        return remainingTime.getMinute() > 0 || remainingTime.getSecond() > 0;
+    }
+
+	public LocalTime getRemainingTime() {
 		Duration roundElapsedTime = getElapsedTimeSinceRoundUpdate();
 
 		int stateDuration = 0;

@@ -20,6 +20,7 @@ import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_TIME_FINISHED;
 public class WorldRoundTimeSystem extends TickingSystem<EntityStore> {
 
 	float elapsedTime = 0;
+	boolean roundEnded = false;
 
 	@Override
 	public void tick(float dt, int index, @NonNullDecl Store<EntityStore> store) {
@@ -35,12 +36,11 @@ public class WorldRoundTimeSystem extends TickingSystem<EntityStore> {
 			return;
 		}
 
-		LocalTime remainingTime = gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap(), gameModeState.mapIsAboutToChange());
-		if (remainingTime.getMinute() > 0 || remainingTime.getSecond() > 0) {
-			return;
-		}
+		if (gameModeState.roundHasTimeRemaining()) {
+			roundEnded = false;
 
-		if (RoundState.IN_GAME.equals(gameModeState.roundState)) {
+		} else if (!roundEnded) {
+			roundEnded = true;
 			Message message = Message.translation(ROUND_TIME_FINISHED.get());
 			EventTitleUtil.showEventTitleToWorld(
 					message,

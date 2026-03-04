@@ -106,7 +106,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 
 	private static void spawnDeadPlayerRemains(@NonNullDecl DeathComponent deathComponent, GameModeState gameModeState, PlayerComponents player, World world, ComponentAccessor<EntityStore> store) {
 		DeadPlayerInfoComponent deadPlayerInfo = DeadPlayerInfoComponent.builder()
-				.timeOfDeath(gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap(), gameModeState.mapIsAboutToChange()).format(timeFormatter))
+				.timeOfDeath(gameModeState.getRemainingTime().format(timeFormatter))
 				.deadPlayerReference(player.reference())
 				.deadPlayerRole(player.info().getCurrentRoundRole())
 				.deadPlayerName(player.component().getDisplayName())
@@ -131,19 +131,17 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 	public void onComponentAdded(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl DeathComponent deathComponent,
 	                             @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer
 	) {
-		// Get reference to the damaged entity
-		var player = getPlayerFrom(reference, commandBuffer).orElse(null);
-		if (player == null) return;
+		// Disable death screen
+		deathComponent.setShowDeathMenu(false);
+		deathComponent.setItemsLossMode(DeathConfig.ItemsLossMode.ALL);
+		deathComponent.setItemsDurabilityLossPercentage(0.0F);
 
-		World world = player.component().getWorld();
-		if (world == null) return;
+		World world = commandBuffer.getExternalData().getWorld();
 
 		world.execute(() -> {
-			// Disable death screen
-			deathComponent.setShowDeathMenu(false);
-			deathComponent.setItemsLossMode(DeathConfig.ItemsLossMode.ALL);
-			deathComponent.setItemsDurabilityLossPercentage(0.0F);
-			commandBuffer.tryRemoveComponent(reference, DeferredCorpseRemoval.getComponentType());
+			// Get reference to the damaged entity
+			var player = getPlayerFrom(reference, commandBuffer).orElse(null);
+			if (player == null) return;
 
 			GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
 			if (gameModeState == null || !RoundState.IN_GAME.equals(gameModeState.roundState)) {

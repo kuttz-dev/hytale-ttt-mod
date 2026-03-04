@@ -82,7 +82,7 @@ public class PlayerCurrentRoleHud extends CustomUIHud {
 		var builder = new UICommandBuilder();
 		setHudRoleValues(builder, gameModeState);
 
-		LocalTime remainingTime = gameModeState.getRemainingTime(gameModeState.roundState, gameModeState.playersAreVotingMap(), gameModeState.mapIsAboutToChange());
+		LocalTime remainingTime = gameModeState.getRemainingTime();
 		builder.set("#LeftRoundTime.Text", remainingTime.format(timeFormatter));
 
 		update(false, builder);
