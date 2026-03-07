@@ -3,6 +3,7 @@ package ar.ncode.plugin.ecs.commands;
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.ecs.system.scheduled.DoubleTapDetector;
+import ar.ncode.plugin.model.GameModeState;
 import com.hypixel.hytale.builtin.instances.InstancesPlugin;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -25,117 +26,133 @@ import java.util.concurrent.TimeUnit;
 
 public class ChangeWorldCommand extends CommandBase {
 
-	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-	RequiredArg<String> targetWorld = this.withRequiredArg("targetWorld", "Target world name", ArgTypes.STRING);
+    RequiredArg<String> targetWorld = this.withRequiredArg("targetWorld", "Target world name", ArgTypes.STRING);
 
-	public ChangeWorldCommand() {
-		super("change-world", "Debug command to change the current world.");
-	}
+    public ChangeWorldCommand() {
+        super("change-world", "Debug command to change the current world.");
+    }
 
-	/**
-	 * Loads a new world instance and teleports all players from the current world to it.
-	 * Note: This method does NOT check the transition flag - callers should use
-	 * scheduleWorldTransition() from PlayerReadyEventListener to ensure proper timing.
-	 *
-	 * @param currentWorld The world to teleport players from
-	 * @param newWorldName The name of the world template to spawn
-	 */
-	public static void loadInstance(World currentWorld, String newWorldName) {
-		currentWorld.execute(() -> {
-			// Store old world info before spawning new instance
-			String oldWorldName = currentWorld.getName();
-			UUID oldWorldUuid = currentWorld.getWorldConfig().getUuid();
+    /**
+     * Loads a new world instance and teleports all players from the current world to it.
+     * Note: This method does NOT check the transition flag - callers should use
+     * scheduleWorldTransition() from PlayerReadyEventListener to ensure proper timing.
+     *
+     * @param currentWorld The world to teleport players from
+     * @param newWorldName The name of the world template to spawn
+     */
+    public static void loadInstance(World currentWorld, String newWorldName) {
+        currentWorld.execute(() -> {
+            // Store old world info before spawning new instance
+            String oldWorldName = currentWorld.getName();
+            UUID oldWorldUuid = currentWorld.getWorldConfig().getUuid();
 
-			World targetWorld = createNewInstance(currentWorld, newWorldName);
+            loadNewWorld(currentWorld, newWorldName);
+            cleanUpOldWorld(oldWorldUuid);
 
-			TroubleInTrorkTownPlugin.currentInstance = targetWorld.getWorldConfig().getUuid();
+            // Schedule direct world removal after teleports complete (2 seconds delay)
+            // Using Universe.removeWorld() directly instead of safeRemoveInstance() because
+            // safeRemoveInstance() silently fails if the world has no InstanceWorldConfig
+            HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
+                try {
+                    // Don't remove the default world!
+                    String defaultWorldName = HytaleServer.get().getConfig().getDefaults().getWorld();
+                    if (oldWorldName.equalsIgnoreCase(defaultWorldName)) {
+                        LOGGER.atInfo().log("Skipping removal of default world: " + oldWorldName);
+                        return;
+                    }
 
-			for (PlayerRef playerRef : currentWorld.getPlayerRefs()) {
-				Ref<EntityStore> ref = playerRef.getReference();
-				PlayerGameModeInfo playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
+                    World oldWorld = Universe.get().getWorld(oldWorldName);
+                    if (oldWorld != null && oldWorld.getPlayerCount() == 0) {
+                        LOGGER.atInfo().log("Removing old world instance: " + oldWorldName);
+                        Universe.get().removeWorld(oldWorldName);
+                    } else if (oldWorld != null) {
+                        LOGGER.atWarning().log("Cannot remove world %s - still has %d players",
+                                oldWorldName, oldWorld.getPlayerCount());
+                    }
+                } catch (Exception e) {
+                    LOGGER.atWarning().withCause(e).log("Failed to remove old world: " + oldWorldName);
+                }
+            }, 3, TimeUnit.SECONDS);
+        });
+    }
 
-				if (!ref.isValid()) {
-					continue;
-				} else if (playerInfo != null) {
-					playerInfo.setWorldInstance(targetWorld.getWorldConfig().getUuid());
-				}
+    public static void loadNewWorld(World currentWorld, String mapTemplateName) {
+        World targetWorld = createNewInstance(currentWorld, mapTemplateName);
+        teleportPlayersToNewWorld(currentWorld, targetWorld);
+    }
 
-				InstancesPlugin.teleportPlayerToInstance(
-						ref,
-						ref.getStore(),
-						targetWorld,
-						null
-				);
-			}
+    private static void teleportPlayersToNewWorld(World currentWorld, World targetWorld) {
+        for (PlayerRef playerRef : currentWorld.getPlayerRefs()) {
+            Ref<EntityStore> ref = playerRef.getReference();
 
-			cleanUpWorld(oldWorldUuid, oldWorldName);
+            if (ref == null || !ref.isValid()) {
+                continue;
+            }
 
-			// Schedule direct world removal after teleports complete (2 seconds delay)
-			// Using Universe.removeWorld() directly instead of safeRemoveInstance() because
-			// safeRemoveInstance() silently fails if the world has no InstanceWorldConfig
-			HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-				try {
-					// Don't remove the default world!
-					String defaultWorldName = HytaleServer.get().getConfig().getDefaults().getWorld();
-					if (oldWorldName.equalsIgnoreCase(defaultWorldName)) {
-						LOGGER.atInfo().log("Skipping removal of default world: " + oldWorldName);
-						return;
-					}
+            PlayerGameModeInfo playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
 
-					World oldWorld = Universe.get().getWorld(oldWorldName);
-					if (oldWorld != null && oldWorld.getPlayerCount() == 0) {
-						LOGGER.atInfo().log("Removing old world instance: " + oldWorldName);
-						Universe.get().removeWorld(oldWorldName);
-					} else if (oldWorld != null) {
-						LOGGER.atWarning().log("Cannot remove world %s - still has %d players",
-								oldWorldName, oldWorld.getPlayerCount());
-					}
-				} catch (Exception e) {
-					LOGGER.atWarning().withCause(e).log("Failed to remove old world: " + oldWorldName);
-				}
-			}, 3, TimeUnit.SECONDS);
-		});
-	}
+            if (playerInfo != null) {
+                playerInfo.setWorldInstance(targetWorld.getWorldConfig().getUuid());
+            }
 
-	public static void cleanUpWorld(UUID oldWorldUuid, String oldWorldName) {
-		// Clear all component states to prevent memory leak when changing instances
-		DoubleTapDetector.getInstance().clearAllPlayers();
+            InstancesPlugin.teleportPlayerToInstance(
+                    ref,
+                    ref.getStore(),
+                    targetWorld,
+                    null
+            );
+        }
+    }
 
-		// Clean up old GameModeState
-		TroubleInTrorkTownPlugin.gameModeStateForWorld.remove(oldWorldUuid);
+    public static void cleanUpOldWorld(UUID oldWorldUuid) {
+        // Clear all component states to prevent memory leak when changing instances
+        DoubleTapDetector.getInstance().clearAllPlayers();
 
-		// Clean up old GameModeState
-		TroubleInTrorkTownPlugin.instanceConfig.remove(oldWorldName);
-	}
+        // Clean up old GameModeState
+        TroubleInTrorkTownPlugin.gameModeStateForWorld.remove(oldWorldUuid);
 
-	public static World createNewInstance(World currentWorld, String newWorldName) {
-		try {
-			return InstancesPlugin.get()
-					.spawnInstance(newWorldName, currentWorld, new Transform())
-					.get();
+        // Clean up old GameModeState
+        TroubleInTrorkTownPlugin.instanceConfigs.remove(oldWorldUuid);
+    }
 
-		} catch (Exception e) {
-			LOGGER.atSevere().withCause(e).log("Failed to spawn instance: " + newWorldName);
-			throw new RuntimeException(e);
-		}
-	}
+    public static World createNewInstance(World currentWorld, String mapTemplateName) {
+        try {
+            var newWorld = InstancesPlugin.get()
+                    .spawnInstance(mapTemplateName, currentWorld, new Transform())
+                    .get();
 
-	@Override
-	protected void executeSync(@NonNullDecl CommandContext commandContext) {
-		World originWorld = commandContext.senderAs(Player.class).getWorld();
-		String[] targetWorldName = commandContext.getInput(targetWorld);
+            TroubleInTrorkTownPlugin.currentInstance = newWorld.getWorldConfig().getUuid();
+            TroubleInTrorkTownPlugin.instanceConfigs.put(
+                    TroubleInTrorkTownPlugin.currentInstance,
+                    TroubleInTrorkTownPlugin.mapTemplateConfig.get(mapTemplateName).getInstanceConfig()
+            );
+            TroubleInTrorkTownPlugin.gameModeStateForWorld.put(newWorld.getWorldConfig().getUuid(), new GameModeState());
 
-		if (targetWorldName.length != 1) {
-			commandContext.sendMessage(Message.raw("You must specify a target world name."));
-			return;
-		}
+            return newWorld;
 
-		if (originWorld == null) {
-			commandContext.sendMessage(Message.raw("You are not in a world."));
-			return;
-		}
+        } catch (Exception e) {
+            LOGGER.atSevere().withCause(e).log("Failed to spawn instance: " + mapTemplateName);
+            throw new RuntimeException(e);
+        }
+    }
 
-		loadInstance(originWorld, targetWorldName[0]);
-	}
+    @Override
+    protected void executeSync(@NonNullDecl CommandContext commandContext) {
+        World originWorld = commandContext.senderAs(Player.class).getWorld();
+        String[] targetWorldName = commandContext.getInput(targetWorld);
+
+        if (targetWorldName.length != 1) {
+            commandContext.sendMessage(Message.raw("You must specify a target world name."));
+            return;
+        }
+
+        if (originWorld == null) {
+            commandContext.sendMessage(Message.raw("You are not in a world."));
+            return;
+        }
+
+        loadInstance(originWorld, targetWorldName[0]);
+    }
 }

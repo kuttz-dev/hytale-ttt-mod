@@ -1,8 +1,8 @@
 package ar.ncode.plugin.accessors;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
-import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.config.instance.InstanceConfig;
+import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;
 import com.hypixel.hytale.component.Component;
@@ -34,136 +34,138 @@ import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 
 public class WorldAccessors {
 
-	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-	public static InstanceConfig getWorldInstanceConfig(World world) {
-		String worldName = getWorldName(world);
-		Config<InstanceConfig> instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName);
+    public static InstanceConfig getWorldInstanceConfig(World world) {
+        Config<InstanceConfig> instanceConfig = TroubleInTrorkTownPlugin.instanceConfigs.get(world.getWorldConfig().getUuid());
 
-		if (instanceConfig == null) {
-			String message = String.format(
-					"There is no config for world with name: %s - Available configs are: %s",
-					worldName, TroubleInTrorkTownPlugin.instanceConfig.keySet()
-			);
-			throw new RuntimeException(message);
-		}
+        if (instanceConfig == null) {
+            LOGGER.atSevere().log(
+                    "There is no config for world with name: %s - Available configs are: %s - Maps: %s",
+                    world.getName(),
+                    TroubleInTrorkTownPlugin.instanceConfigs.keySet(),
+                    TroubleInTrorkTownPlugin.mapTemplateConfig.keySet()
+            );
 
-		return instanceConfig.get();
-	}
+            return null;
+        }
 
-	public static Optional<Config<InstanceConfig>> getWorldInstanceConfigFile(World world) {
-		String worldName = getWorldName(world);
-		return Optional.ofNullable(TroubleInTrorkTownPlugin.instanceConfig.get(worldName));
-	}
+        return instanceConfig.get();
+    }
 
-	private static String getWorldName(World world) {
-		String worldName = getSafeWorldName(world.getWorldConfig().getDisplayName());
-		if (worldName == null) {
-			worldName = world.getName();
-		}
+    public static Optional<Config<InstanceConfig>> getWorldInstanceConfigFile(World world) {
+        UUID worldUUID = world.getWorldConfig().getUuid();
+        return Optional.ofNullable(TroubleInTrorkTownPlugin.instanceConfigs.get(worldUUID));
+    }
 
-		return worldName;
-	}
+    private static String getWorldName(World world) {
+        String worldName = getSafeWorldName(world.getWorldConfig().getDisplayName());
+        if (worldName == null) {
+            worldName = world.getName();
+        }
 
-	public static String getSafeWorldName(String worldName) {
-		if (worldName != null) {
-			return worldName.replace(" ", "_").toLowerCase();
-		}
+        return worldName;
+    }
 
-		return null;
-	}
+    public static String getSafeWorldName(String worldName) {
+        if (worldName != null) {
+            return worldName.replace(" ", "_").toLowerCase();
+        }
 
-	public static Ref<ChunkStore> getBlockEntityRefAt(World world, Vector3i position) {
-		long index = ChunkUtil.indexChunkFromBlock(position.x, position.z);
-		return world.getChunkStore().getChunkReference(index);
-	}
+        return null;
+    }
 
-	public static <T extends Component<ChunkStore>> T getBlockComponentAt(
-			World world, Vector3i position, ComponentType<ChunkStore, T> componentType
-	) {
-		if (componentType == null) {
-			return null;
-		}
-		long index = ChunkUtil.indexChunkFromBlock(position.x, position.z);
-		ChunkStore chunkStore = world.getChunkStore();
-		Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(index);
-		if (chunkRef == null) {
-			return null;
-		}
+    public static Ref<ChunkStore> getBlockEntityRefAt(World world, Vector3i position) {
+        long index = ChunkUtil.indexChunkFromBlock(position.x, position.z);
+        return world.getChunkStore().getChunkReference(index);
+    }
 
-		return chunkStore.getStore().getComponent(chunkRef, componentType);
-	}
+    public static <T extends Component<ChunkStore>> T getBlockComponentAt(
+            World world, Vector3i position, ComponentType<ChunkStore, T> componentType
+    ) {
+        if (componentType == null) {
+            return null;
+        }
+        long index = ChunkUtil.indexChunkFromBlock(position.x, position.z);
+        ChunkStore chunkStore = world.getChunkStore();
+        Ref<ChunkStore> chunkRef = chunkStore.getChunkReference(index);
+        if (chunkRef == null) {
+            return null;
+        }
+
+        return chunkStore.getStore().getComponent(chunkRef, componentType);
+    }
 
 
-	public static List<PlayerComponents> getPlayersAt(World world, ComponentAccessor<EntityStore> componentAccessor) {
-		List<PlayerComponents> result = new ArrayList<>();
-		for (PlayerRef playerRef : world.getPlayerRefs()) {
-			var reference = playerRef.getReference();
-			if (reference == null || !reference.isValid()) continue;
+    public static List<PlayerComponents> getPlayersAt(World world, ComponentAccessor<EntityStore> componentAccessor) {
+        List<PlayerComponents> result = new ArrayList<>();
+        for (PlayerRef playerRef : world.getPlayerRefs()) {
+            var reference = playerRef.getReference();
+            if (reference == null || !reference.isValid()) continue;
 
-			var player = componentAccessor.getComponent(reference, Player.getComponentType());
-			var playerInfo = componentAccessor.getComponent(reference, PlayerGameModeInfo.componentType);
+            var player = componentAccessor.getComponent(reference, Player.getComponentType());
+            var playerInfo = componentAccessor.getComponent(reference, PlayerGameModeInfo.componentType);
 
-			if (player == null || playerInfo == null) continue;
+            if (player == null || playerInfo == null) continue;
 
-			result.add(new PlayerComponents(player, playerRef, playerInfo, reference));
-		}
+            result.add(new PlayerComponents(player, playerRef, playerInfo, reference));
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public static String getWorldNameForInstance(World world) {
-		if (world.getWorldConfig().getDisplayName() == null) return null;
-		return getWorldName(world);
-	}
+    public static String getWorldNameForInstance(World world) {
+        if (world.getWorldConfig().getDisplayName() == null) return null;
+        return getWorldName(world);
+    }
 
-	public static GameModeState gameModeStateForWorld(World world) {
-		return gameModeStateForWorld.get(world.getWorldConfig().getUuid());
-	}
+    public static GameModeState gameModeStateForWorld(World world) {
+        return gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+    }
 
-	public static GameModeState gameModeStateForPlayerWorld(Ref<EntityStore> player) {
-		UUID worldUUID = player.getStore().getExternalData().getWorld().getWorldConfig().getUuid();
-		return gameModeStateForWorld.get(worldUUID);
-	}
+    public static GameModeState gameModeStateForPlayerWorld(Ref<EntityStore> player) {
+        UUID worldUUID = player.getStore().getExternalData().getWorld().getWorldConfig().getUuid();
+        return gameModeStateForWorld.get(worldUUID);
+    }
 
 
     public static boolean saveInstanceConfigPermanently(World world) {
         String name = getWorldNameForInstance(world);
-		if (name == null) {
-			return false;
-		}
+        if (name == null) {
+            return false;
+        }
 
-		Path sourceFile = TroubleInTrorkTownPlugin.instance.getDataDirectory()
-						.resolve(name + "_config.json");
+        Path sourceFile = TroubleInTrorkTownPlugin.instance.getDataDirectory()
+                .resolve(name + "_config.json");
 
-		Path targetFile = TroubleInTrorkTownPlugin.instance.getDataDirectory()
-				.resolve("maps", name, "config.json");
+        Path targetFile = TroubleInTrorkTownPlugin.instance.getDataDirectory()
+                .resolve("maps", name, "config.json");
 
-		try {
-			Files.copy(
-					sourceFile,
-					targetFile,
-					StandardCopyOption.REPLACE_EXISTING
-			);
-		} catch (Exception e) {
-			LOGGER.atSevere().log("Error saving config: %s - Source: %s - Target: %s", e.getMessage(), sourceFile.toString(), targetFile.toString());
-			return false;
-		}
+        try {
+            Files.copy(
+                    sourceFile,
+                    targetFile,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+        } catch (Exception e) {
+            LOGGER.atSevere().log("Error saving config: %s - Source: %s - Target: %s", e.getMessage(), sourceFile.toString(), targetFile.toString());
+            return false;
+        }
 
-		return true;
+        return true;
     }
 
-	public static void saveInstanceConfig(@NonNullDecl CommandContext ctx, World world) {
-		WorldAccessors.getWorldInstanceConfigFile(world)
-				.ifPresentOrElse(config -> {
-					config.save();
-					boolean success = WorldAccessors.saveInstanceConfigPermanently(world);
-					if (success) {
-						ctx.sendMessage(Message.raw("Spawn position added at your current location."));
-					} else {
-						ctx.sendMessage(Message.raw("Could not save spawn position. Error making position permanent"));
-					}
+    public static void saveInstanceConfig(@NonNullDecl CommandContext ctx, World world) {
+        WorldAccessors.getWorldInstanceConfigFile(world)
+                .ifPresentOrElse(config -> {
+                    config.save();
+                    boolean success = WorldAccessors.saveInstanceConfigPermanently(world);
+                    if (success) {
+                        ctx.sendMessage(Message.raw("Spawn position added at your current location."));
+                    } else {
+                        ctx.sendMessage(Message.raw("Could not save spawn position. Error making position permanent"));
+                    }
 
-				}, () -> ctx.sendMessage(Message.raw("Could not save spawn position.")));
-	}
+                }, () -> ctx.sendMessage(Message.raw("Could not save spawn position.")));
+    }
 }

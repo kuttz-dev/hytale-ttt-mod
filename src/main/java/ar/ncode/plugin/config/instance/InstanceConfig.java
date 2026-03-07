@@ -12,26 +12,26 @@ import lombok.Setter;
 @Setter
 public class InstanceConfig {
 
-	public static final BuilderCodec<InstanceConfig> CODEC =
-			BuilderCodec.builder(InstanceConfig.class, InstanceConfig::new)
-					.append(new KeyedCodec<>("LootSpawnPoints", ArrayCodec.ofBuilderCodec(LootSpawnPoint.CODEC,
-									LootSpawnPoint[]::new)),
-							(c, value, extraInfo) -> c.lootSpawnPoints = value,
-							(c, extraInfo) -> c.lootSpawnPoints)
-					.add()
-					.append(new KeyedCodec<>("PlayerSpawnPoints", ArrayCodec.ofBuilderCodec(SpawnPoint.CODEC,
-									SpawnPoint[]::new)),
-							(c, value, extraInfo) -> c.playerSpawnPoints = value,
-							(c, extraInfo) -> c.playerSpawnPoints)
-					.add()
-					.append(new KeyedCodec<>("IsMapDestructibleByExplosions", Codec.BOOLEAN),
-							(c, value, extraInfo) -> c.isMapDestructibleByExplosions = value,
-							(c, extraInfo) -> c.isMapDestructibleByExplosions)
-					.add()
-					.build();
+    public static final BuilderCodec<InstanceConfig> CODEC =
+            BuilderCodec.builder(InstanceConfig.class, InstanceConfig::new)
+                    .append(new KeyedCodec<>("LootSpawnPoints", ArrayCodec.ofBuilderCodec(LootSpawnPoint.CODEC,
+                                    LootSpawnPoint[]::new)),
+                            (c, value, extraInfo) -> c.lootSpawnPoints = value,
+                            (c, extraInfo) -> c.lootSpawnPoints)
+                    .add()
+                    .append(new KeyedCodec<>("PlayerSpawnPoints", ArrayCodec.ofBuilderCodec(SpawnPoint.CODEC,
+                                    SpawnPoint[]::new)),
+                            (c, value, extraInfo) -> c.playerSpawnPoints = value,
+                            (c, extraInfo) -> c.playerSpawnPoints)
+                    .add()
+                    .append(new KeyedCodec<>("IsMapDestructibleByExplosions", Codec.BOOLEAN),
+                            (c, value, extraInfo) -> c.isMapDestructibleByExplosions = value,
+                            (c, extraInfo) -> c.isMapDestructibleByExplosions)
+                    .add()
+                    .build();
 
-	LootSpawnPoint[] lootSpawnPoints = new LootSpawnPoint[]{};
-	SpawnPoint[] playerSpawnPoints = new SpawnPoint[]{};
-	boolean isMapDestructibleByExplosions = true;
+    LootSpawnPoint[] lootSpawnPoints = new LootSpawnPoint[]{};
+    SpawnPoint[] playerSpawnPoints = new SpawnPoint[]{};
+    boolean isMapDestructibleByExplosions = true;
 
 }

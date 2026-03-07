@@ -7,13 +7,13 @@ import ar.ncode.plugin.ecs.component.DeadPlayerInfoComponent;
 import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.ecs.component.death.ConfirmedDeath;
 import ar.ncode.plugin.ecs.component.death.LostInCombat;
-import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.ecs.system.DeathSystem;
 import ar.ncode.plugin.ecs.system.event.FinishCurrentRoundEvent;
 import ar.ncode.plugin.ecs.system.player.PlayerDeathSystem;
 import ar.ncode.plugin.ecs.system.scheduled.DoubleTapDetector;
+import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.model.PlayerComponents;
+import ar.ncode.plugin.model.enums.RoundState;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.HytaleServer;
@@ -33,86 +33,86 @@ import static ar.ncode.plugin.model.enums.TranslationKey.THERE_ARE_NOT_ENOUGH_PL
 
 public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectEvent> {
 
-	private static void theGameMustContinueLogic(GameModeState gameModeState, PlayerRef playerRef, Store<EntityStore> store, Ref<EntityStore> reference, World world) {
-		int value = config.get().getKarmaForDisconnectingMiddleRound();
-		gameModeState.karmaUpdates.merge(playerRef.getUuid(), value, Integer::sum);
+    private static void theGameMustContinueLogic(GameModeState gameModeState, PlayerRef playerRef, Store<EntityStore> store, Ref<EntityStore> reference, World world) {
+        int value = config.get().getKarmaForDisconnectingMiddleRound();
+        gameModeState.karmaUpdates.merge(playerRef.getUuid(), value, Integer::sum);
 
-		DeadPlayerInfoComponent graveStone = new DeadPlayerInfoComponent();
+        DeadPlayerInfoComponent graveStone = new DeadPlayerInfoComponent();
 
-		PlayerGameModeInfo playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
-		if (playerInfo != null) {
-			PlayerDeathSystem.updatePlayerCountsOnPlayerDeath(playerRef, playerInfo.getCurrentRoundRole(), gameModeState);
-			graveStone.setDeadPlayerRole(playerInfo.getCurrentRoundRole());
-			graveStone.setTimeOfDeath(
-					gameModeState.getRemainingTime()
-						.format(timeFormatter)
-			);
-		}
+        PlayerGameModeInfo playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
+        if (playerInfo != null) {
+            PlayerDeathSystem.updatePlayerCountsOnPlayerDeath(playerRef, playerInfo.getCurrentRoundRole(), gameModeState);
+            graveStone.setDeadPlayerRole(playerInfo.getCurrentRoundRole());
+            graveStone.setTimeOfDeath(
+                    gameModeState.getRemainingTime()
+                            .format(timeFormatter)
+            );
+        }
 
-		graveStone.setDeadPlayerName(playerRef.getUsername());
-		DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, reference, reference.getStore());
-	}
+        graveStone.setDeadPlayerName(playerRef.getUsername());
+        DeathSystem.spawnRemainsAtPlayerDeath(world, graveStone, reference, reference.getStore());
+    }
 
-	private static void notEnoughPlayersLogic(Store<EntityStore> store, World world) {
-		Message message = Message.translation(THERE_ARE_NOT_ENOUGH_PLAYERS.get());
-		EventTitleUtil.showEventTitleToWorld(
-				message,
-				Message.raw(""),
-				true, "ui/icons/EntityStats/Sword_Icon.png",
-				4.0f, 1.5f, 1.5f,
-				store
-		);
+    private static void notEnoughPlayersLogic(Store<EntityStore> store, World world) {
+        Message message = Message.translation(THERE_ARE_NOT_ENOUGH_PLAYERS.get());
+        EventTitleUtil.showEventTitleToWorld(
+                message,
+                Message.raw(""),
+                true, "ui/icons/EntityStats/Sword_Icon.png",
+                4.0f, 1.5f, 1.5f,
+                store
+        );
 
-		HytaleServer.get().getEventBus()
-				.dispatchForAsync(FinishCurrentRoundEvent.class)
-				.dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
-	}
+        HytaleServer.get().getEventBus()
+                .dispatchForAsync(FinishCurrentRoundEvent.class)
+                .dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
+    }
 
-	@Override
-	public void accept(PlayerDisconnectEvent event) {
-		PlayerRef playerRef = event.getPlayerRef();
-		Ref<EntityStore> reference = playerRef.getReference();
-		if (reference == null || !reference.isValid()) {
-			return;
-		}
+    @Override
+    public void accept(PlayerDisconnectEvent event) {
+        PlayerRef playerRef = event.getPlayerRef();
+        Ref<EntityStore> reference = playerRef.getReference();
+        if (reference == null || !reference.isValid()) {
+            return;
+        }
 
-		// Remove component from DoubleTapDetector to prevent memory leak
-		DoubleTapDetector.getInstance().removePlayer(playerRef.getUuid());
+        // Remove component from DoubleTapDetector to prevent memory leak
+        DoubleTapDetector.getInstance().removePlayer(playerRef.getUuid());
 
-		Store<EntityStore> store = reference.getStore();
-		World world = store.getExternalData().getWorld();
+        Store<EntityStore> store = reference.getStore();
+        World world = store.getExternalData().getWorld();
 
-		if (world.getPlayerCount() == 0) {
-			TroubleInTrorkTownPlugin.currentInstance = null;
-			ChangeWorldCommand.cleanUpWorld(world.getWorldConfig().getUuid(), world.getWorldConfig().getDisplayName());
-		}
+        if (world.getPlayerCount() == 0) {
+            TroubleInTrorkTownPlugin.currentInstance = null;
+            ChangeWorldCommand.cleanUpOldWorld(world.getWorldConfig().getUuid());
+        }
 
-		GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+        GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
 
-		if (gameModeState == null) {
-			return;
-		}
+        if (gameModeState == null) {
+            return;
+        }
 
-		// Remove from spectator tracking
-		gameModeState.spectators.remove(playerRef.getUuid());
-		gameModeState.traitorsAlive.remove(playerRef.getUuid());
-		gameModeState.innocentsAlive.remove(playerRef.getUuid());
+        // Remove from spectator tracking
+        gameModeState.spectators.remove(playerRef.getUuid());
+        gameModeState.traitorsAlive.remove(playerRef.getUuid());
+        gameModeState.innocentsAlive.remove(playerRef.getUuid());
 
-		world.execute(() -> {
-			if (!reference.isValid()) return;
-			var playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
+        world.execute(() -> {
+            if (!reference.isValid()) return;
+            var playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
 
-			SpectatorMode.disableSpectatorModeForPlayer(new PlayerComponents(null, playerRef, playerInfo, reference), reference.getStore());
-			store.removeComponentIfExists(reference, LostInCombat.componentType);
-			store.removeComponentIfExists(reference, ConfirmedDeath.componentType);
+            SpectatorMode.disableSpectatorModeForPlayer(new PlayerComponents(null, playerRef, playerInfo, reference), reference.getStore());
+            store.removeComponentIfExists(reference, LostInCombat.componentType);
+            store.removeComponentIfExists(reference, ConfirmedDeath.componentType);
 
-			boolean thereAreEnoughPlayers = world.getPlayerCount() < config.get().getRequiredPlayersToStartRound();
-			if (RoundState.IN_GAME.equals(gameModeState.roundState) && thereAreEnoughPlayers) {
-				notEnoughPlayersLogic(store, world);
+            boolean thereAreEnoughPlayers = world.getPlayerCount() < config.get().getRequiredPlayersToStartRound();
+            if (RoundState.IN_GAME.equals(gameModeState.getRoundState()) && thereAreEnoughPlayers) {
+                notEnoughPlayersLogic(store, world);
 
-			} else if (RoundState.IN_GAME.equals(gameModeState.roundState)) {
-				theGameMustContinueLogic(gameModeState, playerRef, store, reference, world);
-			}
-		});
-	}
+            } else if (RoundState.IN_GAME.equals(gameModeState.getRoundState())) {
+                theGameMustContinueLogic(gameModeState, playerRef, store, reference, world);
+            }
+        });
+    }
 }

@@ -15,7 +15,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.worldPreviews;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.mapTemplateConfig;
 import static ar.ncode.plugin.model.CustomPermissions.TTT_MAP_VOTE;
 
 public class MapVoteCommand extends CommandBase {
@@ -51,7 +51,7 @@ public class MapVoteCommand extends CommandBase {
 
         player.getPageManager().openCustomPage(
                 reference, reference.getStore(),
-                new MapVotePage(playerRef, CustomPageLifetime.CanDismiss, worldPreviews, playerInfo)
+                new MapVotePage(playerRef, CustomPageLifetime.CanDismiss, mapTemplateConfig.values(), playerInfo)
         );
     }
 

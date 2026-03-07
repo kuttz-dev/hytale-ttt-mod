@@ -1,9 +1,8 @@
 package ar.ncode.plugin.ecs.system.event.handler;
 
 import ar.ncode.plugin.ecs.commands.ChangeWorldCommand;
-import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.ecs.system.event.FinishCurrentMapEvent;
+import ar.ncode.plugin.model.enums.RoundState;
 import ar.ncode.plugin.ui.pages.MapVotePage;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
@@ -13,130 +12,130 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.currentInstance;
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.TroubleInTrorkTownPlugin.worldPreviews;
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.*;
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
 import static ar.ncode.plugin.model.enums.TranslationKey.MAP_VOTE_NOTIFICATION;
 import static ar.ncode.plugin.model.enums.TranslationKey.MAP_VOTE_NOTIFICATION_NEXT_MAP;
 
 public class FinishCurrentMapEventHandler implements Consumer<FinishCurrentMapEvent> {
 
-	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
-	public static String getNextMap(GameModeState gameState) {
-		if (worldPreviews.isEmpty()) {
-			LOGGER.atSevere().log("There are no maps configured for the game mode - using default world");
-			return "default";
-		}
+    public static String getNextMap(Map<String, Integer> mapVotes) {
+        if (mapTemplateConfig.isEmpty()) {
+            LOGGER.atSevere().log("There are no maps configured for the game mode - using default world");
+            return "default";
+        }
 
-		String newWorldName;
-		if (gameState.mapVotes.isEmpty()) {
-			// Choose a random map
-			int randomIndex = (int) (Math.random() * worldPreviews.size());
-			newWorldName = worldPreviews.get(randomIndex).getWorldName();
+        var maps = new ArrayList<>(mapTemplateConfig.keySet());
+        String newWorldName;
+        if (mapVotes.isEmpty()) {
+            // Choose a random map
+            int randomIndex = ThreadLocalRandom.current().nextInt(maps.size());
+            newWorldName = maps.get(randomIndex);
 
-		} else {
-			// Choose the map with the most votes
-			newWorldName = gameState.mapVotes.entrySet().stream()
-					.max(Comparator.comparingInt(Map.Entry::getValue))
-					.get()
-					.getKey();
-		}
+        } else {
+            // Choose the map with the most votes
+            newWorldName = mapVotes.entrySet().stream()
+                    .max(Comparator.comparingInt(Map.Entry::getValue))
+                    .get()
+                    .getKey();
+        }
 
-		return newWorldName;
-	}
+        return newWorldName;
+    }
 
-	@Override
-	public void accept(FinishCurrentMapEvent finishCurrentMapEvent) {
-		World world = Universe.get().getWorld(finishCurrentMapEvent.getOldWorldUUID());
-		if (world == null) return;
+    @Override
+    public void accept(FinishCurrentMapEvent finishCurrentMapEvent) {
+        World world = Universe.get().getWorld(finishCurrentMapEvent.getOldWorldUUID());
+        if (world == null) return;
 
-		world.execute(() -> {
-			EventTitleUtil.showEventTitleToWorld(
-					Message.translation(MAP_VOTE_NOTIFICATION.get()),
-					Message.raw(""),
-					true, "ui/icons/EntityStats/Sword_Icon.png",
-					4.0f, 1.5f, 1.5f,
-					world.getEntityStore().getStore()
-			);
+        world.execute(() -> {
+            EventTitleUtil.showEventTitleToWorld(
+                    Message.translation(MAP_VOTE_NOTIFICATION.get()),
+                    Message.raw(""),
+                    true, "ui/icons/EntityStats/Sword_Icon.png",
+                    4.0f, 1.5f, 1.5f,
+                    world.getEntityStore().getStore()
+            );
 
-			gameModeStateForWorld.get(currentInstance).updateRoundState(RoundState.AFTER_GAME, true, false);
+            gameModeStateForWorld.get(currentInstance).updateRoundState(RoundState.AFTER_GAME, true, false);
 
-			var players = getPlayersAt(world, world.getEntityStore().getStore());
+            var players = getPlayersAt(world, world.getEntityStore().getStore());
 
-			for (var player : players) {
-				player.info().setCurrentRoundRole(null);
+            for (var player : players) {
+                player.info().setCurrentRoundRole(null);
 
-				if (player.info().getHud() != null) {
-					player.info().getHud().update();
-				}
+                if (player.info().getHud() != null) {
+                    player.info().getHud().update();
+                }
 
-				HytaleServer.SCHEDULED_EXECUTOR.schedule(() ->
-						world.execute(() ->
-								player.component().getPageManager().openCustomPage(
-										player.reference(),
-										player.reference().getStore(),
-										new MapVotePage(
-												player.refComponent(), CustomPageLifetime.CantClose,
-												worldPreviews, player.info()
-										)
-								)
-						), 2, TimeUnit.SECONDS
-				);
-			}
+                HytaleServer.SCHEDULED_EXECUTOR.schedule(() ->
+                        world.execute(() ->
+                                player.component().getPageManager().openCustomPage(
+                                        player.reference(),
+                                        player.reference().getStore(),
+                                        new MapVotePage(
+                                                player.refComponent(), CustomPageLifetime.CantClose,
+                                                mapTemplateConfig.values(), player.info()
+                                        )
+                                )
+                        ), 2, TimeUnit.SECONDS
+                );
+            }
 
-			HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
-						// Check if world is still alive before executing (prevents memory leak from stale references)
-						if (!world.isAlive()) return;
-						endVotesAndChangeWorld(world);
-					},
-					config.get().getTimeToVoteMapInSeconds(),
-					TimeUnit.SECONDS
-			);
-		});
-	}
+            HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
+                        // Check if world is still alive before executing (prevents memory leak from stale references)
+                        if (!world.isAlive()) return;
+                        endVotesAndChangeWorld(world);
+                    },
+                    config.get().getTimeToVoteMapInSeconds(),
+                    TimeUnit.SECONDS
+            );
+        });
+    }
 
-	private void endVotesAndChangeWorld(World currentWorld) {
-		UUID oldWorldId = currentWorld.getWorldConfig().getUuid();
-		var gameState = gameModeStateForWorld.get(oldWorldId);
-		gameState.updateRoundState(RoundState.AFTER_GAME, false, true);
+    private void endVotesAndChangeWorld(World currentWorld) {
+        UUID oldWorldId = currentWorld.getWorldConfig().getUuid();
+        var gameState = gameModeStateForWorld.get(oldWorldId);
+        gameState.updateRoundState(RoundState.AFTER_GAME, false, true);
 
-		String newWorldName = getNextMap(gameState);
+        String newWorldName = getNextMap(gameState.mapVotes);
 
-		// Remove old GameModeState to prevent memory leak when loading new instance
-		// Update round state to reset timer
-		gameModeStateForWorld.remove(oldWorldId);
+        // Remove old GameModeState to prevent memory leak when loading new instance
+        // Update round state to reset timer
+        gameModeStateForWorld.remove(oldWorldId);
 
-		EventTitleUtil.showEventTitleToWorld(
-				Message.translation(MAP_VOTE_NOTIFICATION_NEXT_MAP.get())
-						.param("map_name", newWorldName)
-						.param("time", String.valueOf(config.get().getTimeBeforeChangingMapInSeconds())),
-				Message.raw(""),
-				true, "ui/icons/EntityStats/Sword_Icon.png",
-				4.0f, 1.5f, 1.5f,
-				currentWorld.getEntityStore().getStore()
-		);
+        EventTitleUtil.showEventTitleToWorld(
+                Message.translation(MAP_VOTE_NOTIFICATION_NEXT_MAP.get())
+                        .param("map_name", newWorldName)
+                        .param("time", String.valueOf(config.get().getTimeBeforeChangingMapInSeconds())),
+                Message.raw(""),
+                true, "ui/icons/EntityStats/Sword_Icon.png",
+                4.0f, 1.5f, 1.5f,
+                currentWorld.getEntityStore().getStore()
+        );
 
-		executor.schedule(() -> {
-					// Check if world is still alive before executing (prevents memory leak from stale references)
-					if (!currentWorld.isAlive()) return;
-					ChangeWorldCommand.loadInstance(currentWorld, newWorldName);
-					gameModeStateForWorld.get(currentInstance).updateRoundState(RoundState.PREPARING, false, false);
-				},
-				config.get().getTimeBeforeChangingMapInSeconds(),
-				TimeUnit.SECONDS
-		);
-	}
+        executor.schedule(() -> {
+                    // Check if world is still alive before executing (prevents memory leak from stale references)
+                    if (!currentWorld.isAlive()) return;
+                    ChangeWorldCommand.loadInstance(currentWorld, newWorldName);
+                    gameModeStateForWorld.get(currentInstance).updateRoundState(RoundState.PREPARING, false, false);
+                },
+                config.get().getTimeBeforeChangingMapInSeconds(),
+                TimeUnit.SECONDS
+        );
+    }
 
 
 }

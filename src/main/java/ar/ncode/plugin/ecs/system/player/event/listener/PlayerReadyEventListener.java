@@ -3,10 +3,10 @@ package ar.ncode.plugin.ecs.system.player.event.listener;
 import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.ecs.commands.SpectatorMode;
 import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
+import ar.ncode.plugin.ecs.system.event.StartNewRoundEvent;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;
 import ar.ncode.plugin.model.enums.RoundState;
-import ar.ncode.plugin.ecs.system.event.StartNewRoundEvent;
 import ar.ncode.plugin.ui.hud.PlayerCurrentRoleHud;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.protocol.packets.interface_.HudComponent;
@@ -24,100 +24,100 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
-import static ar.ncode.plugin.model.CustomPermissions.TTT_USER_GROUP;
 import static ar.ncode.plugin.ecs.system.event.handler.StartNewRoundEventHandler.canStartNewRound;
 import static ar.ncode.plugin.ecs.system.player.PlayerRespawnSystem.teleportPlayerToRandomSpawnPoint;
+import static ar.ncode.plugin.model.CustomPermissions.TTT_USER_GROUP;
 
 public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 
-	private static PlayerCurrentRoleHud loadHudForPlayer(Player player, PlayerRef playerRef, PlayerGameModeInfo playerInfo) {
-		PlayerCurrentRoleHud hud = new PlayerCurrentRoleHud(playerRef, playerInfo);
-		HudManager hudManager = player.getHudManager();
-		hudManager.setCustomHud(playerRef, hud);
+    private static PlayerCurrentRoleHud loadHudForPlayer(Player player, PlayerRef playerRef, PlayerGameModeInfo playerInfo) {
+        PlayerCurrentRoleHud hud = new PlayerCurrentRoleHud(playerRef, playerInfo);
+        HudManager hudManager = player.getHudManager();
+        hudManager.setCustomHud(playerRef, hud);
 
-		// Hide specific components (varargs only, no Set overload)
-		hudManager.hideHudComponents(playerRef,
-				HudComponent.Compass,
-				HudComponent.ObjectivePanel,
-				HudComponent.PortalPanel,
-				HudComponent.BuilderToolsLegend,
-				HudComponent.KillFeed,
-				HudComponent.PlayerList
-		);
+        // Hide specific components (varargs only, no Set overload)
+        hudManager.hideHudComponents(playerRef,
+                HudComponent.Compass,
+                HudComponent.ObjectivePanel,
+                HudComponent.PortalPanel,
+                HudComponent.BuilderToolsLegend,
+                HudComponent.KillFeed,
+                HudComponent.PlayerList
+        );
 
-		return hud;
-	}
+        return hud;
+    }
 
-	private static boolean playerCanNotSpawn(GameModeState gameModeState) {
-		return RoundState.IN_GAME.equals(gameModeState.roundState) || RoundState.AFTER_GAME.equals(gameModeState.roundState);
-	}
+    private static boolean playerCanNotSpawn(GameModeState gameModeState) {
+        return RoundState.IN_GAME.equals(gameModeState.getRoundState()) || RoundState.AFTER_GAME.equals(gameModeState.getRoundState());
+    }
 
-	private static void configurePlayerPermissions(PlayerRef playerRef) {
-		PermissionsModule permissions = PermissionsModule.get();
-		permissions.addUserToGroup(playerRef.getUuid(), TTT_USER_GROUP);
-	}
+    private static void configurePlayerPermissions(PlayerRef playerRef) {
+        PermissionsModule permissions = PermissionsModule.get();
+        permissions.addUserToGroup(playerRef.getUuid(), TTT_USER_GROUP);
+    }
 
-	@Override
-	public void accept(PlayerReadyEvent event) {
-		Player playerComponent = event.getPlayer();
-		Ref<EntityStore> reference = event.getPlayerRef();
-		World world = playerComponent.getWorld();
-		if (world == null) {
-			return;
-		}
+    @Override
+    public void accept(PlayerReadyEvent event) {
+        Player playerComponent = event.getPlayer();
+        Ref<EntityStore> reference = event.getPlayerRef();
+        World world = playerComponent.getWorld();
+        if (world == null) {
+            return;
+        }
 
-		world.execute(() -> {
-			PlayerRef playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
-			if (playerRef == null) {
-				return;
-			}
+        world.execute(() -> {
+            PlayerRef playerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
+            if (playerRef == null) {
+                return;
+            }
 
-			configurePlayerPermissions(playerRef);
+            configurePlayerPermissions(playerRef);
 
-			PlayerGameModeInfo playerInfo = reference.getStore().ensureAndGetComponent(reference, PlayerGameModeInfo.componentType);
-			GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+            PlayerGameModeInfo playerInfo = reference.getStore().ensureAndGetComponent(reference, PlayerGameModeInfo.componentType);
+            GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
 
-			if (gameModeState == null) {
-				gameModeState = new GameModeState();
-				gameModeStateForWorld.put(world.getWorldConfig().getUuid(), gameModeState);
-			}
+            if (gameModeState == null) {
+                gameModeState = new GameModeState();
+                gameModeStateForWorld.put(world.getWorldConfig().getUuid(), gameModeState);
+            }
 
-			var player = new PlayerComponents(playerComponent, playerRef, playerInfo, reference);
-			player.info().setWorldInstance(world.getWorldConfig().getUuid());
+            var player = new PlayerComponents(playerComponent, playerRef, playerInfo, reference);
+            player.info().setWorldInstance(world.getWorldConfig().getUuid());
 
-			var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
-			if (instanceConfig != null) {
-				teleportPlayerToRandomSpawnPoint(reference, reference.getStore(), instanceConfig, world);
-			}
+            var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
+            if (instanceConfig != null) {
+                teleportPlayerToRandomSpawnPoint(reference, reference.getStore(), instanceConfig, world);
+            }
 
-			// TTT: Hide ALL players from compass and worldmap (always on)
-			WorldMapTracker worldMapTracker = playerComponent.getWorldMapTracker();
-			worldMapTracker.setPlayerMapFilter(otherPlayer -> true);  // true = hide player
+            // TTT: Hide ALL players from compass and worldmap (always on)
+            WorldMapTracker worldMapTracker = playerComponent.getWorldMapTracker();
+            worldMapTracker.setPlayerMapFilter(otherPlayer -> true);  // true = hide player
 
-			EffectControllerComponent effectController = reference.getStore().getComponent(reference, EffectControllerComponent.getComponentType());
+            EffectControllerComponent effectController = reference.getStore().getComponent(reference, EffectControllerComponent.getComponentType());
 
-			if (effectController == null) {
-				return;
-			}
+            if (effectController == null) {
+                return;
+            }
 
-			effectController.clearEffects(reference, reference.getStore());
-			playerComponent.getInventory().clear();
-			SpectatorMode.disableSpectatorModeForPlayer(player, reference.getStore());
+            effectController.clearEffects(reference, reference.getStore());
+            playerComponent.getInventory().clear();
+            SpectatorMode.disableSpectatorModeForPlayer(player, reference.getStore());
 
-			var hud = loadHudForPlayer(playerComponent, playerRef, playerInfo);
-			playerInfo.setHud(hud);
+            var hud = loadHudForPlayer(playerComponent, playerRef, playerInfo);
+            playerInfo.setHud(hud);
 
-			if (canStartNewRound(gameModeState, world)) {
-				HytaleServer.get().getEventBus()
-						.dispatchForAsync(StartNewRoundEvent.class)
-						.dispatch(new StartNewRoundEvent(world.getWorldConfig().getUuid()));
+            if (canStartNewRound(gameModeState, world)) {
+                HytaleServer.get().getEventBus()
+                        .dispatchForAsync(StartNewRoundEvent.class)
+                        .dispatch(new StartNewRoundEvent(world.getWorldConfig().getUuid()));
 
-			} else if (playerCanNotSpawn(gameModeState)) {
-				SpectatorMode.setGameModeToSpectator(player, reference.getStore());
-			}
+            } else if (playerCanNotSpawn(gameModeState)) {
+                SpectatorMode.setGameModeToSpectator(player, reference.getStore());
+            }
 
-			gameModeStateForWorld.put(world.getWorldConfig().getUuid(), gameModeState);
-		});
-	}
+            gameModeStateForWorld.put(world.getWorldConfig().getUuid(), gameModeState);
+        });
+    }
 
 }

@@ -1,13 +1,14 @@
 package ar.ncode.plugin.patches.advice;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
-import ar.ncode.plugin.accessors.WorldAccessors;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.server.core.entity.ExplosionConfig;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import net.bytebuddy.asm.Advice;
 
 import java.lang.reflect.Field;
+import java.util.UUID;
 
 public class ExplosionUtilsAdvice {
 
@@ -16,8 +17,9 @@ public class ExplosionUtilsAdvice {
             @Advice.Argument(2) ExplosionConfig config,
             @Advice.Argument(4) CommandBuffer<EntityStore> commandBuffer
     ) {
-        String worldName = WorldAccessors.getWorldNameForInstance(commandBuffer.getExternalData().getWorld());
-        var instanceConfig = TroubleInTrorkTownPlugin.instanceConfig.get(worldName);
+        World world = commandBuffer.getExternalData().getWorld();
+        UUID worldUUID = world.getWorldConfig().getUuid();
+        var instanceConfig = TroubleInTrorkTownPlugin.instanceConfigs.get(worldUUID);
         if (config == null || instanceConfig == null) {
             return;
         }
