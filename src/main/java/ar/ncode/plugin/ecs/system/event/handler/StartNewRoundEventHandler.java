@@ -7,6 +7,7 @@ import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.model.PlayerComponents;
 import ar.ncode.plugin.model.enums.RoundState;
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.Message;
@@ -36,7 +37,9 @@ import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_ABOUT_TO_START_MS
 
 public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+    private boolean isRoundStarting = false;
 
     public static boolean canStartNewRound(GameModeState gameModeState, World world) {
         return PREPARING.equals(gameModeState.getRoundState()) && world.getPlayerCount() >= config.get().getRequiredPlayersToStartRound();
@@ -102,6 +105,13 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 
     @Override
     public void accept(StartNewRoundEvent startNewRoundEvent) {
+        LOGGER.atInfo().log("Received StartNewRoundEvent for world %s", startNewRoundEvent.getWorldUUID());
+
+        if (isRoundStarting) {
+            LOGGER.atInfo().log("Round is already starting for world %s, ignoring event", startNewRoundEvent.getWorldUUID());
+            return;
+        }
+
         World world = Universe.get().getWorld(startNewRoundEvent.getWorldUUID());
         if (world == null) {
             return;
@@ -116,6 +126,7 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 
         if (!canStartNewRound(gameModeState, world)) return;
 
+        isRoundStarting = true;
         GameModeSystem.INSTANCE.doBeforeRound(world, gameModeState);
 
         world.execute(() -> {
@@ -136,6 +147,7 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
                         if (!world.isAlive()) return;
                         if (!canStartNewRound(gameModeState, world)) return;
                         GameModeSystem.INSTANCE.doAtRoundStart(world, gameModeState);
+                        isRoundStarting = false;
                     },
                     config.get().getTimeBeforeRoundInSeconds(),
                     TimeUnit.SECONDS

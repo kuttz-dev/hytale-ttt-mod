@@ -25,7 +25,6 @@ import java.util.function.Consumer;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.ecs.system.event.handler.StartNewRoundEventHandler.canStartNewRound;
-import static ar.ncode.plugin.ecs.system.player.PlayerRespawnSystem.teleportPlayerToRandomSpawnPoint;
 import static ar.ncode.plugin.model.CustomPermissions.TTT_USER_GROUP;
 
 public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
@@ -87,7 +86,7 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
 
             var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
             if (instanceConfig != null) {
-                teleportPlayerToRandomSpawnPoint(reference, reference.getStore(), instanceConfig, world);
+//                teleportPlayerToRandomSpawnPoint(reference, reference.getStore(), instanceConfig, world);
             }
 
             // TTT: Hide ALL players from compass and worldmap (always on)

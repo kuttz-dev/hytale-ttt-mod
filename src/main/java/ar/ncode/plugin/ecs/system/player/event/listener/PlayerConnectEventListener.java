@@ -16,7 +16,7 @@ public class PlayerConnectEventListener implements Consumer<PlayerConnectEvent> 
     private static void createNewWorldIfNoneExists(PlayerConnectEvent playerConnectEvent) {
         // No current instance exists, load a new map
         String nextMap = getNextMap(new HashMap<>());
-        World defaultWorld = Universe.get().getDefaultWorld();
+        World defaultWorld = Universe.get().getWorld("default");
         if (defaultWorld == null) {
             throw new RuntimeException("Default world is required");
         }

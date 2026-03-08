@@ -15,6 +15,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.modules.entity.component.Interactable;
@@ -41,6 +42,7 @@ import static ar.ncode.plugin.model.enums.TranslationKey.*;
 public class GameModeSystem {
 
     public static final GameModeSystem INSTANCE = new GameModeSystem();
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     private static void updatePlayersKdaAndKarma(GameModeState gameModeState, List<PlayerComponents> players) {
         var world = Universe.get().getWorld(TroubleInTrorkTownPlugin.currentInstance);
@@ -198,6 +200,7 @@ public class GameModeSystem {
     }
 
     public void doAfterRound(World world, GameModeState state) {
+        LOGGER.atInfo().log("Ending round in world %s - Executing after round logic", world.getWorldConfig().getDisplayName());
         world.execute(() -> {
             // Show result
             showRoundResult(state, world);
@@ -237,6 +240,7 @@ public class GameModeSystem {
 
     public void doBeforeRound(World world, GameModeState state) {
         world.execute(() -> {
+            LOGGER.atInfo().log("Starting new round in world %s - Executing before round logic", world.getWorldConfig().getDisplayName());
             LootSpawnCommand.LootForceSpawnCommand.spawnLootForWorld(world);
 
             UUID worldUUID = world.getWorldConfig().getUuid();
@@ -262,6 +266,7 @@ public class GameModeSystem {
 
     public void doAtRoundStart(World world, GameModeState state) {
         world.execute(() -> {
+            LOGGER.atInfo().log("Starting new round in world %s - Executing start round logic", world.getWorldConfig().getDisplayName());
             var players = getPlayersAt(world, world.getEntityStore().getStore());
             setPlayersRoles(state, players, world.getPlayerCount());
             updateEachPlayer(players);

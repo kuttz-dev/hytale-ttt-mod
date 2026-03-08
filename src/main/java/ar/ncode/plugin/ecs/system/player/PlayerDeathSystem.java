@@ -25,6 +25,7 @@ import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.asset.type.gameplay.DeathConfig;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
@@ -120,10 +121,26 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
         DeathSystem.spawnRemainsAtPlayerDeath(world, deadPlayerInfo, player.reference(), store);
     }
 
+    private static void removeDeathComponentAfterRespawn(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, Throwable exception, World world) {
+        if (exception != null) {
+            LOGGER.atSevere().log("Error respawning player after death: " + reference, exception);
+            return;
+        }
+
+        world.execute(() -> {
+            // Remove lost in combat status after respawn
+            commandBuffer.tryRemoveComponent(reference, DeathComponent.getComponentType());
+            LOGGER.atInfo().log("Player respawned and removed from DeathComponent: " + reference);
+        });
+    }
+
     @Nonnull
     @Override
     public Query<EntityStore> getQuery() {
-        return Query.and(PlayerRef.getComponentType(), Player.getComponentType());
+        return Query.and(PlayerRef.getComponentType(), Player.getComponentType(),
+                TransformComponent.getComponentType(),
+                Query.not(LostInCombat.componentType)
+        );
     }
 
     @Override
@@ -137,6 +154,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 
         World world = commandBuffer.getExternalData().getWorld();
 
+        LOGGER.atInfo().log("Player died! Ref: " + reference + " - World: " + world.getName() + " - DeathCause: " + deathComponent.getDeathCause());
         world.execute(() -> {
             // Get reference to the damaged entity
             var player = getPlayerFrom(reference, commandBuffer).orElse(null);
@@ -144,27 +162,43 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 
             GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
             if (gameModeState == null || !RoundState.IN_GAME.equals(gameModeState.getRoundState())) {
-                CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference));
+                LOGGER.atInfo().log("Player died but round is not in IN_GAME state - respawning without processing death: " + reference);
+                CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference))
+                        .whenCompleteAsync((_, exception) ->
+                                removeDeathComponentAfterRespawn(reference, commandBuffer, exception, world)
+                        );
                 return;
             }
 
-            commandBuffer.ensureComponent(player.reference(), LostInCombat.componentType);
+            LOGGER.atInfo().log("Processing player death for player: " + player.component().getDisplayName() + " - Ref: " + reference);
+            commandBuffer.addComponent(player.reference(), LostInCombat.componentType);
+            LOGGER.atInfo().log("Updating player counts for player: " + player.component().getDisplayName() + " - Ref: " + reference);
             updatePlayerCountsOnPlayerDeath(player.refComponent(), player.info().getCurrentRoundRole(), gameModeState);
+            LOGGER.atInfo().log("Clearing player inventory: " + player.component().getDisplayName() + " - Ref: " + reference);
             player.component().getInventory().clear();
+            LOGGER.atInfo().log("Updating player hud: " + player.component().getDisplayName() + " - Ref: " + reference);
             player.info().getHud().update();
-
+            LOGGER.atInfo().log("Updating player kda: " + player.component().getDisplayName() + " - Ref: " + reference);
             updateKdaAndKarma(deathComponent, player, gameModeState, commandBuffer);
 
             if (roundShouldEnd(gameModeState)) {
+                LOGGER.atInfo().log("Round should end after death of player: " + player.component().getDisplayName() + " - Ref: " + reference);
                 HytaleServer.get().getEventBus()
                         .dispatchForAsync(FinishCurrentRoundEvent.class)
                         .dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
+
             } else {
+                LOGGER.atInfo().log("Spawning remains and setting spectator mode for player: " + player.component().getDisplayName() + " - Ref: " + reference);
                 spawnDeadPlayerRemains(deathComponent, gameModeState, player, world, commandBuffer);
+                LOGGER.atInfo().log("Setting spectator mode for player: " + player.component().getDisplayName() + " - Ref: " + reference);
                 SpectatorMode.setGameModeToSpectator(player, commandBuffer);
             }
 
-            CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference));
+            LOGGER.atInfo().log("Scheduling respawn for player: " + player.component().getDisplayName() + " - Ref: " + reference);
+            CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference))
+                    .whenCompleteAsync((_, exception) ->
+                            removeDeathComponentAfterRespawn(reference, commandBuffer, exception, world)
+                    );
         });
     }
 

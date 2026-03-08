@@ -8,6 +8,7 @@ import ar.ncode.plugin.config.loot.IncludedLootItem;
 import ar.ncode.plugin.config.loot.LootItem;
 import ar.ncode.plugin.config.loot.LootSpawnPoint;
 import ar.ncode.plugin.config.loot.LootTable;
+import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -57,18 +58,22 @@ public class LootSpawnCommand extends AbstractCommandCollection {
         }
 
         private static void addLoot(World world, LootSpawnPoint lootSpawnPoint) {
+            LOGGER.atFine().log("Adding loot for loot spawn point at position: %s with probability: %d%%", lootSpawnPoint.getSpawnPoint().getPosition(), lootSpawnPoint.getProbability());
             for (String lootTableId : lootSpawnPoint.getLootTables()) {
                 LootTable lootTable = weaponsConfig.get().getLootTableById(lootTableId);
                 if (lootTable == null) {
                     continue;
                 }
 
+                LOGGER.atFine().log("Processing loot table with id: %s and max items: %d%%", lootTableId, lootTable.getMaxItems());
+
                 List<LootItem> items = Arrays.asList(lootTable.getItems());
                 Collections.shuffle(items);
 
                 int spawnedItems = 0;
-                for (LootItem item : lootTable.getItems()) {
+                for (LootItem item : items) {
                     if (lootTable.getMaxItems() != null && spawnedItems == lootTable.getMaxItems()) {
+                        LOGGER.atFine().log("Max items reached for loot table with id: %s. Stopping item spawns for this table.", lootTableId);
                         break;
                     }
 
@@ -76,6 +81,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
                         continue;
                     }
 
+                    LOGGER.atFine().log("Spawning item with id: %s and amount: %d for loot table with id: %s", item.getItemId(), item.getAmount(), lootTableId);
                     Vector3d position = lootSpawnPoint.getSpawnPoint().getPosition().clone();
                     position.x += ThreadLocalRandom.current().nextDouble(-2.0, 2.0);
                     position.z += ThreadLocalRandom.current().nextDouble(-2.0, 2.0);
@@ -90,6 +96,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
                     spawnedItems++;
 
                     for (IncludedLootItem included : item.getIncludes()) {
+                        LOGGER.atFine().log("Spawning included item with id: %s and amount: %d included in item with id: %s for loot table with id: %s", included.getItemId(), included.getAmount(), item.getItemId(), lootTableId);
                         spawnItemInWorld(world, emptyPosition, lootSpawnPoint.getSpawnPoint().getRotation(), included.getItemId(), included.getAmount());
                     }
                 }
@@ -128,7 +135,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
                 itemComponent.setPickupDelay(0.5F);
             }
 
-//            Ref<EntityStore> item = world.getEntityStore().getStore().addEntity(itemEntityHolder, AddReason.SPAWN);
+            Ref<EntityStore> item = world.getEntityStore().getStore().addEntity(itemEntityHolder, AddReason.SPAWN);
         }
 
         public static boolean chance(int probability) {
@@ -141,20 +148,18 @@ public class LootSpawnCommand extends AbstractCommandCollection {
         }
 
         public static void spawnLootForWorld(World world) {
-            world.execute(() -> {
-                if (world.getWorldConfig().getDisplayName() == null) return;
-                UUID worldUUID = world.getWorldConfig().getUuid();
-                InstanceConfig instanceConfig =
-                        TroubleInTrorkTownPlugin.instanceConfigs.get(worldUUID).get();
+            if (world.getWorldConfig().getDisplayName() == null) return;
+            UUID worldUUID = world.getWorldConfig().getUuid();
+            InstanceConfig instanceConfig =
+                    TroubleInTrorkTownPlugin.instanceConfigs.get(worldUUID).get();
 
-                for (LootSpawnPoint lootSpawnPoint : instanceConfig.getLootSpawnPoints()) {
-                    if (!chance(lootSpawnPoint.getProbability())) {
-                        continue;
-                    }
-
-                    addLoot(world, lootSpawnPoint);
+            for (LootSpawnPoint lootSpawnPoint : instanceConfig.getLootSpawnPoints()) {
+                if (!chance(lootSpawnPoint.getProbability())) {
+                    continue;
                 }
-            });
+
+                addLoot(world, lootSpawnPoint);
+            }
         }
 
         protected void executeSync(@NonNullDecl CommandContext ctx) {
@@ -166,7 +171,7 @@ public class LootSpawnCommand extends AbstractCommandCollection {
             }
 
             var world = reference.getStore().getExternalData().getWorld();
-            spawnLootForWorld(world);
+            world.execute(() -> spawnLootForWorld(world));
         }
 
         @NonNullDecl

@@ -46,6 +46,7 @@ import ar.ncode.plugin.exception.ConfigError;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.packet.filter.PacketsFilter;
 import ar.ncode.plugin.patches.CancelExplosionInteraction;
+import ar.ncode.plugin.patches.server.core.universe.world.spawn.CustomSpawnProvider;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.event.EventRegistration;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -66,6 +67,7 @@ import com.hypixel.hytale.server.core.plugin.PluginBase;
 import com.hypixel.hytale.server.core.plugin.PluginState;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.events.RemoveWorldEvent;
+import com.hypixel.hytale.server.core.universe.world.spawn.ISpawnProvider;
 import com.hypixel.hytale.server.core.util.BsonUtil;
 import com.hypixel.hytale.server.core.util.Config;
 import com.hypixel.hytale.server.npc.NPCPlugin;
@@ -208,6 +210,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
         LostInCombat.componentType = getEntityStoreRegistry().registerComponent(
                 LostInCombat.class, "LostInCombat", LostInCombat.CODEC
         );
+        ISpawnProvider.CODEC.register("CustomSpawnPoints", CustomSpawnProvider.class, CustomSpawnProvider.CODEC);
 
         events.add(getEventRegistry().registerGlobal(PlayerReadyEvent.class, new PlayerReadyEventListener()));
         events.add(getEventRegistry().registerGlobal(PlayerConnectEvent.class, new PlayerConnectEventListener()));

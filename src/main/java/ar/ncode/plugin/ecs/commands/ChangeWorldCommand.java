@@ -1,9 +1,11 @@
 package ar.ncode.plugin.ecs.commands;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.config.instance.InstanceConfig;
 import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.ecs.system.scheduled.DoubleTapDetector;
 import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.patches.server.core.universe.world.spawn.CustomSpawnProvider;
 import com.hypixel.hytale.builtin.instances.InstancesPlugin;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -18,7 +20,9 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.spawn.FitToHeightMapSpawnProvider;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.util.Config;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.UUID;
@@ -124,11 +128,19 @@ public class ChangeWorldCommand extends CommandBase {
                     .get();
 
             TroubleInTrorkTownPlugin.currentInstance = newWorld.getWorldConfig().getUuid();
+            Config<InstanceConfig> instanceConfig = TroubleInTrorkTownPlugin.mapTemplateConfig.get(mapTemplateName).getInstanceConfig();
             TroubleInTrorkTownPlugin.instanceConfigs.put(
                     TroubleInTrorkTownPlugin.currentInstance,
-                    TroubleInTrorkTownPlugin.mapTemplateConfig.get(mapTemplateName).getInstanceConfig()
+                    instanceConfig
             );
             TroubleInTrorkTownPlugin.gameModeStateForWorld.put(newWorld.getWorldConfig().getUuid(), new GameModeState());
+
+            if (instanceConfig != null) {
+                newWorld.getWorldConfig()
+                        .setSpawnProvider(new FitToHeightMapSpawnProvider(new CustomSpawnProvider(instanceConfig.get())));
+            } else {
+                LOGGER.atSevere().log("No instance config found for template: " + mapTemplateName);
+            }
 
             return newWorld;
 
