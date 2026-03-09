@@ -23,6 +23,7 @@ making it easy for the community to build on top of it.
 - Minimum players: configurable in the server configuration (e.g. `config.json`). Default: 3 players.
 - Maps: at least one map template must be configured under `mods/ncode_ttt/maps` (the map system requires a configured
   map to run).
+- For maps you can use anything you want, but here you have some already configured: [hytale-ttt-maps](https://github.com/kuttz-dev/hytale-ttt-maps)
 
 ---
 
