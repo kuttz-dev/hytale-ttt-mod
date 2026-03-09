@@ -50,20 +50,6 @@ public class PlayerRespawnSystem extends RespawnSystems.OnRespawnSystem {
 
     @Override
     public void onComponentRemoved(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl DeathComponent deathComponent, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer) {
-//        Player player = store.getComponent(reference, Player.getComponentType());
-//
-//        if (player == null) {
-//            return;
-//        }
-//
-//        World world = player.getWorld();
-//        if (world == null || world.getWorldConfig().getDisplayName() == null) {
-//            return;
-//        }
-//
-//        var config = WorldAccessors.getWorldInstanceConfigFile(world);
-//        if (config.isEmpty()) {
-//            return;
-//        }
+
     }
 }

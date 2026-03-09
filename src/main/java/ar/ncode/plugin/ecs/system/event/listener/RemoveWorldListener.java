@@ -8,11 +8,8 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.events.RemoveWorldEvent;
 
-import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-
-import static ar.ncode.plugin.ecs.system.event.handler.FinishCurrentMapEventHandler.getNextMap;
 
 public class RemoveWorldListener implements Consumer<RemoveWorldEvent> {
 
@@ -24,6 +21,7 @@ public class RemoveWorldListener implements Consumer<RemoveWorldEvent> {
             World world = event.getWorld();
             String instanceName = world.getName();
             RemoveWorldEvent.RemovalReason reason = event.getRemovalReason();
+            String defaultWorldName = HytaleServer.get().getConfig().getDefaults().getWorld();
 
             if (!reason.equals(RemoveWorldEvent.RemovalReason.EXCEPTIONAL)) {
                 return;
@@ -34,19 +32,16 @@ public class RemoveWorldListener implements Consumer<RemoveWorldEvent> {
             HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
                 LOGGER.atInfo().log("World " + instanceName + " reloading!!!!");
 
-                if ("default".equals(instanceName)) {
-                    Universe.get().loadWorld("default")
+                if (defaultWorldName.equals(instanceName)) {
+                    Universe.get().loadWorld(defaultWorldName)
                             .thenAccept((newWorld) -> {
-                                String mapName = getNextMap(new HashMap<>());
-                                ChangeWorldCommand.loadNewWorld(newWorld, mapName);
-                                LOGGER.atInfo().log("World " + mapName + " has been loaded!");
-
+                                LOGGER.atInfo().log("Default World has been loaded!");
                             });
 
                 } else {
                     String mapName = WorldAccessors.getWorldNameForInstance(world);
 
-                    World defaultWorld = Universe.get().getWorld("default");
+                    World defaultWorld = Universe.get().getWorld(defaultWorldName);
                     if (defaultWorld == null) {
                         LOGGER.atSevere().log("Default world not found - cannot load new world instance!");
                         return;
@@ -56,7 +51,6 @@ public class RemoveWorldListener implements Consumer<RemoveWorldEvent> {
                     ChangeWorldCommand.cleanUpOldWorld(world.getWorldConfig().getUuid());
                     LOGGER.atInfo().log("World " + instanceName + " has been loaded!");
                 }
-
             }, 5L, TimeUnit.SECONDS);
 
         } catch (Exception e) {
