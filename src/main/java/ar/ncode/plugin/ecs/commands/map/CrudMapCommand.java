@@ -124,6 +124,7 @@ public class CrudMapCommand {
                     String replaced = text.replace("WORLD_NAME", name);
                     Files.write(instanceFile, replaced.getBytes());
                 } catch (IOException e) {
+                    LOGGER.atSevere().withCause(e).log("Error updating instance.bson file");
                     ctx.sendMessage(Message.raw("Created map folder but failed to update instance.bson: " + e.getMessage()));
                     // proceed without failing to keep behavior similar to previous implementation
                 }

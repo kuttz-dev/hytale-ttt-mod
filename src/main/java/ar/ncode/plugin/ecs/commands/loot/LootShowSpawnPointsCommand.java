@@ -20,70 +20,70 @@ import static ar.ncode.plugin.ecs.system.DeathSystem.setBlockWithRotation;
 
 public class LootShowSpawnPointsCommand extends AbstractAsyncCommand {
 
-	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-	public LootShowSpawnPointsCommand() {
-		super("show", "Show all spawn points in the world with statues.");
-	}
+    public LootShowSpawnPointsCommand() {
+        super("show", "Show all spawn points in the world with statues.");
+    }
 
-	public static boolean addBlockToWorldOnSpawnPoint(@NonNullDecl CommandContext commandContext, SpawnPoint spawnPoint,
-	                                                  World world, String blockId) {
-		long chunkIndex = ChunkUtil.indexChunkFromBlock(spawnPoint.getPosition().x, spawnPoint.getPosition().z);
-		WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
+    public static boolean addBlockToWorldOnSpawnPoint(@NonNullDecl CommandContext commandContext, SpawnPoint spawnPoint,
+                                                      World world, String blockId) {
+        long chunkIndex = ChunkUtil.indexChunkFromBlock(spawnPoint.getPosition().x, spawnPoint.getPosition().z);
+        WorldChunk chunk = world.getChunkIfInMemory(chunkIndex);
 
-		Vector3i position = spawnPoint.getPosition().toVector3i();
-		var rotationIndex = world.getBlockRotationIndex(
-				(int) spawnPoint.getRotation().x,
-				(int) spawnPoint.getRotation().y,
-				(int) spawnPoint.getRotation().z
-		);
+        Vector3i position = spawnPoint.getPosition().toVector3i();
+        var rotationIndex = world.getBlockRotationIndex(
+                (int) spawnPoint.getRotation().x,
+                (int) spawnPoint.getRotation().y,
+                (int) spawnPoint.getRotation().z
+        );
 
-		if (chunk == null) {
-			try {
+        if (chunk == null) {
+            try {
 
-				return world.getChunkAsync(chunkIndex).thenApply(worldChunk -> {
-					if (worldChunk == null) {
-						return false;
-					}
+                return world.getChunkAsync(chunkIndex).thenApply(worldChunk -> {
+                    if (worldChunk == null) {
+                        return false;
+                    }
 
 
-					return setBlockWithRotation(worldChunk, position.x, position.y, position.z, blockId, rotationIndex);
-				}).get();
-			} catch (Exception e) {
-				LOGGER.atSevere().log("Could not load chunk for spawn point at position: {}, exception: {}", position, e);
-				return false;
-			}
-		}
+                    return setBlockWithRotation(worldChunk, position.x, position.y, position.z, blockId, rotationIndex);
+                }).get();
+            } catch (Exception e) {
+                LOGGER.atSevere().withCause(e).log("Could not load chunk for spawn point at position: {}, exception: {}", position, e);
+                return false;
+            }
+        }
 
-		return setBlockWithRotation(chunk, position.x, position.y, position.z, blockId, rotationIndex);
-	}
+        return setBlockWithRotation(chunk, position.x, position.y, position.z, blockId, rotationIndex);
+    }
 
-	@NonNullDecl
-	@Override
-	protected CompletableFuture<Void> executeAsync(@NonNullDecl CommandContext commandContext) {
-		return CompletableFuture.runAsync(() -> {
-			World world = getWorldFromCommandContext(commandContext);
-			if (world == null) return;
+    @NonNullDecl
+    @Override
+    protected CompletableFuture<Void> executeAsync(@NonNullDecl CommandContext commandContext) {
+        return CompletableFuture.runAsync(() -> {
+            World world = getWorldFromCommandContext(commandContext);
+            if (world == null) return;
 
-			world.execute(() -> {
+            world.execute(() -> {
 
-				var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
+                var instanceConfig = WorldAccessors.getWorldInstanceConfig(world);
 
-				for (LootSpawnPoint lootSpawnPoint : instanceConfig.getLootSpawnPoints()) {
-					SpawnPoint spawnPoint = lootSpawnPoint.getSpawnPoint();
-					boolean result = addBlockToWorldOnSpawnPoint(commandContext, spawnPoint, world,
-							"Furniture_Human_Ruins_Brazier");
+                for (LootSpawnPoint lootSpawnPoint : instanceConfig.getLootSpawnPoints()) {
+                    SpawnPoint spawnPoint = lootSpawnPoint.getSpawnPoint();
+                    boolean result = addBlockToWorldOnSpawnPoint(commandContext, spawnPoint, world,
+                            "Furniture_Human_Ruins_Brazier");
 
-					if (!result) {
-						commandContext.sendMessage(Message.raw("Could not set flower at spawn point: " + spawnPoint.getPosition().toVector3i()));
-					}
-				}
+                    if (!result) {
+                        commandContext.sendMessage(Message.raw("Could not set flower at spawn point: " + spawnPoint.getPosition().toVector3i()));
+                    }
+                }
 
-				commandContext.sendMessage(Message.raw("All spawn points have been shown with statues."));
+                commandContext.sendMessage(Message.raw("All spawn points have been shown with statues."));
 
-			});
+            });
 
-		});
+        });
 
-	}
+    }
 }

@@ -148,7 +148,7 @@ public class WorldAccessors {
                     StandardCopyOption.REPLACE_EXISTING
             );
         } catch (Exception e) {
-            LOGGER.atSevere().log("Error saving config: %s - Source: %s - Target: %s", e.getMessage(), sourceFile.toString(), targetFile.toString());
+            LOGGER.atSevere().withCause(e).log("Error saving config: %s - Source: %s - Target: %s", e.getMessage(), sourceFile.toString(), targetFile.toString());
             return false;
         }
 

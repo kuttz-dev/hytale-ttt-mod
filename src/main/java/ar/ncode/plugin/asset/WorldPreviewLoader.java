@@ -60,7 +60,7 @@ public class WorldPreviewLoader {
                     copyDirectories(world.resolve("chunks"), instanceOutput.resolve("chunks"));
 
                 } catch (Exception e) {
-                    LOGGER.atSevere().log("Failed to copy world template for world %s - %s", worldName, e);
+                    LOGGER.atSevere().withCause(e).log("Failed to copy world template for world %s - %s", worldName, e);
                     continue;
                 }
 
@@ -80,7 +80,7 @@ public class WorldPreviewLoader {
             AssetModule.get().registerPack("worlds_assets", assetsRoot, manifest, false);
 
         } catch (Exception e) {
-            LOGGER.atSevere().log("Failed to load worlds assets - %s", e);
+            LOGGER.atSevere().withCause(e).log("Failed to load worlds assets - %s", e);
         }
 
         if (maps == 0) {

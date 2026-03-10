@@ -54,7 +54,7 @@ public class RemoveWorldListener implements Consumer<RemoveWorldEvent> {
             }, 5L, TimeUnit.SECONDS);
 
         } catch (Exception e) {
-            LOGGER.atWarning().log("Error handling world remove event.", e.getMessage());
+            LOGGER.atWarning().withCause(e).log("Error handling world remove event.", e.getMessage());
         }
     }
 }

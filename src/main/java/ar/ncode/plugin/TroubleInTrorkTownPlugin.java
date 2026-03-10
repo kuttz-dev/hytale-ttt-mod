@@ -179,7 +179,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
             }
 
         } catch (Exception e) {
-            LOGGER.atSevere().log("Failed to load instance configs - %s", e.getMessage());
+            LOGGER.atSevere().withCause(e).log("Failed to load instance configs - %s", e.getMessage());
         }
 
         CompletableFuture<?>[] promisesArray = maps.toArray(new CompletableFuture[0]);
@@ -249,7 +249,7 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
                 DoubleTapDetector.getInstance().tick();
 
             } catch (Exception e) {
-                LOGGER.atWarning().log("Error in double-tap detector: " + e.getMessage());
+                LOGGER.atWarning().withCause(e).log("Error in double-tap detector: " + e.getMessage());
             }
 
         }, 100L, 50L, TimeUnit.MILLISECONDS);

@@ -1,8 +1,8 @@
 package ar.ncode.plugin.ecs.system;
 
-import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.config.DebugConfig;
 import ar.ncode.plugin.config.WeaponTypeConfig;
+import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import com.hypixel.hytale.component.ArchetypeChunk;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
@@ -61,7 +61,7 @@ public class ItemPickUpSystem extends EntityTickingSystem<EntityStore> {
             }
 
         } catch (Exception e) {
-            LOGGER.atSevere().log("Error on item pickup handler", e);
+            LOGGER.atSevere().withCause(e).log("Error on item pickup handler", e);
         }
         return false;
     }
@@ -181,7 +181,7 @@ public class ItemPickUpSystem extends EntityTickingSystem<EntityStore> {
             }
 
         } catch (Exception e) {
-            LOGGER.atSevere().log("Error on item pickup handler", e);
+            LOGGER.atSevere().withCause(e).log("Error on item pickup handler", e);
 
         }
     }

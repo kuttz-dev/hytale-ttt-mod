@@ -14,36 +14,34 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
-import java.util.logging.Level;
-
 public class InteractiveItemPickUpListener extends EntityEventSystem<EntityStore, InteractivelyPickupItemEvent> {
 
-	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-	public InteractiveItemPickUpListener() {
-		super(InteractivelyPickupItemEvent.class);
-	}
+    public InteractiveItemPickUpListener() {
+        super(InteractivelyPickupItemEvent.class);
+    }
 
-	@Override
-	public void handle(int i, @NonNullDecl ArchetypeChunk<EntityStore> archetypeChunk, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer,
-	                   @NonNullDecl InteractivelyPickupItemEvent event) {
-		if (DebugConfig.INSTANCE.isCanPlaceAndDestroyBlocks()) {
-			return;
-		}
+    @Override
+    public void handle(int i, @NonNullDecl ArchetypeChunk<EntityStore> archetypeChunk, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer,
+                       @NonNullDecl InteractivelyPickupItemEvent event) {
+        if (DebugConfig.INSTANCE.isCanPlaceAndDestroyBlocks()) {
+            return;
+        }
 
-		// By default, block players from breaking blocks
-		event.setCancelled(true);
+        // By default, block players from breaking blocks
+        event.setCancelled(true);
 
-		try {
-			event.setItemStack(ItemStack.EMPTY);
-		} catch (Exception e) {
-			LOGGER.at(Level.WARNING).log("Could not set empty item stack: %s", e.getMessage());
-		}
-	}
+        try {
+            event.setItemStack(ItemStack.EMPTY);
+        } catch (Exception e) {
+            LOGGER.atWarning().withCause(e).log("Could not set empty item stack: %s", e.getMessage());
+        }
+    }
 
-	@NullableDecl
-	@Override
-	public Query<EntityStore> getQuery() {
-		return Archetype.empty();
-	}
+    @NullableDecl
+    @Override
+    public Query<EntityStore> getQuery() {
+        return Archetype.empty();
+    }
 }
