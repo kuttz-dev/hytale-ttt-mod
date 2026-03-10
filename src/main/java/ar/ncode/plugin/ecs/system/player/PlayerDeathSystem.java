@@ -155,33 +155,33 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 
         GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
         if (gameModeState == null || !RoundState.IN_GAME.equals(gameModeState.getRoundState())) {
-            LOGGER.atInfo().log("Player died but round is not in IN_GAME state - respawning without processing death: " + reference);
+            LOGGER.atFine().log("Player died but round is not in IN_GAME state - respawning without processing death: " + reference);
             forceRespawnForPlayer(reference, commandBuffer, world, player);
             return;
         }
 
-        LOGGER.atInfo().log("Processing player death for player: " + player.component().getDisplayName() + " - Ref: " + reference);
+        LOGGER.atFine().log("Processing player death for player: " + player.component().getDisplayName() + " - Ref: " + reference);
         world.execute(() -> {
-            LOGGER.atInfo().log("Ensuring LostInCombat component for player: %s - Ref: ", player.component().getDisplayName(), reference);
+            LOGGER.atFine().log("Ensuring LostInCombat component for player: %s - Ref: ", player.component().getDisplayName(), reference);
             commandBuffer.ensureComponent(player.reference(), LostInCombat.componentType);
         });
-        LOGGER.atInfo().log("Updating player counts for player: " + player.component().getDisplayName() + " - Ref: " + reference);
+        LOGGER.atFine().log("Updating player counts for player: " + player.component().getDisplayName() + " - Ref: " + reference);
         updatePlayerCountsOnPlayerDeath(player.refComponent(), player.info().getCurrentRoundRole(), gameModeState);
-        LOGGER.atInfo().log("Clearing player inventory: " + player.component().getDisplayName() + " - Ref: " + reference);
+        LOGGER.atFine().log("Clearing player inventory: " + player.component().getDisplayName() + " - Ref: " + reference);
         player.component().getInventory().clear();
-        LOGGER.atInfo().log("Updating player hud: " + player.component().getDisplayName() + " - Ref: " + reference);
+        LOGGER.atFine().log("Updating player hud: " + player.component().getDisplayName() + " - Ref: " + reference);
         player.info().getHud().update();
-        LOGGER.atInfo().log("Updating player kda: " + player.component().getDisplayName() + " - Ref: " + reference);
+        LOGGER.atFine().log("Updating player kda: " + player.component().getDisplayName() + " - Ref: " + reference);
         updateKdaAndKarma(deathComponent, player, gameModeState, commandBuffer);
 
         if (roundShouldEnd(gameModeState)) {
-            LOGGER.atInfo().log("Round should end after death of player: " + player.component().getDisplayName() + " - Ref: " + reference);
+            LOGGER.atFine().log("Round should end after death of player: " + player.component().getDisplayName() + " - Ref: " + reference);
             HytaleServer.get().getEventBus()
                     .dispatchForAsync(FinishCurrentRoundEvent.class)
                     .dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
 
         } else {
-            LOGGER.atInfo().log("Spawning remains and setting spectator mode for player: " + player.component().getDisplayName() + " - Ref: " + reference);
+            LOGGER.atFine().log("Spawning remains and setting spectator mode for player: " + player.component().getDisplayName() + " - Ref: " + reference);
             spawnDeadPlayerRemains(deathComponent, gameModeState, player, world, commandBuffer);
             LOGGER.atInfo().log("Setting spectator mode for player: " + player.component().getDisplayName() + " - Ref: " + reference);
             SpectatorMode.setGameModeToSpectator(player, commandBuffer);
