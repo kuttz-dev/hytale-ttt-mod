@@ -84,7 +84,7 @@ public class ChangeWorldCommand extends CommandBase {
 
     public static void loadNewWorld(World currentWorld, String mapTemplateName) {
         World targetWorld = createNewInstance(currentWorld, mapTemplateName);
-        targetWorld.execute(() -> {
+        currentWorld.execute(() -> {
             teleportPlayersToNewWorld(currentWorld, targetWorld);
         });
     }

@@ -23,91 +23,97 @@ import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 public class GravePlatePage extends InteractiveCustomUIPage<GravePlatePage.InteractionEvent> {
 
-	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-	private final DeadPlayerInfoComponent deadPLayerInfoComponent;
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private final DeadPlayerInfoComponent deadPLayerInfoComponent;
 
-	public GravePlatePage(@NonNullDecl PlayerRef playerRef, @NonNullDecl CustomPageLifetime lifetime,
-	                      DeadPlayerInfoComponent deadPLayerInfoComponent) {
-		super(playerRef, lifetime, InteractionEvent.CODEC);
-		this.deadPLayerInfoComponent = deadPLayerInfoComponent;
-	}
+    public GravePlatePage(@NonNullDecl PlayerRef playerRef, @NonNullDecl CustomPageLifetime lifetime,
+                          DeadPlayerInfoComponent deadPLayerInfoComponent) {
+        super(playerRef, lifetime, InteractionEvent.CODEC);
+        this.deadPLayerInfoComponent = deadPLayerInfoComponent;
+    }
 
 
-	@Override
-	public void build(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl UICommandBuilder builder,
-	                  @NonNullDecl UIEventBuilder eventBuilder, @NonNullDecl Store<EntityStore> store
-	) {
-		builder.append("Pages/Grave/grave-plate.ui");
-		builder.set("#TitleText.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_TITLE.get()));
-		builder.set("#ReportDeath.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_REPORT_DEATH.get()));
-		builder.set("#CloseBtn.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_CLOSE.get()));
+    @Override
+    public void build(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl UICommandBuilder builder,
+                      @NonNullDecl UIEventBuilder eventBuilder, @NonNullDecl Store<EntityStore> store
+    ) {
+        builder.append("Pages/Grave/grave-plate.ui");
+        builder.set("#TitleText.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_TITLE.get()));
+        builder.set("#ReportDeath.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_REPORT_DEATH.get()));
+        builder.set("#CloseBtn.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_CLOSE.get()));
 
-		eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ReportDeath", EventData.of("Action",
-				"reportDeath"));
-		eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#CloseBtn", EventData.of("Action", "close"));
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ReportDeath", EventData.of("Action",
+                "reportDeath"));
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#CloseBtn", EventData.of("Action", "close"));
 
-		if (deadPLayerInfoComponent == null) {
-			return;
-		}
+        if (deadPLayerInfoComponent == null) {
+            return;
+        }
 
-		builder.set("#Player.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_PLAYER.get()));
-		builder.set("#PlayerValue.Text", deadPLayerInfoComponent.getDeadPlayerName());
+        builder.set("#Player.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_PLAYER.get()));
+        builder.set("#PlayerValue.Text", deadPLayerInfoComponent.getDeadPlayerName());
 
-		if (deadPLayerInfoComponent.getDeadPlayerRole() != null) {
-			builder.set("#Role.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_ROLE.get()));
-			builder.set("#RoleValue.Text", Message.translation(deadPLayerInfoComponent.getDeadPlayerRole().getTranslationKey()));
-		}
+        if (deadPLayerInfoComponent.getDeadPlayerRole() != null) {
+            builder.set("#Role.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_ROLE.get()));
+            builder.set("#RoleValue.Text", Message.translation(deadPLayerInfoComponent.getDeadPlayerRole().getTranslationKey()));
+        }
 
-		if (deadPLayerInfoComponent.getTimeOfDeath() != null) {
-			builder.set("#DeathTime.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_DEATH_TIME.get()));
-			builder.set("#DeathTimeValue.Text", deadPLayerInfoComponent.getTimeOfDeath());
-		}
+        if (deadPLayerInfoComponent.getTimeOfDeath() != null) {
+            builder.set("#DeathTime.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_DEATH_TIME.get()));
+            builder.set("#DeathTimeValue.Text", deadPLayerInfoComponent.getTimeOfDeath());
+        }
 
-		if (deadPLayerInfoComponent.getCauseOfDeath() != null) {
-			builder.set("#DeathCause.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_DEATH_CAUSE.get()));
-			String translationKey = deadPLayerInfoComponent.getCauseOfDeath().getTranslationKey();
-			builder.set("#DeathCauseValue.Text", Message.translation(translationKey));
-		}
+        if (deadPLayerInfoComponent.getCauseOfDeath() != null) {
+            builder.set("#DeathCause.Text", Message.translation(TranslationKey.GRAVESTONE_PLATE_DEATH_CAUSE.get()));
+            String translationKey = deadPLayerInfoComponent.getCauseOfDeath().getTranslationKey();
+            builder.set("#DeathCauseValue.Text", Message.translation(translationKey));
+        }
 
-		var playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
-		if (playerInfo != null && playerInfo.isSpectator()) {
-			builder.set("#ReportDeath.Visible", false);
-		}
-	}
+        var playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
+        if (playerInfo != null && playerInfo.isSpectator()) {
+            builder.set("#ReportDeath.Visible", false);
+        }
+    }
 
-	@Override
-	public void handleDataEvent(
-			Ref<EntityStore> reference, Store<EntityStore> store, GravePlatePage.InteractionEvent event
-	) {
-		if (event == null) {
-			close();
-			return;
-		}
+    @Override
+    public void handleDataEvent(
+            Ref<EntityStore> reference, Store<EntityStore> store, GravePlatePage.InteractionEvent event
+    ) {
+        if (event == null) {
+            close();
+            return;
+        }
 
-		if ("reportDeath".equals(event.action)) {
-			Ref<EntityStore> deadPlayerReference = deadPLayerInfoComponent.getDeadPlayerReference();
+        if ("reportDeath".equals(event.action)) {
+            Ref<EntityStore> deadPlayerReference = deadPLayerInfoComponent.getDeadPlayerReference();
 
-			if (deadPlayerReference == null) {
-				LOGGER.atSevere().log("No se pudo confirmar un cadaver");
-				close();
-				return;
-			}
+            if (deadPlayerReference == null) {
+                LOGGER.atSevere().log("No se pudo confirmar un cadaver");
+                close();
+                return;
+            }
 
-			store.ensureComponent(deadPlayerReference, ConfirmedDeath.componentType);
-		}
+            try {
+                store.ensureComponent(deadPlayerReference, ConfirmedDeath.componentType);
+            } catch (Exception e) {
+                LOGGER.atSevere().withCause(e).log("Error confirming player death");
+                close();
+                return;
+            }
+        }
 
-		close();
-	}
+        close();
+    }
 
-	public static class InteractionEvent {
+    public static class InteractionEvent {
 
-		public static final BuilderCodec<InteractionEvent> CODEC =
-				BuilderCodec.builder(InteractionEvent.class, InteractionEvent::new)
-						.append(new KeyedCodec<>("Action", Codec.STRING),
-								(d, v) -> d.action = v, d -> d.action)
-						.add()
-						.build();
+        public static final BuilderCodec<InteractionEvent> CODEC =
+                BuilderCodec.builder(InteractionEvent.class, InteractionEvent::new)
+                        .append(new KeyedCodec<>("Action", Codec.STRING),
+                                (d, v) -> d.action = v, d -> d.action)
+                        .add()
+                        .build();
 
-		public String action;
-	}
+        public String action;
+    }
 }
