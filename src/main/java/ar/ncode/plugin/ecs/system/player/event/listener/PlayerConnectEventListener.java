@@ -1,6 +1,7 @@
 package ar.ncode.plugin.ecs.system.player.event.listener;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.accessors.PlayerRefAccessors;
 import ar.ncode.plugin.ecs.commands.ChangeWorldCommand;
 import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
 import com.hypixel.hytale.server.core.universe.Universe;
@@ -27,6 +28,10 @@ public class PlayerConnectEventListener implements Consumer<PlayerConnectEvent> 
 
     @Override
     public void accept(PlayerConnectEvent playerConnectEvent) {
+        if (PlayerRefAccessors.isDummyPlayer(playerConnectEvent.getPlayerRef())) {
+            return;
+        }
+
         // Handle world instance transitions
         if (TroubleInTrorkTownPlugin.currentInstance == null) {
             createNewWorldIfNoneExists(playerConnectEvent);

@@ -1,6 +1,7 @@
 package ar.ncode.plugin.ecs.system.player.event.listener;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
+import ar.ncode.plugin.accessors.PlayerRefAccessors;
 import ar.ncode.plugin.ecs.commands.ChangeWorldCommand;
 import ar.ncode.plugin.ecs.commands.SpectatorMode;
 import ar.ncode.plugin.ecs.component.DeadPlayerInfoComponent;
@@ -71,6 +72,10 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
     @Override
     public void accept(PlayerDisconnectEvent event) {
         PlayerRef playerRef = event.getPlayerRef();
+        if (PlayerRefAccessors.isDummyPlayer(playerRef)) {
+            return;
+        }
+
         Ref<EntityStore> reference = playerRef.getReference();
         if (reference == null || !reference.isValid()) {
             return;

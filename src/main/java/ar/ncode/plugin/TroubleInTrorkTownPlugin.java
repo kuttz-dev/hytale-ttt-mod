@@ -46,6 +46,9 @@ import ar.ncode.plugin.exception.ConfigError;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.packet.filter.PacketsFilter;
 import ar.ncode.plugin.patches.CancelExplosionInteraction;
+import ar.ncode.plugin.patches.CancelDeathAnimationInteraction;
+import ar.ncode.plugin.patches.CancelKillFeedInteraction;
+import ar.ncode.plugin.patches.CancelPlayDeathAnimationInteraction;
 import ar.ncode.plugin.patches.server.core.universe.world.spawn.CustomSpawnProvider;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.event.EventRegistration;
@@ -264,6 +267,9 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
         // Apply patches
         new CancelExplosionInteraction().apply();
+        new CancelDeathAnimationInteraction().apply();
+        new CancelPlayDeathAnimationInteraction().apply();
+        new CancelKillFeedInteraction().apply();
 
         // Metrics
         this.metrics = new Metrics(this, 29880);

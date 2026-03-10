@@ -1,5 +1,6 @@
 package ar.ncode.plugin.ecs.system.player.event.listener;
 
+import ar.ncode.plugin.accessors.PlayerRefAccessors;
 import ar.ncode.plugin.accessors.WorldAccessors;
 import ar.ncode.plugin.ecs.commands.SpectatorMode;
 import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
@@ -60,6 +61,15 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
     public void accept(PlayerReadyEvent event) {
         Player playerComponent = event.getPlayer();
         Ref<EntityStore> reference = event.getPlayerRef();
+        if (reference == null || !reference.isValid()) {
+            return;
+        }
+
+        PlayerRef eventPlayerRef = reference.getStore().getComponent(reference, PlayerRef.getComponentType());
+        if (PlayerRefAccessors.isDummyPlayer(eventPlayerRef)) {
+            return;
+        }
+
         World world = playerComponent.getWorld();
         if (world == null) {
             return;
