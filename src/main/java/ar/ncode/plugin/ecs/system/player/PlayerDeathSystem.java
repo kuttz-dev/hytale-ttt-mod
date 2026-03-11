@@ -1,16 +1,11 @@
 package ar.ncode.plugin.ecs.system.player;
 
-import ar.ncode.plugin.config.CustomRole;
-import ar.ncode.plugin.ecs.commands.SpectatorMode;
-import ar.ncode.plugin.ecs.component.DeadPlayerInfoComponent;
-import ar.ncode.plugin.ecs.component.death.LostInCombat;
-import ar.ncode.plugin.ecs.system.DeathSystem;
-import ar.ncode.plugin.ecs.system.event.FinishCurrentRoundEvent;
-import ar.ncode.plugin.model.DamageCause;
-import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.RoleGroup;
-import ar.ncode.plugin.model.enums.RoundState;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+
 import com.hypixel.hytale.common.util.CompletableFutureUtil;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.ComponentAccessor;
@@ -32,17 +27,24 @@ import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import lombok.Getter;
-import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
-
-import javax.annotation.Nonnull;
-import java.util.Set;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.accessors.PlayerAccessors.getPlayerFrom;
+import ar.ncode.plugin.config.CustomRole;
+import ar.ncode.plugin.ecs.commands.SpectatorMode;
+import ar.ncode.plugin.ecs.component.DeadPlayerInfoComponent;
+import ar.ncode.plugin.ecs.component.death.LostInCombat;
+import ar.ncode.plugin.ecs.system.DeathSystem;
+import ar.ncode.plugin.ecs.system.event.FinishCurrentRoundEvent;
 import static ar.ncode.plugin.ecs.system.event.handler.FinishCurrentRoundEventHandler.roundShouldEnd;
+import ar.ncode.plugin.model.DamageCause;
+import ar.ncode.plugin.model.GameModeState;
 import static ar.ncode.plugin.model.GameModeState.timeFormatter;
+import ar.ncode.plugin.model.PlayerComponents;
+import ar.ncode.plugin.model.enums.RoleGroup;
+import ar.ncode.plugin.model.enums.RoundState;
+import lombok.Getter;
 
 @Getter
 public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
@@ -121,10 +123,10 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
         DeathSystem.spawnRemainsAtPlayerDeath(world, deadPlayerInfo, player.reference(), store);
     }
 
-    private static void forceRespawnForPlayer(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, World world, PlayerComponents player) {
+    private static void forceRespawnForPlayer(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl World world, PlayerComponents player) {
         world.execute(() -> {
             LOGGER.atInfo().log("Scheduling respawn for player: " + player.component().getDisplayName() + " - Ref: " + reference);
-            CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference));
+            CompletableFutureUtil._catch(DeathComponent.respawn(world.getEntityStore().getStore(), reference));
         });
     }
 
@@ -156,21 +158,22 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
         GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
         if (gameModeState == null || !RoundState.IN_GAME.equals(gameModeState.getRoundState())) {
             LOGGER.atFine().log("Player died but round is not in IN_GAME state - respawning without processing death: " + reference);
-            forceRespawnForPlayer(reference, commandBuffer, world, player);
+            forceRespawnForPlayer(reference, world, player);
             return;
         }
 
         LOGGER.atFine().log("Processing player death for player: " + player.component().getDisplayName() + " - Ref: " + reference);
-        world.execute(() -> {
-            LOGGER.atFine().log("Ensuring LostInCombat component for player: %s - Ref: ", player.component().getDisplayName(), reference);
-            commandBuffer.ensureComponent(player.reference(), LostInCombat.componentType);
-        });
+        LOGGER.atFine().log("Ensuring LostInCombat component for player: %s - Ref: ", player.component().getDisplayName(), reference);
+        world.execute(() -> world.getEntityStore().getStore().ensureComponent(player.reference(), LostInCombat.componentType));
         LOGGER.atFine().log("Updating player counts for player: " + player.component().getDisplayName() + " - Ref: " + reference);
         updatePlayerCountsOnPlayerDeath(player.refComponent(), player.info().getCurrentRoundRole(), gameModeState);
         LOGGER.atFine().log("Clearing player inventory: " + player.component().getDisplayName() + " - Ref: " + reference);
         player.component().getInventory().clear();
         LOGGER.atFine().log("Updating player hud: " + player.component().getDisplayName() + " - Ref: " + reference);
-        player.info().getHud().update();
+        var hud = player.info().getHud();
+        if (hud != null) {
+            hud.update();
+        }   
         LOGGER.atFine().log("Updating player kda: " + player.component().getDisplayName() + " - Ref: " + reference);
         updateKdaAndKarma(deathComponent, player, gameModeState, commandBuffer);
 
@@ -179,7 +182,6 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
             HytaleServer.get().getEventBus()
                     .dispatchForAsync(FinishCurrentRoundEvent.class)
                     .dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
-
         } else {
             LOGGER.atFine().log("Spawning remains and setting spectator mode for player: " + player.component().getDisplayName() + " - Ref: " + reference);
             spawnDeadPlayerRemains(deathComponent, gameModeState, player, world, commandBuffer);
@@ -187,7 +189,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
             SpectatorMode.setGameModeToSpectator(player, commandBuffer);
         }
 
-        forceRespawnForPlayer(reference, commandBuffer, world, player);
+        forceRespawnForPlayer(reference, world, player);
     }
 
 }
