@@ -1,16 +1,11 @@
 package ar.ncode.plugin.ecs.system;
 
-import ar.ncode.plugin.TroubleInTrorkTownPlugin;
-import ar.ncode.plugin.config.CustomRole;
-import ar.ncode.plugin.config.DebugConfig;
-import ar.ncode.plugin.config.instance.InstanceConfig;
-import ar.ncode.plugin.ecs.commands.SpectatorMode;
-import ar.ncode.plugin.ecs.commands.loot.LootSpawnCommand;
-import ar.ncode.plugin.ecs.component.death.ConfirmedDeath;
-import ar.ncode.plugin.ecs.component.death.LostInCombat;
-import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.RoundState;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
@@ -28,16 +23,27 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.Config;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 
-import java.util.*;
-
+import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.accessors.WorldAccessors.getPlayersAt;
+import ar.ncode.plugin.config.CustomRole;
+import ar.ncode.plugin.config.DebugConfig;
+import ar.ncode.plugin.config.instance.InstanceConfig;
+import ar.ncode.plugin.ecs.commands.SpectatorMode;
+import ar.ncode.plugin.ecs.commands.loot.LootSpawnCommand;
+import ar.ncode.plugin.ecs.component.death.ConfirmedDeath;
+import ar.ncode.plugin.ecs.component.death.LostInCombat;
 import static ar.ncode.plugin.ecs.system.event.handler.StartNewRoundEventHandler.updateEachPlayer;
 import static ar.ncode.plugin.ecs.system.player.PlayerRespawnSystem.teleportPlayerToRandomSpawnPoint;
+import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.model.PlayerComponents;
 import static ar.ncode.plugin.model.enums.RoleGroup.INNOCENT;
 import static ar.ncode.plugin.model.enums.RoleGroup.TRAITOR;
-import static ar.ncode.plugin.model.enums.TranslationKey.*;
+import ar.ncode.plugin.model.enums.RoundState;
+import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_INNOCENTS_WIN_MSG;
+import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_START_MSG;
+import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_TRAITORS_WIN_MSG;
 
 public class GameModeSystem {
 
@@ -223,7 +229,10 @@ public class GameModeSystem {
 
             for (var player : players) {
                 player.component().getInventory().clear();
-                player.info().getHud().update();
+                var hud = player.info().getHud();
+				if (hud != null) {
+					hud.update();
+				}
             }
         });
     }
@@ -259,7 +268,10 @@ public class GameModeSystem {
                 }
 
                 player.info().setCurrentRoundRole(null);
-                player.info().getHud().update();
+                var hud = player.info().getHud();
+				if (hud != null) {
+					hud.update();
+				}
             }
         });
     }

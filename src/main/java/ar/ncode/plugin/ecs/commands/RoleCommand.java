@@ -1,9 +1,7 @@
 package ar.ncode.plugin.ecs.commands;
 
-import ar.ncode.plugin.accessors.PlayerAccessors;
-import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.RoleGroup;
+import javax.annotation.Nonnull;
+
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
@@ -15,12 +13,14 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 
-import javax.annotation.Nonnull;
-
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
+import ar.ncode.plugin.accessors.PlayerAccessors;
 import static ar.ncode.plugin.model.CustomPermissions.TTT_ADMIN_GROUP;
 import static ar.ncode.plugin.model.CustomPermissions.TTT_ROLE_SET;
+import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.model.PlayerComponents;
+import ar.ncode.plugin.model.enums.RoleGroup;
 
 public class RoleCommand extends AbstractCommandCollection {
 
@@ -102,7 +102,10 @@ public class RoleCommand extends AbstractCommandCollection {
 					gameModeState.innocentsAlive.add(player.refComponent().getUuid());
 				}
 
-				player.info().getHud().update();
+				var hud = player.info().getHud();
+				if (hud != null) {
+					hud.update();
+				}
 
 				//            if (FinishCurrentRoundEventHandler.roundShouldEnd(gameModeState)) {
 				//                HytaleServer.get().getEventBus()

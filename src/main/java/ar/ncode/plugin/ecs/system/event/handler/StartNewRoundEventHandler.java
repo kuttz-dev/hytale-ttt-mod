@@ -1,11 +1,10 @@
 package ar.ncode.plugin.ecs.system.event.handler;
 
-import ar.ncode.plugin.config.CustomRole;
-import ar.ncode.plugin.ecs.system.GameModeSystem;
-import ar.ncode.plugin.ecs.system.event.StartNewRoundEvent;
-import ar.ncode.plugin.model.GameModeState;
-import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.RoundState;
+import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
@@ -23,14 +22,15 @@ import com.hypixel.hytale.server.core.util.EventTitleUtil;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.hypixel.hytale.server.spawning.local.LocalSpawnController;
 
-import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
+import ar.ncode.plugin.config.CustomRole;
+import ar.ncode.plugin.ecs.system.GameModeSystem;
+import ar.ncode.plugin.ecs.system.event.StartNewRoundEvent;
+import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.model.PlayerComponents;
 import static ar.ncode.plugin.model.enums.RoleGroup.TRAITOR;
+import ar.ncode.plugin.model.enums.RoundState;
 import static ar.ncode.plugin.model.enums.RoundState.PREPARING;
 import static ar.ncode.plugin.model.enums.TranslationKey.PLAYER_ASSIGNED_ROLE_NOTIFICATION;
 import static ar.ncode.plugin.model.enums.TranslationKey.ROUND_ABOUT_TO_START_MSG;
@@ -63,7 +63,10 @@ public class StartNewRoundEventHandler implements Consumer<StartNewRoundEvent> {
 
             // GUI
             player.component().getPageManager().setPage(reference, reference.getStore(), Page.None);
-            player.info().getHud().update();
+            var hud = player.info().getHud();
+            if (hud != null) {
+                hud.update();
+            }
 
             // Remove effects
             stats.maximizeStatValue(DefaultEntityStatTypes.getHealth());
