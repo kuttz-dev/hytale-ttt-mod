@@ -20,6 +20,9 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.WorldMapTracker;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.modules.entity.damage.DeferredCorpseRemoval;
+import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
+
 
 import java.util.function.Consumer;
 
@@ -114,6 +117,10 @@ public class PlayerReadyEventListener implements Consumer<PlayerReadyEvent> {
             } else if (playerCanNotSpawn(gameModeState)) {
                 SpectatorMode.setGameModeToSpectator(player, reference.getStore());
             }
+			// If the player somehow persisted as "dead" (disconnect during death / crash / etc),
+			// normalize them back to alive before applying our TTT setup.
+			reference.getStore().removeComponentIfExists(reference, DeferredCorpseRemoval.getComponentType());
+			reference.getStore().removeComponentIfExists(reference, DeathComponent.getComponentType());
 
             gameModeStateForWorld.put(world.getWorldConfig().getUuid(), gameModeState);
         });

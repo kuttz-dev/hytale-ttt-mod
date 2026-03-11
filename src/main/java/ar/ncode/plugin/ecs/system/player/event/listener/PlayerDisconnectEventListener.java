@@ -23,6 +23,8 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
+import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
+import com.hypixel.hytale.server.core.modules.entity.damage.DeferredCorpseRemoval;
 
 import java.util.function.Consumer;
 
@@ -105,6 +107,11 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
             SpectatorMode.disableSpectatorModeForPlayer(new PlayerComponents(null, playerRef, playerInfo, reference), reference.getStore());
             store.removeComponentIfExists(reference, LostInCombat.componentType);
             store.removeComponentIfExists(reference, ConfirmedDeath.componentType);
+
+			// If the player disconnects while dead, make sure we don't persist a "not alive" state
+			// into their next session (vanilla PlayerAddedSystem will warn loudly about it).
+			store.removeComponentIfExists(reference, DeferredCorpseRemoval.getComponentType());
+			store.removeComponentIfExists(reference, DeathComponent.getComponentType());
 
             boolean thereAreEnoughPlayers = world.getPlayerCount() < config.get().getRequiredPlayersToStartRound();
             if (RoundState.IN_GAME.equals(gameModeState.getRoundState()) && thereAreEnoughPlayers) {
