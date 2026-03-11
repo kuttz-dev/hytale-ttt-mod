@@ -12,6 +12,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.modules.entity.component.Intangible;
 import com.hypixel.hytale.server.core.modules.entity.component.Invulnerable;
+import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -60,6 +61,7 @@ public class PlayerInfoCommand extends AbstractAsyncCommand {
 				boolean hasConfirmedDeath = reference.getStore().getComponent(reference, ConfirmedDeath.componentType) != null;
 				boolean isIntangible = reference.getStore().getComponent(reference, Intangible.getComponentType()) != null;
 				boolean isInvulnerable = reference.getStore().getComponent(reference, Invulnerable.getComponentType()) != null;
+				boolean hasDeathComponent = reference.getStore().getComponent(reference, DeathComponent.getComponentType()) != null;
 
 				PlayerGameModeInfo info = player.get().info();
 				ctx.sendMessage(Message.raw("Player: " + player.get().component().getDisplayName()));
@@ -73,7 +75,9 @@ public class PlayerInfoCommand extends AbstractAsyncCommand {
 				}
 				ctx.sendMessage(Message.raw("- is lost in combat: " + isLostInCombat));
 				ctx.sendMessage(Message.raw("- has confirmed death: " + hasConfirmedDeath));
+				ctx.sendMessage(Message.raw("- is intangible: " + isIntangible));
 				ctx.sendMessage(Message.raw("- is invulnerable: " + isInvulnerable));
+				ctx.sendMessage(Message.raw("- has death component: " + hasDeathComponent));
 			});
 		});
 	}
