@@ -1,5 +1,6 @@
 package ar.ncode.plugin.ecs.system.player;
 
+import ar.ncode.plugin.accessors.PlayerRefAccessors;
 import ar.ncode.plugin.config.CustomRole;
 import ar.ncode.plugin.ecs.commands.SpectatorMode;
 import ar.ncode.plugin.ecs.component.DeadPlayerInfoComponent;
@@ -24,18 +25,22 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.asset.type.gameplay.DeathConfig;
+import com.hypixel.hytale.server.core.entity.AnimationUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.modules.entity.component.ModelComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.Damage;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.PlayerUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import javax.annotation.Nonnull;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
@@ -49,8 +54,16 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-    private final Set<Dependency<EntityStore>> dependencies = Set.of(new SystemDependency<>(Order.BEFORE,
-            DeathSystems.PlayerDeathScreen.class, OrderPriority.FURTHEST));
+    private final Set<Dependency<EntityStore>> dependencies = createDependencies();
+
+    private static Set<Dependency<EntityStore>> createDependencies() {
+        Set<Dependency<EntityStore>> dependencies = new LinkedHashSet<>();
+        dependencies.add(new SystemDependency<>(Order.BEFORE,
+                DeathSystems.DeathAnimation.class, OrderPriority.FURTHEST));
+        dependencies.add(new SystemDependency<>(Order.BEFORE,
+                DeathSystems.PlayerDeathScreen.class, OrderPriority.FURTHEST));
+        return Set.copyOf(dependencies);
+    }
 
     public static void updatePlayerCountsOnPlayerDeath(PlayerRef playerRef, CustomRole role, GameModeState gameModeState) {
         gameModeState.spectators.add(playerRef.getUuid());
@@ -121,10 +134,54 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
         DeathSystem.spawnRemainsAtPlayerDeath(world, deadPlayerInfo, player.reference(), store);
     }
 
-    private static void forceRespawnForPlayer(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, World world, PlayerComponents player) {
+    private static boolean hasDummyPlayers(World world) {
+        for (PlayerRef playerRef : world.getPlayerRefs()) {
+            if (PlayerRefAccessors.isDummyPlayer(playerRef)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void suppressEngineDeathAnimation(@NonNullDecl Ref<EntityStore> reference,
+                                                     @NonNullDecl CommandBuffer<EntityStore> commandBuffer,
+                                                     PlayerComponents player) {
+        if (commandBuffer.getComponent(reference, ModelComponent.getComponentType()) == null) {
+            return;
+        }
+
+        LOGGER.atInfo().log("Suppressing engine death animation for player: " + player.component().getDisplayName() + " - Ref: " + reference);
+        commandBuffer.tryRemoveComponent(reference, ModelComponent.getComponentType());
+    }
+
+    private static void restorePlayerModel(@NonNullDecl Ref<EntityStore> reference, World world) {
+        if (!reference.isValid()) {
+            return;
+        }
+
+        PlayerUtil.resetPlayerModel(reference, world.getEntityStore().getStore());
+        AnimationUtils.stopAnimation(reference, com.hypixel.hytale.protocol.AnimationSlot.Action, world.getEntityStore().getStore());
+    }
+
+    private static void forceRespawnForPlayer(@NonNullDecl Ref<EntityStore> reference,
+                                              @NonNullDecl CommandBuffer<EntityStore> commandBuffer,
+                                              World world,
+                                              PlayerComponents player,
+                                              boolean restoreModelAfterRespawn) {
         world.execute(() -> {
             LOGGER.atInfo().log("Scheduling respawn for player: " + player.component().getDisplayName() + " - Ref: " + reference);
-            CompletableFutureUtil._catch(DeathComponent.respawn(commandBuffer, reference));
+            var respawnFuture = DeathComponent.respawn(commandBuffer, reference);
+            if (restoreModelAfterRespawn) {
+                respawnFuture.whenComplete((unused, throwable) -> {
+                    if (throwable != null) {
+                        return;
+                    }
+
+                    world.execute(() -> restorePlayerModel(reference, world));
+                });
+            }
+            CompletableFutureUtil._catch(respawnFuture);
         });
     }
 
@@ -154,40 +211,37 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
         if (player == null) return;
 
         GameModeState gameModeState = gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+        boolean isRoundInGame = gameModeState != null && RoundState.IN_GAME.equals(gameModeState.getRoundState());
+        boolean suppressDeathAnimation = !isRoundInGame || hasDummyPlayers(world);
+        if (suppressDeathAnimation) {
+            suppressEngineDeathAnimation(reference, commandBuffer, player);
+        }
+
         if (gameModeState == null || !RoundState.IN_GAME.equals(gameModeState.getRoundState())) {
             LOGGER.atInfo().log("Player died but round is not in IN_GAME state - respawning without processing death: " + reference);
-            forceRespawnForPlayer(reference, commandBuffer, world, player);
+            forceRespawnForPlayer(reference, commandBuffer, world, player, suppressDeathAnimation);
             return;
         }
 
-        LOGGER.atInfo().log("Processing player death for player: " + player.component().getDisplayName() + " - Ref: " + reference);
         world.execute(() -> {
-            LOGGER.atInfo().log("Ensuring LostInCombat component for player: %s - Ref: ", player.component().getDisplayName(), reference);
             commandBuffer.ensureComponent(player.reference(), LostInCombat.componentType);
         });
-        LOGGER.atInfo().log("Updating player counts for player: " + player.component().getDisplayName() + " - Ref: " + reference);
         updatePlayerCountsOnPlayerDeath(player.refComponent(), player.info().getCurrentRoundRole(), gameModeState);
-        LOGGER.atInfo().log("Clearing player inventory: " + player.component().getDisplayName() + " - Ref: " + reference);
         player.component().getInventory().clear();
-        LOGGER.atInfo().log("Updating player hud: " + player.component().getDisplayName() + " - Ref: " + reference);
         player.info().getHud().update();
-        LOGGER.atInfo().log("Updating player kda: " + player.component().getDisplayName() + " - Ref: " + reference);
         updateKdaAndKarma(deathComponent, player, gameModeState, commandBuffer);
 
         if (roundShouldEnd(gameModeState)) {
-            LOGGER.atInfo().log("Round should end after death of player: " + player.component().getDisplayName() + " - Ref: " + reference);
             HytaleServer.get().getEventBus()
                     .dispatchForAsync(FinishCurrentRoundEvent.class)
                     .dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
 
         } else {
-            LOGGER.atInfo().log("Spawning remains and setting spectator mode for player: " + player.component().getDisplayName() + " - Ref: " + reference);
             spawnDeadPlayerRemains(deathComponent, gameModeState, player, world, commandBuffer);
-            LOGGER.atInfo().log("Setting spectator mode for player: " + player.component().getDisplayName() + " - Ref: " + reference);
             SpectatorMode.setGameModeToSpectator(player, commandBuffer);
         }
 
-        forceRespawnForPlayer(reference, commandBuffer, world, player);
+        forceRespawnForPlayer(reference, commandBuffer, world, player, suppressDeathAnimation);
     }
 
 }
