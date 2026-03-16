@@ -2,6 +2,7 @@ package ar.ncode.plugin.ecs.commands.map;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.accessors.WorldAccessors;
+import ar.ncode.plugin.model.GameModeState;
 import com.hypixel.hytale.codec.ExtraInfo;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.logger.HytaleLogger;
@@ -25,8 +26,10 @@ import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.ecs.commands.map.CrudMapCommand.copyFiles;
 import static ar.ncode.plugin.ecs.commands.map.CrudMapCommand.reloadMaps;
+import static ar.ncode.plugin.ecs.system.GameModeSystem.*;
 import static ar.ncode.plugin.model.CustomPermissions.TTT_MAP_CONFIG_SPAWN_POINT;
 import static ar.ncode.plugin.model.CustomPermissions.TTT_MAP_SAVE;
 
@@ -52,6 +55,18 @@ public class MapConfig extends AbstractCommandCollection {
                 ctx.sendMessage(Message.raw("Error obtaining world"));
                 return;
             }
+
+            GameModeState gameModeState = gameModeStateForWorld.get(currentWorld.getWorldConfig().getUuid());
+            if (gameModeState != null) {
+                currentWorld.execute(() -> {
+                    removeGraveStones(gameModeState, currentWorld);
+                    removeCorpses(gameModeState);
+                    removeDroppedItems(currentWorld);
+                });
+            } else {
+                ctx.sendMessage(Message.raw("Warning - Error obtaining game mode state for world"));
+            }
+
 
             String mapName = WorldAccessors.getWorldNameForInstance(currentWorld);
             if (mapName == null) {

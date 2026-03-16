@@ -1,11 +1,16 @@
 package ar.ncode.plugin.ecs.system.player;
 
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-
-import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
-
+import ar.ncode.plugin.config.CustomRole;
+import ar.ncode.plugin.ecs.commands.SpectatorMode;
+import ar.ncode.plugin.ecs.component.DeadPlayerInfoComponent;
+import ar.ncode.plugin.ecs.component.death.LostInCombat;
+import ar.ncode.plugin.ecs.system.DeathSystem;
+import ar.ncode.plugin.ecs.system.event.FinishCurrentRoundEvent;
+import ar.ncode.plugin.model.DamageCause;
+import ar.ncode.plugin.model.GameModeState;
+import ar.ncode.plugin.model.PlayerComponents;
+import ar.ncode.plugin.model.enums.RoleGroup;
+import ar.ncode.plugin.model.enums.RoundState;
 import com.hypixel.hytale.common.util.CompletableFutureUtil;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.ComponentAccessor;
@@ -27,24 +32,17 @@ import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import lombok.Getter;
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+
+import javax.annotation.Nonnull;
+import java.util.Set;
 
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.accessors.PlayerAccessors.getPlayerFrom;
-import ar.ncode.plugin.config.CustomRole;
-import ar.ncode.plugin.ecs.commands.SpectatorMode;
-import ar.ncode.plugin.ecs.component.DeadPlayerInfoComponent;
-import ar.ncode.plugin.ecs.component.death.LostInCombat;
-import ar.ncode.plugin.ecs.system.DeathSystem;
-import ar.ncode.plugin.ecs.system.event.FinishCurrentRoundEvent;
 import static ar.ncode.plugin.ecs.system.event.handler.FinishCurrentRoundEventHandler.roundShouldEnd;
-import ar.ncode.plugin.model.DamageCause;
-import ar.ncode.plugin.model.GameModeState;
 import static ar.ncode.plugin.model.GameModeState.timeFormatter;
-import ar.ncode.plugin.model.PlayerComponents;
-import ar.ncode.plugin.model.enums.RoleGroup;
-import ar.ncode.plugin.model.enums.RoundState;
-import lombok.Getter;
 
 @Getter
 public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
@@ -125,7 +123,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
 
     private static void forceRespawnForPlayer(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl World world, PlayerComponents player) {
         world.execute(() -> {
-            LOGGER.atInfo().log("Scheduling respawn for player: " + player.component().getDisplayName() + " - Ref: " + reference);
+            LOGGER.atFine().log("Scheduling respawn for player: " + player.component().getDisplayName() + " - Ref: " + reference);
             CompletableFutureUtil._catch(DeathComponent.respawn(world.getEntityStore().getStore(), reference));
         });
     }
@@ -173,7 +171,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
         var hud = player.info().getHud();
         if (hud != null) {
             hud.update();
-        }   
+        }
         LOGGER.atFine().log("Updating player kda: " + player.component().getDisplayName() + " - Ref: " + reference);
         updateKdaAndKarma(deathComponent, player, gameModeState, commandBuffer);
 

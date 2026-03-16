@@ -13,38 +13,39 @@ import java.util.Optional;
 
 public class PlayerAccessors {
 
-	public static Optional<PlayerComponents> getPlayerFrom(@Nullable Ref<EntityStore> reference, ComponentAccessor<EntityStore> store) {
-		if (reference == null || !reference.isValid()) {
-			return Optional.empty();
-		}
+    public static Optional<PlayerComponents> getPlayerFrom(@Nullable Ref<EntityStore> reference, ComponentAccessor<EntityStore> store) {
+        if (reference == null || !reference.isValid()) {
+            return Optional.empty();
+        }
 
-		Player player = store.getComponent(reference, Player.getComponentType());
-		PlayerRef playerRef = store.getComponent(reference, PlayerRef.getComponentType());
-		PlayerGameModeInfo playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
+        Player player = store.getComponent(reference, Player.getComponentType());
+        PlayerRef playerRef = store.getComponent(reference, PlayerRef.getComponentType());
+        PlayerGameModeInfo playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
 
-		if (player == null || playerRef == null || playerInfo == null) {
-			return Optional.empty();
-		}
+        if (player == null || playerRef == null || playerInfo == null) {
+            return Optional.empty();
+        }
 
-		return Optional.of(
-				new PlayerComponents(player, playerRef, playerInfo, reference)
-		);
-	}
+        return Optional.of(
+                new PlayerComponents(player, playerRef, playerInfo, reference)
+        );
+    }
 
-	public static Optional<PlayerComponents> getPlayerFrom(@Nullable PlayerRef playerRef, ComponentAccessor<EntityStore> store) {
-		if (playerRef == null || !playerRef.isValid() || playerRef.getReference() == null) {
-			return Optional.empty();
-		}
+    public static Optional<PlayerComponents> getPlayerFrom(@Nullable PlayerRef playerRef, ComponentAccessor<EntityStore> store) {
+        if (playerRef == null || !playerRef.isValid() || playerRef.getReference() == null) {
+            return Optional.empty();
+        }
 
-		Player player = store.getComponent(playerRef.getReference(), Player.getComponentType());
-		PlayerGameModeInfo playerInfo = store.getComponent(playerRef.getReference(), PlayerGameModeInfo.componentType);
+        Player player = store.getComponent(playerRef.getReference(), Player.getComponentType());
+        PlayerGameModeInfo playerInfo = store.getComponent(playerRef.getReference(), PlayerGameModeInfo.componentType);
 
-		if (player == null || playerInfo == null) {
-			return Optional.empty();
-		}
+        if (player == null || playerInfo == null) {
+            return Optional.empty();
+        }
 
-		return Optional.of(
-				new PlayerComponents(player, playerRef, playerInfo, playerRef.getReference())
-		);
-	}
+        return Optional.of(
+                new PlayerComponents(player, playerRef, playerInfo, playerRef.getReference())
+        );
+    }
+
 }
