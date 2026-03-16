@@ -3,7 +3,6 @@
 [![Github Badge](https://img.shields.io/badge/project-github-repo?style=for-the-badge&logo=github)](https://github.com/kuttz-dev/hytale-ttt-mod) [![Discord Support](https://img.shields.io/badge/Support-Discord-5865F2?style=for-the-badge&logo=discord)](https://discord.gg/eECVkthTfQ) [![TTT - Curseforge](https://img.shields.io/badge/TTT-Curseforge-page?style=for-the-badge&logo=curseforge)](https://www.curseforge.com/hytale/mods/ttt) [![TTT Maps - Curseforge](https://img.shields.io/badge/TTT_Maps-Curseforge-page?style=for-the-badge&logo=curseforge)](https://www.curseforge.com/hytale/worlds/ttt-maps)
 
 
-
 **Trouble in Trork Town** is an open-source gamemode for **Hytale**, inspired by the classic _Trouble in Terrorist Town_
 from Garry’s Mod. It can also be configured to be played as Murder Mystery. And its published in github, curseforge and modtale, supporting the latest Hytale version. 
 
@@ -13,6 +12,8 @@ everything together—before it’s too late.
 
 The project was prototyped during Hytale’s first week and is designed to be **modular, configurable, and extensible**,
 making it easy for the community to build on top of it.
+
+---
 
 ## Quick Start
 
@@ -160,7 +161,6 @@ richer gameplay and community-made content.
 - Better modding hooks for third-party extensions
 
 ---
-
 ## Open-Source Philosophy
 
 This mod is **fully open-source** and built with extensibility in mind.
@@ -181,8 +181,12 @@ testing, and limited to:
 - Text content, descriptions, and documentation.
 - Provisional concept art used for mandatory logos, banners, and also for prototyping with temporary models.
 
-## Art
-
-- [A Trork in Trouble](https://media.forgecdn.net/attachments/1577/86/48602-1-jpg.jpg) - Artwork commissioned to IZANAGIOOZ
-
 ---
+## Art and Images
+| Artowrk / Image                                                                                                    	| Description                                                                                                                                                                                                                                                 	|
+|--------------------------------------------------------------------------------------------------------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
+| ![image](https://media.forgecdn.net/attachments/1577/86/48602-1-jpg.jpg)                                           	| [A Trork in Trouble](https://media.forgecdn.net/attachments/1577/86/48602-1-jpg.jpg) - Artwork commissioned to [IZANAGIOOZ](https://www.instagram.com/izanagiooz/)                                                                                                                                   	|
+| ![chatgpt-image](https://media.forgecdn.net/attachments/1577/965/chatgpt-image-25-feb-2026-04_14_13-p-m-1-png.png) 	| Concept art made with ChatGPT - 4x4 logo picture of a dead troll, in the style of Goya and Beksinski, oil painting, cinematic, dark fantasy, gothic style, dark medieval background, gloomy atmosphere, masterpiece. Include the text Trouble in Trork Town 	|
+
+
+
