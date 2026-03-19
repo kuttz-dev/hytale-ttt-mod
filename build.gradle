@@ -355,11 +355,15 @@ tasks.shadowJar {
     configurations = [project.configurations.runtimeClasspath]
 
     dependencies {
-        // Only merge bStats into the final jar, no other dependencies
-        exclude { it.moduleGroup != "org.bstats" }
+        // Merge only the libraries needed at runtime by the plugin.
+        // ByteBuddy is required for patch instrumentation in plugin startup.
+        exclude { !["org.bstats", "net.bytebuddy"].contains(it.moduleGroup) }
     }
 
     // Relocate bStats into a stable plugin-owned package to avoid conflicts
     // and invalid class names when project.group is unset.
     relocate("org.bstats", "ar.ncode.plugin.libs.bstats")
+
+    // Relocate ByteBuddy to avoid potential version conflicts with other plugins.
+    relocate("net.bytebuddy", "ar.ncode.plugin.libs.bytebuddy")
 }
