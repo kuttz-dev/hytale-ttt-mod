@@ -359,7 +359,7 @@ tasks.shadowJar {
         exclude { it.moduleGroup != "org.bstats" }
     }
 
-    // Relocate bStats into the plugin's package to avoid conflicts with other
-    // plugins using bStats
-    relocate("org.bstats", project.group.toString())
+    // Relocate bStats into a stable plugin-owned package to avoid conflicts
+    // and invalid class names when project.group is unset.
+    relocate("org.bstats", "ar.ncode.plugin.libs.bstats")
 }
