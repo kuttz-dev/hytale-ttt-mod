@@ -1,7 +1,7 @@
 {
     "Group": "ncode",
     "Name": "ttt",
-    "Version": "0.6.5",
+    "Version": "0.6.7",
     "Description": "An open version of Trouble in Terrorist Town for Hytale!",
     "Authors": [
         {
@@ -11,7 +11,7 @@
         }
     ],
     "Website": "ncode.ar",
-    "ServerVersion": "2026.03.19-c0865d17c",
+    "ServerVersion": "2026.02.19-1a311a592",
     "Dependencies": {
         "Hytale:NPC": "*"
     },
