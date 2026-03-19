@@ -11,7 +11,7 @@
         }
     ],
     "Website": "ncode.ar",
-    "ServerVersion": "2026.03.05-9fdc5985d",
+    "ServerVersion": "2026.03.19-c0865d17c",
     "Dependencies": {
         "Hytale:NPC": "*"
     },

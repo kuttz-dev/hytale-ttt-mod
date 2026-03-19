@@ -1,7 +1,7 @@
 package ar.ncode.plugin.ecs.commands;
 
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
-import ar.ncode.plugin.config.instance.InstanceConfig;
+import ar.ncode.plugin.config.instance.InstanceConfigWrapper;
 import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.ecs.system.scheduled.DoubleTapDetector;
 import ar.ncode.plugin.model.GameModeState;
@@ -22,11 +22,12 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.spawn.FitToHeightMapSpawnProvider;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.util.Config;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static ar.ncode.plugin.TroubleInTrorkTownPlugin.mapTemplateConfig;
 
 public class ChangeWorldCommand extends CommandBase {
 
@@ -125,21 +126,26 @@ public class ChangeWorldCommand extends CommandBase {
 
     public static World createNewInstance(World currentWorld, String mapTemplateName) {
         try {
+            InstanceConfigWrapper config = mapTemplateConfig.get(mapTemplateName);
+            if (config != null) {
+                mapTemplateName = config.getFolderName();
+            }
+
             var newWorld = InstancesPlugin.get()
                     .spawnInstance(mapTemplateName, currentWorld, new Transform())
                     .get();
 
             TroubleInTrorkTownPlugin.currentInstance = newWorld.getWorldConfig().getUuid();
-            Config<InstanceConfig> instanceConfig = TroubleInTrorkTownPlugin.mapTemplateConfig.get(mapTemplateName).getInstanceConfig();
-            TroubleInTrorkTownPlugin.instanceConfigs.put(
-                    TroubleInTrorkTownPlugin.currentInstance,
-                    instanceConfig
-            );
             TroubleInTrorkTownPlugin.gameModeStateForWorld.put(newWorld.getWorldConfig().getUuid(), new GameModeState());
 
-            if (instanceConfig != null) {
+            if (config != null && config.getInstanceConfig() != null) {
+                TroubleInTrorkTownPlugin.instanceConfigs.put(
+                        TroubleInTrorkTownPlugin.currentInstance,
+                        config.getInstanceConfig()
+                );
+
                 newWorld.getWorldConfig()
-                        .setSpawnProvider(new FitToHeightMapSpawnProvider(new CustomSpawnProvider(instanceConfig.get())));
+                        .setSpawnProvider(new FitToHeightMapSpawnProvider(new CustomSpawnProvider(config.getInstanceConfig().get())));
             } else {
                 LOGGER.atSevere().log("No instance config found for template: " + mapTemplateName);
             }
