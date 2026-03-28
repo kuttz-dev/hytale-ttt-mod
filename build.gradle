@@ -2,8 +2,9 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.internal.jvm.Jvm
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
-import java.nio.file.Files
+
 import javax.xml.parsers.DocumentBuilderFactory
+import java.nio.file.Files
 
 plugins {
     id 'java'
@@ -61,8 +62,8 @@ javadoc {
 
 repositories {
     mavenCentral()
-    maven {url = uri("https://maven.hytale.com/release")}
-    maven {url = uri("https://maven.hytale.com/pre-release")}
+    maven { url = uri("https://maven.hytale.com/release") }
+    maven { url = uri("https://maven.hytale.com/pre-release") }
 
     maven {
         url "https://cursemaven.com"
@@ -89,9 +90,6 @@ dependencies {
     }
 
     implementation("org.bstats:bstats-hytale:3.2.1")
-
-    implementation "net.bytebuddy:byte-buddy:1.18.7"
-    implementation "net.bytebuddy:byte-buddy-agent:1.18.7"
 
     compileOnly("org.projectlombok:lombok:1.18.42")
     annotationProcessor("org.projectlombok:lombok:1.18.42")
@@ -193,17 +191,10 @@ tasks.named("updatePluginManifest") {
     dependsOn updateHytaleServerVersion
 }
 
-def createServerRunArguments(String srcDir) {
+def createServerRunArguments() {
     def programParameters = '--allow-op --disable-sentry --accept-early-plugins --assets="' + "${hytaleHome}/install/$patchline/package/game/latest/Assets.zip" + '"'
-    def modPaths = []
-    if (includes_pack.toBoolean()) {
-        modPaths << srcDir
-    }
     if (load_user_mods.toBoolean()) {
-        modPaths << "${hytaleHome}/UserData/Mods"
-    }
-    if (!modPaths.isEmpty()) {
-        programParameters += ' --mods="' + modPaths.join(',') + '"'
+        programParameters += ' --mods="' + "${hytaleHome}/UserData/Mods" + '"'
     }
     return programParameters
 }
@@ -214,7 +205,7 @@ idea.project.settings.runConfigurations {
     'HytaleServer'(org.jetbrains.gradle.ext.Application) {
         mainClass = 'com.hypixel.hytale.Main'
         moduleName = project.idea.module.name + '.main'
-        programParameters = createServerRunArguments(sourceSets.main.java.srcDirs.first().parentFile.absolutePath)
+        programParameters = createServerRunArguments()
         workingDirectory = serverRunDir.absolutePath
         jvmArgs = '-Dbstats.relocatecheck=false'
     }
@@ -228,7 +219,7 @@ tasks.register('generateVSCodeLaunch') {
         if (!vscodeDir.exists()) {
             vscodeDir.mkdirs()
         }
-        def programParams = createServerRunArguments("\${workspaceFolder}")
+        def programParams = createServerRunArguments()
         def launchConfig = [
                 version       : "0.2.0",
                 configurations: [
@@ -356,14 +347,29 @@ tasks.shadowJar {
 
     dependencies {
         // Merge only the libraries needed at runtime by the plugin.
-        // ByteBuddy is required for patch instrumentation in plugin startup.
-        exclude { !["org.bstats", "net.bytebuddy"].contains(it.moduleGroup) }
+        exclude { !["org.bstats"].contains(it.moduleGroup) }
     }
 
     // Relocate bStats into a stable plugin-owned package to avoid conflicts
     // and invalid class names when project.group is unset.
     relocate("org.bstats", "ar.ncode.plugin.libs.bstats")
+}
 
-    // Relocate ByteBuddy to avoid potential version conflicts with other plugins.
-    relocate("net.bytebuddy", "ar.ncode.plugin.libs.bytebuddy")
+tasks.register("syncShadowJarForDevRun") {
+    dependsOn tasks.shadowJar
+    doLast {
+        copy {
+            from(tasks.shadowJar.archiveFile)
+            into(layout.projectDirectory.dir("run/mods"))
+        }
+
+        copy {
+            from(tasks.shadowJar.archiveFile)
+            into(layout.projectDirectory.dir("run/earlyplugins"))
+        }
+    }
+}
+
+tasks.register("syncEarlyPluginJar") {
+    dependsOn tasks.named("syncShadowJarForDevRun")
 }

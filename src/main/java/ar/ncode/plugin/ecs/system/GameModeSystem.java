@@ -18,6 +18,7 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.component.Interactable;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.item.ItemComponent;
@@ -93,6 +94,7 @@ public class GameModeSystem {
         Query<EntityStore> query = Query.and(
                 ItemComponent.getComponentType(),
                 TransformComponent.getComponentType(),
+                Query.not(Player.getComponentType()),
                 Query.not(Interactable.getComponentType()),
                 Query.not(PickupItemComponent.getComponentType())
         );
