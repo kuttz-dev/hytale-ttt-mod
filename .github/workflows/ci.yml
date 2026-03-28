@@ -1,7 +1,7 @@
 name: CI
 
 permissions:
-  contents: write
+  contents: read
 
 on:
   push:
@@ -13,6 +13,20 @@ on:
 
 jobs:
   build:
+    if: github.event_name == 'pull_request'
+    uses: kuttz-dev/hytale-plugin-workflows/.github/workflows/gradle-plugin-ci.yml@v1.1.0
+    with:
+      use-fat-jar: true
+    secrets:
+      MODTALE_API_KEY: ${{ secrets.MODTALE_API_KEY }}
+      MODTALE_PROJECT_ID: ${{ secrets.MODTALE_PROJECT_ID }}
+      CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+      CURSEFORGE_PROJECT_ID: ${{ secrets.CURSEFORGE_PROJECT_ID }}
+
+  build_release:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    permissions:
+      contents: write
     uses: kuttz-dev/hytale-plugin-workflows/.github/workflows/gradle-plugin-ci.yml@v1.1.0
     with:
       use-fat-jar: true
