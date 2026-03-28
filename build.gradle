@@ -84,7 +84,7 @@ dependencies {
 
     } else {
         def serverJar = files("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar")
-        implementation(serverJar)
+        compileOnly(serverJar)
         testImplementation(serverJar)
         println "Local build detected -> using LOCAL jar"
     }
