@@ -33,6 +33,7 @@ shop_item_bought = You have purchased: {item_name}
 shop_no_space = You have no space for this item!
 shop_close = Close
 shop_only_for_traitors_or_detectives = The shop is only for traitors or detectives!
+shop_can_only_be_opened_during_round = You can only open the shop while a round is active.
 
 gravestone_plate_title = Here lies
 gravestone_plate_player = Player:
@@ -52,6 +53,7 @@ dead_reason_out_of_world = Fell out of the world
 dead_reason_outofworld = Fell out of the world
 dead_reason_suffocation = Suffocated
 dead_reason_fire = Incinerated
+dead_reason_disconnected = Player disconnected
 
 map_vote_notification = Time to vote for the next map!
 map_vote_notification_next_map = Changing map to {map_name} in {time} seconds!

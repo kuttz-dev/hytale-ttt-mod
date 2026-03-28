@@ -19,57 +19,58 @@ import java.util.concurrent.CompletableFuture;
 
 public class Debug extends AbstractCommandCollection {
 
-	private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
-	public Debug() {
-		super("debug", "Command to toggle the debug mode.");
-		this.addSubCommand(new DebugToggleCommand());
-		this.addSubCommand(new GetCurrentPositonCommand());
-		this.addSubCommand(new MemoryDebugCommand());
+    public Debug() {
+        super("debug", "Command to toggle the debug mode.");
+        this.addSubCommand(new DebugToggleCommand());
+        this.addSubCommand(new GetCurrentPositonCommand());
+        this.addSubCommand(new MemoryDebugCommand());
+        this.addSubCommand(new CleanEntitiesCommand());
 //		this.addSubCommand(new SetCurrentRole());
-		this.addSubCommand(new Info());
-	}
+        this.addSubCommand(new Info());
+    }
 
-	public static class GetCurrentPositonCommand extends AbstractAsyncCommand {
+    public static class GetCurrentPositonCommand extends AbstractAsyncCommand {
 
-		public GetCurrentPositonCommand() {
-			super("get-position", "Debug command to get the current component position.");
-		}
+        public GetCurrentPositonCommand() {
+            super("get-position", "Debug command to get the current component position.");
+        }
 
-		@NonNullDecl
-		@Override
-		protected CompletableFuture<Void> executeAsync(@NonNullDecl CommandContext commandContext) {
-			return CompletableFuture.runAsync(() -> {
-				if (!commandContext.isPlayer()) {
-					commandContext.sendMessage(Message.raw("This command can only be used by players."));
-					return;
-				}
+        @NonNullDecl
+        @Override
+        protected CompletableFuture<Void> executeAsync(@NonNullDecl CommandContext commandContext) {
+            return CompletableFuture.runAsync(() -> {
+                if (!commandContext.isPlayer()) {
+                    commandContext.sendMessage(Message.raw("This command can only be used by players."));
+                    return;
+                }
 
-				var player = commandContext.senderAs(Player.class);
-				Ref<EntityStore> reference = player.getReference();
+                var player = commandContext.senderAs(Player.class);
+                Ref<EntityStore> reference = player.getReference();
 
-				if (reference == null || !reference.isValid()) {
-					commandContext.sendMessage(Message.raw("Could not get component reference!"));
-					return;
-				}
+                if (reference == null || !reference.isValid()) {
+                    commandContext.sendMessage(Message.raw("Could not get component reference!"));
+                    return;
+                }
 
-				player.getWorld().execute(() -> {
-					TransformComponent transform = reference.getStore().getComponent(reference, TransformComponent.getComponentType());
-					if (transform == null) {
-						player.sendMessage(Message.raw("Could not get position!"));
-						return;
-					}
+                player.getWorld().execute(() -> {
+                    TransformComponent transform = reference.getStore().getComponent(reference, TransformComponent.getComponentType());
+                    if (transform == null) {
+                        player.sendMessage(Message.raw("Could not get position!"));
+                        return;
+                    }
 
-					Vector3d position = transform.getPosition();
-					double x = position.getX();
-					double y = position.getY();
-					double z = position.getZ();
+                    Vector3d position = transform.getPosition();
+                    double x = position.getX();
+                    double y = position.getY();
+                    double z = position.getZ();
 
-					player.sendMessage(Message.raw(String.format("Position: %.1f, %.1f, %.1f", x, y, z)));
-				});
-			});
-		}
-	}
+                    player.sendMessage(Message.raw(String.format("Position: %.1f, %.1f, %.1f", x, y, z)));
+                });
+            });
+        }
+    }
 
 //	public static class SetCurrentRole extends AbstractAsyncCommand {
 //
@@ -123,39 +124,39 @@ public class Debug extends AbstractCommandCollection {
 //		}
 //	}
 
-	public static class Info extends AbstractAsyncCommand {
+    public static class Info extends AbstractAsyncCommand {
 
-		public Info() {
-			super("info", "Shows info about the player and the gmaemode");
-		}
+        public Info() {
+            super("info", "Shows info about the player and the gmaemode");
+        }
 
-		@NonNullDecl
-		@Override
-		protected CompletableFuture<Void> executeAsync(@NonNullDecl CommandContext ctx) {
-			return CompletableFuture.runAsync(() -> {
-				Player player = ctx.senderAs(Player.class);
-				World world = player.getWorld();
-				world.execute(() -> {
-					Ref<EntityStore> ref = ctx.senderAsPlayerRef();
-					var playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
+        @NonNullDecl
+        @Override
+        protected CompletableFuture<Void> executeAsync(@NonNullDecl CommandContext ctx) {
+            return CompletableFuture.runAsync(() -> {
+                Player player = ctx.senderAs(Player.class);
+                World world = player.getWorld();
+                world.execute(() -> {
+                    Ref<EntityStore> ref = ctx.senderAsPlayerRef();
+                    var playerInfo = ref.getStore().getComponent(ref, PlayerGameModeInfo.componentType);
 
-					if (playerInfo == null) {
-						ctx.sendMessage(Message.raw("Error"));
-						return;
-					}
+                    if (playerInfo == null) {
+                        ctx.sendMessage(Message.raw("Error"));
+                        return;
+                    }
 
-					var gameState = TroubleInTrorkTownPlugin.gameModeStateForWorld.get(world.getWorldConfig().getUuid());
+                    var gameState = TroubleInTrorkTownPlugin.gameModeStateForWorld.get(world.getWorldConfig().getUuid());
 
-					String message = "Player info: " + playerInfo;
-					ctx.sendMessage(Message.raw(message));
-					LOGGER.atInfo().log(message);
+                    String message = "Player info: " + playerInfo;
+                    ctx.sendMessage(Message.raw(message));
+                    LOGGER.atInfo().log(message);
 
 
-					message = "Game mode state: " + gameState;
-					ctx.sendMessage(Message.raw(message));
-				});
-			});
-		}
-	}
+                    message = "Game mode state: " + gameState;
+                    ctx.sendMessage(Message.raw(message));
+                });
+            });
+        }
+    }
 
 }

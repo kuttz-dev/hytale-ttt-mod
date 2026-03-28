@@ -45,7 +45,6 @@ import ar.ncode.plugin.ecs.system.scheduled.WorldRoundTimeSystem;
 import ar.ncode.plugin.exception.ConfigError;
 import ar.ncode.plugin.model.GameModeState;
 import ar.ncode.plugin.packet.filter.PacketsFilter;
-import ar.ncode.plugin.patches.CancelExplosionInteraction;
 import ar.ncode.plugin.patches.server.core.universe.world.spawn.CustomSpawnProvider;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.event.EventRegistration;
@@ -72,7 +71,6 @@ import com.hypixel.hytale.server.core.util.BsonUtil;
 import com.hypixel.hytale.server.core.util.Config;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import lombok.SneakyThrows;
-import net.bytebuddy.agent.ByteBuddyAgent;
 import org.bstats.hytale.Metrics;
 
 import javax.annotation.Nonnull;
@@ -122,8 +120,11 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
 
         gatherMapsConfig();
 
-        ByteBuddyAgent.install();
         LOGGER.atInfo().log("Starting plugin: " + this.getName() + " - version " + this.getManifest().getVersion().toString());
+    }
+
+    public static GameModeState getCurrentGameModeStateForCurrentWorld() {
+        return TroubleInTrorkTownPlugin.gameModeStateForWorld.get(TroubleInTrorkTownPlugin.currentInstance);
     }
 
     public void gatherMapsConfig() throws IOException {
@@ -261,9 +262,6 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
         } else {
             LOGGER.atSevere().log("NPCPlugin not available yet; ShowDeadPlayerInfoAction builder not registered in setup().");
         }
-
-        // Apply patches
-        new CancelExplosionInteraction().apply();
 
         // Metrics
         this.metrics = new Metrics(this, 29880);

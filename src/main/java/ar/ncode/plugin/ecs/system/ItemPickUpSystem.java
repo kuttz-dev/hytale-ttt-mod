@@ -192,6 +192,7 @@ public class ItemPickUpSystem extends EntityTickingSystem<EntityStore> {
         return Query.and(
                 ItemComponent.getComponentType(),
                 TransformComponent.getComponentType(),
+                Query.not(Player.getComponentType()),
                 Query.not(Interactable.getComponentType()),
                 Query.not(PickupItemComponent.getComponentType())
         );

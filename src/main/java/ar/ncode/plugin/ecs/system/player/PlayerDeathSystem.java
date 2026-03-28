@@ -104,7 +104,7 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
         }
     }
 
-    private static void spawnDeadPlayerRemains(@NonNullDecl DeathComponent deathComponent, GameModeState gameModeState, PlayerComponents player, World world, ComponentAccessor<EntityStore> store) {
+    public static void spawnDeadPlayerRemains(GameModeState gameModeState, PlayerComponents player, World world, ComponentAccessor<EntityStore> componentAccessor, DamageCause damageCause) {
         DeadPlayerInfoComponent deadPlayerInfo = DeadPlayerInfoComponent.builder()
                 .timeOfDeath(gameModeState.getRemainingTime().format(timeFormatter))
                 .deadPlayerReference(player.reference())
@@ -113,12 +113,11 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
                 .credits(player.info().getCredits())
                 .build();
 
-        if (deathComponent.getDeathCause() != null) {
-            DamageCause damageCause = DamageCause.valueOf(deathComponent.getDeathCause().getId().toUpperCase());
+        if (damageCause != null) {
             deadPlayerInfo.setCauseOfDeath(damageCause);
         }
 
-        DeathSystem.spawnRemainsAtPlayerDeath(world, deadPlayerInfo, player.reference(), store);
+        DeathSystem.spawnRemainsAtPlayerDeath(world, deadPlayerInfo, player.reference(), componentAccessor);
     }
 
     private static void forceRespawnForPlayer(@NonNullDecl Ref<EntityStore> reference, @NonNullDecl World world, PlayerComponents player) {
@@ -182,7 +181,12 @@ public class PlayerDeathSystem extends DeathSystems.OnDeathSystem {
                     .dispatch(new FinishCurrentRoundEvent(world.getWorldConfig().getUuid()));
         } else {
             LOGGER.atFine().log("Spawning remains and setting spectator mode for player: " + player.component().getDisplayName() + " - Ref: " + reference);
-            spawnDeadPlayerRemains(deathComponent, gameModeState, player, world, commandBuffer);
+            DamageCause damageCause = null;
+            if (deathComponent.getDeathCause() != null) {
+                damageCause = DamageCause.valueOf(deathComponent.getDeathCause().getId().toUpperCase());
+            }
+
+            spawnDeadPlayerRemains(gameModeState, player, world, commandBuffer, damageCause);
             LOGGER.atInfo().log("Setting spectator mode for player: " + player.component().getDisplayName() + " - Ref: " + reference);
             SpectatorMode.setGameModeToSpectator(player, commandBuffer);
         }
