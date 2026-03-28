@@ -10,17 +10,17 @@ import static ar.ncode.plugin.model.CustomPermissions.TTT_USER_GROUP;
 
 public class TttCommand extends AbstractCommandCollection {
 
-	public TttCommand() {
-		super("ttt", "Gamemode specific commands for Trouble in Trork Town.");
-		setPermissionGroups(TTT_USER_GROUP);
+    public TttCommand() {
+        super("ttt", "Gamemode specific commands for Trouble in Trork Town.");
+        setPermissionGroups(TTT_USER_GROUP);
 
-		this.addSubCommand(new Debug());
-		this.addSubCommand(new LootCommand());
-		this.addSubCommand(new SpawnCommand());
-		this.addSubCommand(new MapCommand());
-		this.addSubCommand(new Shop());
-		this.addSubCommand(new RoleCommand());
-		this.addSubCommand(new CreditsCommand());
-		this.addSubCommand(new PlayerInfoCommand());
-	}
+        this.addSubCommand(new Debug());
+        this.addSubCommand(new LootCommand());
+        this.addSubCommand(new SpawnCommand());
+        this.addSubCommand(new MapCommand());
+        this.addSubCommand(new ShopCommand());
+        this.addSubCommand(new RoleCommand());
+        this.addSubCommand(new CreditsCommand());
+        this.addSubCommand(new PlayerInfoCommand());
+    }
 }

@@ -123,6 +123,10 @@ public class TroubleInTrorkTownPlugin extends JavaPlugin {
         LOGGER.atInfo().log("Starting plugin: " + this.getName() + " - version " + this.getManifest().getVersion().toString());
     }
 
+    public static GameModeState getCurrentGameModeStateForCurrentWorld() {
+        return TroubleInTrorkTownPlugin.gameModeStateForWorld.get(TroubleInTrorkTownPlugin.currentInstance);
+    }
+
     public void gatherMapsConfig() throws IOException {
         if (!Files.exists(templatesPath)) {
             Files.createDirectories(templatesPath);

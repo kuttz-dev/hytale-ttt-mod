@@ -33,6 +33,7 @@ shop_item_bought = Has comprado: {item_name}
 shop_no_space = No tienes espacio para este objeto!
 shop_close = Cerrar
 shop_only_for_traitors_or_detectives = ¡Solo traidores o detectives pueden usar la tienda!
+shop_can_only_be_opened_during_round = Solo puedes abrir la tienda durante una ronda activa.
 
 gravestone_plate_title = Aquí descansa
 gravestone_plate_player = Jugador:
