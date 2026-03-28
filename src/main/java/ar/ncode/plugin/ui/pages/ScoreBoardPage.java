@@ -75,7 +75,7 @@ public class ScoreBoardPage extends BasicCustomUIPage {
 				continue;
 			}
 
-			if (player.info().getCurrentRoundRole() == null) {
+			if (!lostInCombat && (player.info().isSpectator() || player.info().getCurrentRoundRole() == null)) {
 				result.spectators.add(player);
 				continue;
 			}
