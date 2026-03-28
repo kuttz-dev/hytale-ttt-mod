@@ -53,6 +53,7 @@ dead_reason_out_of_world = Salirse del mundo
 dead_reason_outofworld = Salirse del mundo
 dead_reason_suffocation = Ahogado
 dead_reason_fire = Incinerado
+dead_reason_disconnected = Jugador desconectado
 
 map_vote_notification = Hora de votar por el siguiente mapa!
 map_vote_notification_next_map = Cambiando el mapa a {map_name} en {time} segundos!
