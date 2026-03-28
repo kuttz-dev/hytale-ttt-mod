@@ -3,7 +3,6 @@ package ar.ncode.plugin.ecs.system.player.event.listener;
 import ar.ncode.plugin.TroubleInTrorkTownPlugin;
 import ar.ncode.plugin.ecs.commands.ChangeWorldCommand;
 import ar.ncode.plugin.ecs.commands.SpectatorMode;
-import ar.ncode.plugin.ecs.component.DeadPlayerInfoComponent;
 import ar.ncode.plugin.ecs.component.PlayerGameModeInfo;
 import ar.ncode.plugin.ecs.component.death.ConfirmedDeath;
 import ar.ncode.plugin.ecs.component.death.LostInCombat;
@@ -16,6 +15,7 @@ import ar.ncode.plugin.model.PlayerComponents;
 import ar.ncode.plugin.model.enums.RoundState;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -33,29 +33,25 @@ import static ar.ncode.plugin.TroubleInTrorkTownPlugin.config;
 import static ar.ncode.plugin.TroubleInTrorkTownPlugin.gameModeStateForWorld;
 import static ar.ncode.plugin.ecs.system.event.handler.FinishCurrentRoundEventHandler.roundShouldEnd;
 import static ar.ncode.plugin.ecs.system.player.PlayerDeathSystem.spawnDeadPlayerRemains;
-import static ar.ncode.plugin.model.GameModeState.timeFormatter;
 import static ar.ncode.plugin.model.enums.TranslationKey.THERE_ARE_NOT_ENOUGH_PLAYERS;
 
 public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectEvent> {
 
-    static DeadPlayerInfoComponent processInGameDisconnect(GameModeState gameModeState, PlayerRef playerRef, Store<EntityStore> store, Ref<EntityStore> reference) {
+    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+
+    static void processInGameDisconnect(GameModeState gameModeState, PlayerRef playerRef, Store<EntityStore> store, Ref<EntityStore> reference, World world) {
         int value = config.get().getKarmaForDisconnectingMiddleRound();
         gameModeState.karmaUpdates.merge(playerRef.getUuid(), value, Integer::sum);
-
-        DeadPlayerInfoComponent graveStone = new DeadPlayerInfoComponent();
 
         PlayerGameModeInfo playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
         if (playerInfo != null) {
             PlayerDeathSystem.updatePlayerCountsOnPlayerDeath(playerRef, playerInfo.getCurrentRoundRole(), gameModeState);
-            graveStone.setDeadPlayerRole(playerInfo.getCurrentRoundRole());
-            graveStone.setTimeOfDeath(
-                    gameModeState.getRemainingTime()
-                            .format(timeFormatter)
-            );
         }
 
-        graveStone.setDeadPlayerName(playerRef.getUsername());
-        return graveStone;
+        var playerComponent = store.getComponent(reference, Player.getComponentType());
+        var player = new PlayerComponents(playerComponent, playerRef, playerInfo, reference);
+        spawnDeadPlayerRemains(gameModeState, player, world, store, DamageCause.DISCONNECTED);
+
     }
 
     private static void finishRound(World world) {
@@ -110,8 +106,6 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
         world.execute(() -> {
             if (!reference.isValid()) return;
             var playerInfo = store.getComponent(reference, PlayerGameModeInfo.componentType);
-            var playerComponent = store.getComponent(reference, Player.getComponentType());
-            var player = new PlayerComponents(playerComponent, playerRef, playerInfo, reference);
 
             SpectatorMode.disableSpectatorModeForPlayer(new PlayerComponents(null, playerRef, playerInfo, reference), reference.getStore());
             store.removeComponentIfExists(reference, LostInCombat.componentType);
@@ -122,14 +116,14 @@ public class PlayerDisconnectEventListener implements Consumer<PlayerDisconnectE
             store.removeComponentIfExists(reference, DeferredCorpseRemoval.getComponentType());
             store.removeComponentIfExists(reference, DeathComponent.getComponentType());
 
-            boolean hasTooFewPlayers = world.getPlayerCount() < config.get().getRequiredPlayersToStartRound();
             if (RoundState.IN_GAME.equals(gameModeState.getRoundState())) {
-                spawnDeadPlayerRemains(gameModeState, player, world, store, DamageCause.DISCONNECTED);
-            }
-
-            if (roundShouldEnd(gameModeState)) {
-                finishRound(world);
+                LOGGER.atInfo().log("Player %s disconnected during the round. Processing as in-game disconnect.", playerRef.getUsername());
+                processInGameDisconnect(gameModeState, playerRef, store, reference, world);
             }
         });
+
+        if (RoundState.IN_GAME.equals(gameModeState.getRoundState()) && roundShouldEnd(gameModeState)) {
+            finishRound(world);
+        }
     }
 }

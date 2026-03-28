@@ -275,13 +275,13 @@ class ScoreBoardPageTest {
 
 	/**
 	 * Scenario D Extended: Spectator with Role
-	 * A player has SPECTATOR as their main role but no currentRoundRole.
+	 * A player joined mid-round, was forced into spectator mode, but still has a persisted round role.
 	 * They should be placed in the spectator category.
 	 */
 	@Test
-	void testScenarioD_SpectatorWithoutCurrentRole() {
+	void testScenarioD_SpectatorWithPersistedRole() {
 		Collection<PlayerComponents> players = new ArrayList<>();
-		PlayerComponents spectator = createPlayer(null, "spectator_player", false, false);
+		PlayerComponents spectator = createPlayer(INNOCENT_ROLE, "spectator_player", false, false);
 		spectator.info().setSpectator(true);
 		players.add(spectator);
 
@@ -290,7 +290,8 @@ class ScoreBoardPageTest {
 		Assertions.assertEquals(0, result.alivePlayers.size());
 		Assertions.assertEquals(0, result.confirmedDeaths.size());
 		Assertions.assertEquals(0, result.lostInCombat.size());
-		Assertions.assertEquals(1, result.spectators.size(), "Player without current round role should be spectator");
+		Assertions.assertEquals(1, result.spectators.size(), "Spectator flag should override a persisted round role");
+		Assertions.assertEquals("spectator_player", result.spectators.getFirst().component().getDisplayName());
 	}
 
 	/**
